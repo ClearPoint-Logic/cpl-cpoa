@@ -19,7 +19,7 @@ disclosure path.
 ```bash
 # Python (3.13 required for the runtime; tests run under 3.13)
 python3.13 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # runtime + dev tooling (ruff, pytest, coverage)
 
 # Web UI (Node 20 LTS)
 cd app/web && npm install

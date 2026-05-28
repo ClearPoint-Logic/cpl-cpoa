@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, stream-a-logic, stream-b-mcp-deploy, stream-c-ui-submission, submission-cut]
+    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
   python:
-    name: Lint, schemas, evals, security
+    name: Python — lint + full test suite (unit / integration / evals / security)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,21 +17,45 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install ruff pytest pytest-asyncio
+          pip install -r requirements-dev.txt   # pulls runtime + dev tooling (ruff, pytest, coverage)
 
       - name: Lint (ruff)
         run: ruff check .
 
-      - name: Unit tests + schema validation
-        run: pytest tests/unit -q
+      - name: Full pytest suite (unit + integration + evals + security)
+        run: pytest -q
 
-      - name: Fixture decision evals
-        run: pytest tests/evals -q
+      - name: Coverage threshold
+        # Gate at 88% (we run at ~90% locally; the 2-point cushion absorbs
+        # platform variance and intentionally-uncovered live-Gemini /
+        # Cloud-KMS code paths that are gated behind real GCP credentials).
+        run: |
+          coverage run --source=cpoa,agents,mcp_servers,app -m pytest -q
+          coverage report --fail-under=88
 
-      - name: MCP security tests
-        run: pytest tests/security -q
+  web:
+    name: Web — Next.js build + lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: app/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build

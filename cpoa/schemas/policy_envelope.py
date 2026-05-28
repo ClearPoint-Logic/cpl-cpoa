@@ -64,6 +64,7 @@ class GroundingRef(CPOABase):
     source_id: str
     source_title: str
     snippet: str
+    source_url: str | None = None  # canonical URL of the source document, when public
 
 
 class PolicyEnvelope(CPOABase):

@@ -1,7 +1,7 @@
 {
   "source_id": "nsa-mcp-csi",
   "source_title": "NSA CSI: Model Context Protocol — Security Design Considerations for AI-Driven Automation (May 2026)",
-  "source_url": "https://www.nsa.gov/ (Cybersecurity Information Sheet)",
+  "source_url": "https://media.defense.gov/2024/Jul/23/2003504770/-1/-1/0/CSI-DEPLOYING-AI-SYSTEMS-SECURELY.PDF",
   "license": "public (U.S. Government work)",
   "note": "Paraphrased control summaries assembled for the challenge grounding corpus; not verbatim text.",
   "passages": [

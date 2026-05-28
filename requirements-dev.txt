@@ -1,0 +1,17 @@
+# Development-only dependencies — not installed into the production Docker images.
+# Used by CI (.github/workflows/ci.yml) and local dev.
+#
+# Codex M6: separating dev tooling out of requirements.txt keeps the runtime
+# images smaller and avoids shipping test/lint tooling into production.
+
+-r requirements.txt
+
+# Test runner + plugins
+pytest==9.0.3
+pytest-asyncio==1.4.0
+
+# Coverage measurement
+coverage==7.6.1
+
+# Lint
+ruff==0.15.14
