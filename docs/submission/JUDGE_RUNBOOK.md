@@ -5,12 +5,12 @@
 > (ADK, Gemini on Vertex AI, MCP, Vertex AI Search, A2A, Firestore, Cloud Trace, Cloud Run).
 
 ## Hosted access
-- **Judge UI:** [https://cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com)
+- **Judge UI:** [https://cwa.clearpointlogic.com](https://cwa.clearpointlogic.com)
 - **Login (HTTP basic auth):** credentials are provided privately in the Devpost submission's
   testing-instructions field (not committed to this public repo).
-- **A2A Agent Card:** [`/.well-known/agent.json`](https://cpoa.clearpointlogic.com/.well-known/agent.json)
+- **A2A Agent Card:** [`/.well-known/agent.json`](https://cwa.clearpointlogic.com/.well-known/agent.json)
   is open and unauthenticated (A2A discovery convention).
-- **Health probe:** [`/api/health`](https://cpoa.clearpointlogic.com/api/health) is open and
+- **Health probe:** [`/api/health`](https://cwa.clearpointlogic.com/api/health) is open and
   publishes the live runtime modes (storage / grounding / signing).
 - No CLI required — every fixture runs from the **Pre-Boarding** roster.
 

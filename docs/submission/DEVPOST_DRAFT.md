@@ -136,7 +136,7 @@ For a 200-agent fleet through the gate over a typical month:
 - **NSA MCP security baseline** implemented and **tested** — 19 security tests pass across auth,
   RBAC, message integrity, replay protection, output filtering, and audit logging.
 - **Sub-second deterministic decision** on every fixture; live Gemini narration on demand.
-- **Live on a custom domain** at [cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com),
+- **Live on a custom domain** at [cwa.clearpointlogic.com](https://cwa.clearpointlogic.com),
   judge-gated, with production security headers (HSTS, CSP, X-Frame-Options, Permissions-Policy),
   PDF / Markdown / JSON evidence export, and real Cloud Trace spans.
 - **A2A-discoverable** at the open URL — peer enterprise agents can call onboarding as a skill.
@@ -185,7 +185,7 @@ CI. The MCP server passes the NSA-baseline security tests.
 ## Testing instructions
 
 Public code repository linked in the submission. Hosted judge UI at
-[cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com), gated by HTTP basic auth
+[cwa.clearpointlogic.com](https://cwa.clearpointlogic.com), gated by HTTP basic auth
 (credentials provided privately in this submission's testing-instructions field). Open the
 **Workforce** tab to see the lifecycle census, then **Pre-Boarding** to run any fixture
 end-to-end — no CLI required. Evidence bundles export as JSON, Markdown, and PDF.

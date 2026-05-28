@@ -86,4 +86,4 @@ Initial submission build for the Google for Startups AI Agents Challenge
 - Firestore persistence; Cloud Trace observability.
 - PDF / Markdown / JSON evidence export.
 - Production-grade Next.js + Tailwind UI on Cloud Run.
-- Custom domain at cpoa.clearpointlogic.com.
+- Custom domain at cwa.clearpointlogic.com.

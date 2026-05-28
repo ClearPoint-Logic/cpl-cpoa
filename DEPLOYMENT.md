@@ -7,7 +7,7 @@ persistence, Vertex AI Search grounding, and Cloud Trace observability.
 
 - A Google Cloud project (e.g. `clearpoint-operations-agent`) with billing enabled.
 - `gcloud` CLI authenticated and pointed at that project.
-- DNS control over the target domain (this deployment uses `cpoa.clearpointlogic.com`).
+- DNS control over the target domain (this deployment uses `cwa.clearpointlogic.com`).
 - `gh` CLI authenticated if pushing the repo.
 
 ## One-time setup
@@ -55,7 +55,7 @@ TLS certificate automatically once DNS resolves.
 ```bash
 gcloud beta run domain-mappings create \
   --service cpoa-web \
-  --domain cpoa.clearpointlogic.com \
+  --domain cwa.clearpointlogic.com \
   --region us-central1
 ```
 
@@ -129,14 +129,14 @@ Output prints the live URLs and credentials. The script:
 
 ```bash
 # Health probe publishes the runtime modes envelope
-curl -sS https://cpoa.clearpointlogic.com/api/health | jq .
+curl -sS https://cwa.clearpointlogic.com/api/health | jq .
 
 # A2A Agent Card is open
-curl -sS https://cpoa.clearpointlogic.com/.well-known/agent.json | jq .
+curl -sS https://cwa.clearpointlogic.com/.well-known/agent.json | jq .
 
 # Web UI is gated by basic auth
 curl -sI -u "$CPOA_JUDGE_BASIC_AUTH_USER:$CPOA_JUDGE_BASIC_AUTH_PASS" \
-  https://cpoa.clearpointlogic.com/
+  https://cwa.clearpointlogic.com/
 # Expect: HTTP/2 200 + Strict-Transport-Security + Content-Security-Policy headers
 ```
 
@@ -163,7 +163,7 @@ gcloud run services delete cpoa-web --region us-central1 -q
 gcloud run services delete cpoa-api --region us-central1 -q
 gcloud run services delete cpoa-mcp --region us-central1 -q
 gcloud beta run domain-mappings delete \
-  --domain cpoa.clearpointlogic.com --region us-central1 -q
+  --domain cwa.clearpointlogic.com --region us-central1 -q
 ```
 
 (Firestore documents persist independently — delete them via the console if
