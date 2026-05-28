@@ -120,4 +120,7 @@ EventType = Literal[
     "manage.returned_from_leave",
     "manage.ownership_transferred",
     "manage.scope_updated",
+    # Operate (Sentinel runtime monitoring)
+    "operate.anomaly_detected",
+    "operate.performance_reviewed",
 ]
