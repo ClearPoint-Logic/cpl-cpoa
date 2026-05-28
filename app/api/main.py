@@ -21,7 +21,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import engine
+from cpoa.services import agent_discovery, engine
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -323,4 +323,56 @@ def a2a_message_send(body: dict) -> dict:
                 }
             ],
         }
+    }
+
+
+# --- Discover phase (AI Workforce Management lifecycle) ---------------------
+# Real HTTP crawl of A2A Agent Cards; classification against the governed
+# registry surfaces unmanaged agents. The demo fleet is hosted here so the
+# scanner makes real network calls but lands on data we control.
+
+
+@app.get("/api/demo-fleet/{name}/.well-known/agent.json")
+def demo_fleet_agent_card(name: str, request: Request) -> dict:
+    """Serve a representative A2A Agent Card from the local directory.
+
+    Public on purpose: A2A Agent Cards are a discovery surface and must be
+    fetchable without credentials. The scanner walks these endpoints over the
+    public network exactly as it would a real enterprise inventory.
+    """
+    card = agent_discovery.demo_fleet_card(name)
+    if not card:
+        raise HTTPException(status_code=404, detail="agent not found in directory")
+    base = str(request.base_url).rstrip("/")
+    return {**card, "url": f"{base}/api/demo-fleet/{name}/a2a/v1"}
+
+
+@app.post("/api/discovery/scan", dependencies=[Depends(require_auth)])
+def discovery_scan(body: dict | None = None, request: Request = None) -> dict:
+    """Crawl a list of A2A endpoints and classify each finding.
+
+    Body: `{ "endpoints"?: [str] }`. Omit to scan the demo fleet.
+    """
+    body = body or {}
+    endpoints = body.get("endpoints")
+    if not endpoints:
+        base = str(request.base_url).rstrip("/") if request else "http://localhost:8080"
+        endpoints = agent_discovery.demo_fleet_endpoints(base)
+    results = agent_discovery.scan_endpoints(list(endpoints))
+    summary = {
+        "scanned": len(results),
+        "known": sum(1 for r in results if r.status == "known"),
+        "unknown": sum(1 for r in results if r.status == "unknown"),
+        "unreachable": sum(1 for r in results if r.status == "unreachable"),
+        "invalid": sum(1 for r in results if r.status == "invalid"),
+    }
+    return {
+        "summary": summary,
+        "results": [r.to_dict() for r in results],
+        "scope": (
+            "A representative A2A directory is served from this deployment so the scan "
+            "exercises real network paths. The same scanner walks enterprise inventory "
+            "APIs (Agent Engine catalog, Cloud Run service inventory, A2A directory "
+            "services) when pointed at a customer environment."
+        ),
     }

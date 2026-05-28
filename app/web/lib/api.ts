@@ -1,4 +1,4 @@
-import type { FixtureCard, Run } from "./types";
+import type { DiscoveryScanResult, FixtureCard, Run } from "./types";
 
 // Relative paths; next.config rewrites /api/* to the FastAPI backend (dev + deploy).
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
@@ -23,4 +23,10 @@ export const api = {
       method: "POST",
     }),
   downloadUrl: (id: string, fmt: "json" | "md" | "pdf") => `/api/runs/${id}/download/${fmt}`,
+  discoveryScan: (endpoints?: string[]) =>
+    j<DiscoveryScanResult>("/api/discovery/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(endpoints ? { endpoints } : {}),
+    }),
 };

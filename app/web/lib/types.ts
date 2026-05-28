@@ -1,3 +1,25 @@
+// Discover phase — A2A directory scan results
+export interface DiscoveredAgent {
+  endpoint: string;
+  status: "known" | "unknown" | "unreachable" | "invalid";
+  agent_card: Record<string, any> | null;
+  candidate_agent_id: string | null;
+  matched_registry_entry: Record<string, any> | null;
+  error: string | null;
+}
+
+export interface DiscoveryScanResult {
+  summary: {
+    scanned: number;
+    known: number;
+    unknown: number;
+    unreachable: number;
+    invalid: number;
+  };
+  results: DiscoveredAgent[];
+  scope: string;
+}
+
 export interface FixtureCard {
   name: string;
   agent_name: string;
