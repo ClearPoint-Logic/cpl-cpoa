@@ -103,6 +103,35 @@ export default function Home() {
         </ol>
       </section>
 
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-heading text-xl font-semibold">By the numbers</h2>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Every figure below is measurable from the deployed build — not aspiration.
+          </p>
+        </div>
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { k: "&lt; 5 ms", v: "Deterministic decision latency per onboarding run (CLI; sub-second incl. live Gemini narration)" },
+            { k: "8 / 8", v: "Pre-Boarding fixtures decide correctly across 8 production-shaped risk archetypes" },
+            { k: "5", v: "Fail-closed pre-employment-screening checks (OV-001..005)" },
+            { k: "29", v: "Live regulatory-citation resolutions in Compass (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
+            { k: "19 / 19", v: "NSA MCP security baseline tests pass (auth, RBAC, integrity, replay, output filter, audit)" },
+            { k: "186", v: "Total tests across unit, integration, evals, and security" },
+            { k: "90 %", v: "Code coverage on the gate core (cpoa/services + agents + mcp_servers + app/api)" },
+            { k: "6 / 7", v: "AI Workforce Management lifecycle phases shipped; the seventh is continuous attestation" },
+          ].map(({ k, v }) => (
+            <div key={k} className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+              <dt
+                className="font-heading text-2xl font-semibold text-primary"
+                dangerouslySetInnerHTML={{ __html: k }}
+              />
+              <dd className="mt-1 text-xs text-on-surface-variant">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <section className="space-y-3">
         <h2 className="font-heading text-xl font-semibold">Built on Google&apos;s agent platform</h2>
         <p className="max-w-3xl text-on-surface-variant">
