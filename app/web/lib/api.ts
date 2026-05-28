@@ -18,5 +18,9 @@ export const api = {
     }),
   grounding: (name: string) =>
     j<{ ungrounded: any; grounded: any }>(`/api/grounding-comparison/${name}`),
+  narrate: (id: string) =>
+    j<{ narrative: string; source: string; model: string }>(`/api/runs/${id}/narrate`, {
+      method: "POST",
+    }),
   downloadUrl: (id: string, fmt: "json" | "md") => `/api/runs/${id}/download/${fmt}`,
 };

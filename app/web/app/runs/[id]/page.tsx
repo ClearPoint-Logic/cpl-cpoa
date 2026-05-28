@@ -40,6 +40,20 @@ export default function RunPage({ params }: { params: { id: string } }) {
   const [run, setRun] = useState<Run | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("Passport");
+  const [live, setLive] = useState<string | null>(null);
+  const [narrating, setNarrating] = useState(false);
+
+  async function narrate() {
+    setNarrating(true);
+    try {
+      const r = await api.narrate(params.id);
+      setLive(r.narrative);
+    } catch (e) {
+      setLive(`(live narration unavailable on this deployment: ${String(e)})`);
+    } finally {
+      setNarrating(false);
+    }
+  }
 
   useEffect(() => {
     api.getRun(params.id).then(setRun).catch((e) => setError(String(e)));
@@ -259,6 +273,22 @@ export default function RunPage({ params }: { params: { id: string } }) {
             {run.narrative.grounded_sources?.length ? (
               <p className="mt-2 text-xs text-slate-500">Grounded: {run.narrative.grounded_sources.join("; ")}</p>
             ) : null}
+            <button
+              onClick={narrate}
+              disabled={narrating}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+            >
+              <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+              {narrating ? "Asking Gemini…" : "Explain with Gemini (live)"}
+            </button>
+            {live && (
+              <div className="mt-3 rounded-lg bg-primary/5 p-3">
+                <div className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <span className="material-symbols-outlined text-[12px]">spark</span> Gemini · live (Vertex AI)
+                </div>
+                <p className="text-slate-700">{live}</p>
+              </div>
+            )}
           </div>
         </aside>
       </div>

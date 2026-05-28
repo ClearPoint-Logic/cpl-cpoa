@@ -12,7 +12,7 @@ import os
 import secrets
 import uuid
 
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
@@ -25,6 +25,9 @@ from cpoa.services import engine
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
+from cpoa.services.tracing import span
+
+from .store import get_store
 
 app = FastAPI(title="ClearPoint Onboarding Agent API", version="0.4.0")
 
@@ -35,8 +38,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory run store (CPOA_STORAGE_MODE=local). Sufficient for the demo lifetime.
-RUNS: dict[str, dict] = {}
+# Run store: in-memory (local) or Firestore (durable across scale-to-zero).
+store = get_store()
 
 _BASIC = HTTPBasic(auto_error=False)
 _USER = os.environ.get("CPOA_JUDGE_BASIC_AUTH_USER")
@@ -143,16 +146,20 @@ def create_run(body: dict) -> dict:
     else:
         raise HTTPException(status_code=422, detail="provide 'fixture' or 'candidate_manifest'")
 
-    result = engine.onboard(manifest)
+    with span("onboarding", candidate=manifest.candidate_agent_id, origin=manifest.origin) as s:
+        result = engine.onboard(manifest)
+        if s is not None:
+            s.set_attribute("decision", result.decision)
+            s.set_attribute("readiness_score", result.score.score)
     run_id = f"run-{uuid.uuid4().hex[:12]}"
     payload = _serialize_run(run_id, result, narrate_offline(result))
-    RUNS[run_id] = payload
+    store.save(run_id, payload)
     return payload
 
 
 @app.get("/api/runs/{run_id}", dependencies=[Depends(require_auth)])
 def get_run(run_id: str) -> dict:
-    run = RUNS.get(run_id)
+    run = store.get(run_id)
     if not run:
         raise HTTPException(status_code=404, detail="run not found")
     return run
@@ -160,7 +167,7 @@ def get_run(run_id: str) -> dict:
 
 @app.get("/api/runs/{run_id}/download/{fmt}", dependencies=[Depends(require_auth)])
 def download_bundle(run_id: str, fmt: str) -> Response:
-    run = RUNS.get(run_id)
+    run = store.get(run_id)
     if not run:
         raise HTTPException(status_code=404, detail="run not found")
     from cpoa.schemas import EvidenceBundle
@@ -173,7 +180,43 @@ def download_bundle(run_id: str, fmt: str) -> Response:
     if fmt in ("md", "markdown"):
         return Response(bundle_to_markdown(bundle), media_type="text/markdown",
                         headers={"Content-Disposition": f"attachment; filename={base}.evidence.md"})
-    raise HTTPException(status_code=400, detail="fmt must be 'json' or 'md'")
+    if fmt == "pdf":
+        from cpoa.services.pdf_export import bundle_to_pdf
+
+        return Response(bundle_to_pdf(bundle), media_type="application/pdf",
+                        headers={"Content-Disposition": f"attachment; filename={base}.evidence.pdf"})
+    raise HTTPException(status_code=400, detail="fmt must be 'json', 'md', or 'pdf'")
+
+
+@app.post("/api/runs/{run_id}/narrate", dependencies=[Depends(require_auth)])
+def narrate_run(run_id: str) -> dict:
+    """Live Gemini (via Vertex/ADK) narration of a completed run. Decision stays fixed."""
+    run = store.get(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="run not found")
+    if not llm_available():
+        raise HTTPException(status_code=503, detail="Gemini/Vertex not configured on this deployment")
+    facts = {
+        "agent_name": run["agent_name"],
+        "decision": run["decision"],
+        "score": run["score"]["score"],
+        "band": run["score"]["band"],
+        "blockers": run["blockers"],
+        "conditions": run["conditions"],
+        "findings": run["narrative"]["findings"],
+        "grounded_sources": run["narrative"]["grounded_sources"],
+        "workforce_lines": run["narrative"]["workforce_lines"],
+    }
+    try:
+        from agents.run import narrate_facts
+
+        prose = narrate_facts(facts)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Gemini narration failed: {exc}") from exc
+    run["narrative"]["narrative"] = prose
+    run["narrative"]["source"] = "gemini"
+    store.save(run_id, run)
+    return {"narrative": prose, "source": "gemini", "model": "gemini-2.5-flash"}
 
 
 @app.get("/api/grounding-comparison/{name}", dependencies=[Depends(require_auth)])
@@ -196,4 +239,84 @@ def architecture() -> dict:
         "runtime": "Agent Engine (orchestrator) + Cloud Run (UI, API, MCP)",
         "observability": "Cloud Logging / Trace + hash-chained evidence",
         "design": "Google Stitch → Next.js + Tailwind with CPL brand tokens",
+    }
+
+
+# --- A2A protocol surface (Agent-to-Agent interoperability) -----------------
+_A2A_CARD = {
+    "name": "ClearPoint Onboarding Agent",
+    "description": (
+        "Onboards AI agents into the enterprise workforce: inspects a candidate manifest and "
+        "issues an Agent Passport, Policy Envelope, AI BOM, and audit-ready Evidence Bundle with "
+        "a Ready / Ready with Conditions / Blocked Pending Remediation decision."
+    ),
+    "version": "0.4.0",
+    "protocolVersion": "0.2.0",
+    "capabilities": {"streaming": False, "pushNotifications": False},
+    "defaultInputModes": ["application/json", "text/plain"],
+    "defaultOutputModes": ["application/json", "text/plain"],
+    "skills": [
+        {
+            "id": "onboard_agent",
+            "name": "Onboard a candidate AI agent",
+            "description": "Return an onboarding decision and workforce-management artifacts "
+                           "for a candidate agent manifest.",
+            "tags": ["governance", "onboarding", "workforce", "ai-bom", "policy", "evidence"],
+            "examples": ["Onboard this agent manifest and tell me if it is Ready, Conditional, or Blocked."],
+        }
+    ],
+    "securitySchemes": {"basic": {"type": "http", "scheme": "basic"}},
+    "security": [{"basic": []}],
+}
+
+
+@app.get("/.well-known/agent.json")
+def a2a_agent_card(request: Request) -> dict:
+    """A2A Agent Card — open for discovery by other enterprise agents."""
+    base = str(request.base_url).rstrip("/")
+    return {**_A2A_CARD, "url": f"{base}/a2a/v1"}
+
+
+@app.post("/a2a/v1/message:send", dependencies=[Depends(require_auth)])
+def a2a_message_send(body: dict) -> dict:
+    """A2A message endpoint: accept a candidate manifest, return an onboarding task result."""
+    message = body.get("message") or {}
+    manifest_data = None
+    for part in message.get("parts", []):
+        data = part.get("data") or {}
+        if isinstance(data, dict) and data.get("candidate_manifest"):
+            manifest_data = data["candidate_manifest"]
+            break
+    if not manifest_data:
+        raise HTTPException(status_code=422,
+                            detail="provide message.parts[].data.candidate_manifest")
+    try:
+        manifest = CandidateAgentManifest(**manifest_data)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=422, detail=f"invalid manifest: {exc}") from exc
+
+    result = engine.onboard(manifest)
+    run_id = f"run-{uuid.uuid4().hex[:12]}"
+    store.save(run_id, _serialize_run(run_id, result, narrate_offline(result)))
+    summary = f"{result.manifest.name}: {result.decision} (readiness {result.score.score}/100)."
+    return {
+        "task": {
+            "id": run_id,
+            "status": {"state": "completed"},
+            "artifacts": [
+                {
+                    "name": "onboarding-decision",
+                    "parts": [
+                        {"kind": "text", "text": summary},
+                        {"kind": "data", "data": {
+                            "decision": result.decision,
+                            "passport_readiness_score": result.score.score,
+                            "passport": result.passport.model_dump(),
+                            "evidence_bundle_id": result.bundle.bundle_id,
+                            "evidence_bundle_hash": result.bundle.bundle_hash,
+                        }},
+                    ],
+                }
+            ],
+        }
     }
