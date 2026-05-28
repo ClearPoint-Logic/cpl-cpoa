@@ -20,10 +20,6 @@ export default function Home() {
         />
         <div className="relative grid items-center gap-gutter lg:grid-cols-2">
           <div className="flex max-w-2xl flex-col gap-6">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary-container/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-hover">
-              <span className="material-symbols-outlined text-[16px]">verified</span>
-              Track 1 · Build · Enterprise Readiness
-            </span>
             <h1 className="font-heading text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
               Hire AI agents. <br />
               <span className="text-primary">Don&apos;t just deploy code.</span>
