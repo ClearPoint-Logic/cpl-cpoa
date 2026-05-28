@@ -12,7 +12,7 @@ Status against the 28 final-submission criteria. ✅ done · ⏳ pending live ve
 | 5 | ADK / Gemini / Stitch demonstrable | ✅ | `agents/` (ADK+Gemini); Stitch designs in `design/stitch/` drive the UI |
 | 6 | MCP tools via real HTTP MCP server | ✅ | `mcp_servers/onboarding_tools/server.py` |
 | 7 | MCP passes NSA baseline tests | ✅ | `tests/security/` (19 tests) |
-| 8 | Web UI deployed behind basic auth | ✅ | https://cpoa.clearpointlogic.com (401→200 verified) |
+| 8 | Web UI deployed behind basic auth | ✅ | https://cwa.clearpointlogic.com (401→200 verified) |
 | 9 | UI: zoo, timeline, artifacts, decision, evidence dl, architecture, judge | ✅ | `app/web/app/` routes |
 | 10 | 8 fixtures exist; 5 must-ship pass | ✅ | `scripts/run_evals.py` → 5/5, 8/8 |
 | 11 | ≥1 Ready | ✅ | safe_research_agent |
@@ -35,7 +35,7 @@ Status against the 28 final-submission criteria. ✅ done · ⏳ pending live ve
 | 28 | Grounded comparison in deployed UI citing a public source | ✅ | `/grounding` route (live) + policy grounding chips; cites NSA/NIST/EU sources |
 
 ## Remaining before submission (owner tasks)
-- ~~Deploy verification (#8, #21)~~ — ✅ done; live at https://cpoa.clearpointlogic.com
+- ~~Deploy verification (#8, #21)~~ — ✅ done; live at https://cwa.clearpointlogic.com
 - ~~`JUDGE_RUNBOOK.md` URL + credentials~~ — ✅ done; custom domain landed.
 - **Video** (#25): record per `VIDEO_SCRIPT.md` (hard 2:00).
 - **Public repo** (#26): publish `public-safe-export` to a judge-accessible GitHub repo.
@@ -49,5 +49,5 @@ Status against the 28 final-submission criteria. ✅ done · ⏳ pending live ve
 | Cloud Trace observability | ✅ | `cpoa/services/tracing.py`; per-stage spans across onboarding |
 | Vertex AI Search grounding seam | ✅ | `cpoa/services/grounding.py` retriever + `scripts/seed_vertex_search.py` |
 | Agent-to-Agent (A2A) protocol surface | ✅ | `/.well-known/agent.json` + `/a2a/v1/message:send` |
-| Custom domain on Cloud Run | ✅ | https://cpoa.clearpointlogic.com (Cloudflare DNS, Google-managed TLS) |
+| Custom domain on Cloud Run | ✅ | https://cwa.clearpointlogic.com (Cloudflare DNS, Google-managed TLS) |
 | PDF evidence export | ✅ | `cpoa/services/exports.py::bundle_to_pdf`; UI download |

@@ -3,7 +3,7 @@
 This document maps the named personas who interact with CWA to the concrete
 paths through the product, the artifacts they touch, and the success criterion
 for each journey. Every journey runs against the deployed demo at
-https://cpoa.clearpointlogic.com (basic-auth credentials in the Devpost
+https://cwa.clearpointlogic.com (basic-auth credentials in the Devpost
 submission), against a local `pytest -q`, or both.
 
 ---
@@ -18,7 +18,7 @@ submission), against a local `pytest -q`, or both.
 Management onboarding gate for her enterprise.
 
 **Steps.**
-1. Open https://cpoa.clearpointlogic.com → land on the home page workforce frame.
+1. Open https://cwa.clearpointlogic.com → land on the home page workforce frame.
 2. Navigate to **Pre-Boarding** → click **`prompt_injected_mcp_agent`**.
 3. Watch the run pipeline complete; decision lands as **Blocked**.
 4. Open the **Background Check** tab → review the OV-004 prompt-injection finding.
@@ -129,7 +129,7 @@ to deploy. He prefers programmatic submission over UI clicking.
 **Steps.**
 1. Submit the manifest via A2A:
    ```bash
-   curl -sS -u "$U:$P" -X POST https://cpoa.clearpointlogic.com/a2a/v1/message:send \
+   curl -sS -u "$U:$P" -X POST https://cwa.clearpointlogic.com/a2a/v1/message:send \
      -H "Content-Type: application/json" \
      -d '{"message":{"parts":[{"data":{"candidate_manifest":{...}}}]}}'
    ```
@@ -157,7 +157,7 @@ audit record.
 testing-instructions field.
 
 **Steps.**
-1. Open https://cpoa.clearpointlogic.com → enter the basic-auth credentials.
+1. Open https://cwa.clearpointlogic.com → enter the basic-auth credentials.
 2. **Workforce** → see the shadow-IT problem (Discovered bucket has unmanaged
    agents); click **Re-scan directory** to confirm the scan is real.
 3. **Pre-Boarding** → run `safe_research_agent` → **Ready** in under a second.

@@ -4,7 +4,7 @@
 
 > **Google for Startups AI Agents Challenge — Track 1: Build (Net-New Agents)**
 
-**▶ Live judge demo:** [https://cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com).
+**▶ Live judge demo:** [https://cwa.clearpointlogic.com](https://cwa.clearpointlogic.com).
 Testing credentials are provided privately in the Devpost submission's testing-instructions
 field; see [`docs/submission/JUDGE_RUNBOOK.md`](docs/submission/JUDGE_RUNBOOK.md) for the
 end-to-end evaluation path. No CLI required.
@@ -186,5 +186,5 @@ ruff check .
 
 ## Status
 
-Shipped and live at [cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com) for the
+Shipped and live at [cwa.clearpointlogic.com](https://cwa.clearpointlogic.com) for the
 **June 5, 2026** submission. Built by **Jared Mabry, ClearPoint Logic** with Claude Code.
