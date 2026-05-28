@@ -35,6 +35,7 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["E501"]  # test fixtures/parametrize tables legitimately exceed line length
+"app/api/**" = ["B008"]  # FastAPI Depends() in argument defaults is the framework idiom
 
 [build-system]
 requires = ["setuptools>=68"]

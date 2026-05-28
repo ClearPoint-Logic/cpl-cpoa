@@ -11,7 +11,6 @@ import json
 import os
 import secrets
 import uuid
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
