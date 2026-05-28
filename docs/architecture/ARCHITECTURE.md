@@ -38,8 +38,8 @@ Flash on Vertex AI** contributes summaries, rationale, and explanations only (ca
 | Secure MCP server | `mcp_servers/onboarding_tools/` | 5 tools + NSA MCP security baseline (§12.6) |
 | API | `app/api/` | FastAPI; basic auth; A2A; downloads; grounding comparison |
 | Web UI | `app/web/` | Next.js 14 + Tailwind + Material 3 tokens; all §15.2 routes |
-| Persistence | `cpoa/services/run_store.py` | In-memory (dev) + Firestore (`CPOA_STORAGE_MODE=firestore`) |
-| Observability | `cpoa/services/observability.py` | OpenTelemetry → Cloud Trace |
+| Persistence | `app/api/store.py` | In-memory (dev) + Firestore (`CPOA_STORAGE_MODE=firestore`) |
+| Observability | `cpoa/services/tracing.py` | OpenTelemetry → Cloud Trace |
 | Deploy | `infra/cloudrun/` | Cloud Build + Cloud Run (Web, API, MCP) |
 
 ## Google platform mapping (§9.2)

@@ -44,8 +44,14 @@ const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
   async rewrites() {
-    // Proxy /api/* to the FastAPI backend (local dev and single-origin deploy).
-    return [{ source: "/api/:path*", destination: `${API_BASE}/api/:path*` }];
+    // Proxy /api/* to the FastAPI backend (local dev and single-origin deploy),
+    // plus the A2A discovery surfaces so peer enterprise agents can reach the
+    // Agent Card and submit tasks at the canonical paths.
+    return [
+      { source: "/api/:path*", destination: `${API_BASE}/api/:path*` },
+      { source: "/.well-known/agent.json", destination: `${API_BASE}/.well-known/agent.json` },
+      { source: "/a2a/:path*", destination: `${API_BASE}/a2a/:path*` },
+    ];
   },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];

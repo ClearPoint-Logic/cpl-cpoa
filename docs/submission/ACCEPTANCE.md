@@ -45,8 +45,8 @@ Status against the 28 final-submission criteria. ✅ done · ⏳ pending live ve
 | Feature | Status | Evidence |
 |---|---|---|
 | Live Gemini narration (Vertex AI) | ✅ | `agents/run.py::narrate_facts`; "Explain with Gemini" action on every run |
-| Firestore-backed run persistence | ✅ | `cpoa/services/run_store.py` + `CPOA_STORAGE_MODE=firestore` on Cloud Run |
-| Cloud Trace observability | ✅ | `cpoa/services/observability.py`; spans emitted per onboarding stage |
+| Firestore-backed run persistence | ✅ | `app/api/store.py` + `CPOA_STORAGE_MODE=firestore` on Cloud Run |
+| Cloud Trace observability | ✅ | `cpoa/services/tracing.py`; per-stage spans across onboarding |
 | Vertex AI Search grounding seam | ✅ | `cpoa/services/grounding.py` retriever + `scripts/seed_vertex_search.py` |
 | Agent-to-Agent (A2A) protocol surface | ✅ | `/.well-known/agent.json` + `/a2a/v1/message:send` |
 | Custom domain on Cloud Run | ✅ | https://cpoa.clearpointlogic.com (Cloudflare DNS, Google-managed TLS) |
