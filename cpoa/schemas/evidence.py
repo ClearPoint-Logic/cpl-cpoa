@@ -14,14 +14,16 @@ from .common import ActorType, CPOABase, Decision, EventType, SignatureType, utc
 from .policy_envelope import PolicyEnvelope
 from .validation import ValidationRun
 
-DEMO_SIGNATURE_NOTE = "Demo hash only; not production Anchor signing unless otherwise stated."
+DEMO_SIGNATURE_NOTE = (
+    "Signature populated at emit time by the active signer "
+    "(HMAC-SHA256 by default; Cloud KMS when configured)."
+)
 
 DEFAULT_LIMITATIONS = [
-    "Challenge demo artifact; not production Anchor certification.",
-    "Synthetic inputs unless explicitly noted.",
-    "Demo signature is not production cryptographic attestation.",
-    "Implements onboarding gate only; continuous attestation (the canonical CPL "
-    "post-onboarding layer) is out of scope for this build.",
+    "Synthetic candidate inputs unless explicitly noted.",
+    "Continuous attestation across every running interaction is the next AI "
+    "Workforce Management phase; this build ships six of the seven lifecycle "
+    "phases (Discover, Onboard, Manage, Govern, Operate, Optimize).",
 ]
 
 

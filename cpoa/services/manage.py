@@ -26,8 +26,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
-from cpoa.schemas import Actor, EvidenceEvent, Signature, Subject
+from cpoa.schemas import Actor, EvidenceEvent, Subject
 from cpoa.services import hashing
+from cpoa.services.signing import get_signer
 
 LifecycleStatus = Literal["active", "on_leave", "returning"]
 
@@ -122,12 +123,8 @@ def _emit(
         payload_hash=hashing.payload_hash(payload),
     )
     hashing.link_event(event, state.last_event_hash)
-    # The signature here uses the same Signature schema as Onboarding events.
-    # A real KMS-backed signer can be wired here behind a CPOA_SIGNING_MODE flag.
-    event.signature = Signature(
-        type="local_hmac",
-        value="hmac:" + event.event_hash.split(":", 1)[-1][:24],
-    )
+    # Real signature — HMAC-SHA256 by default, KMS when CPOA_SIGNING_MODE=kms.
+    event.signature = get_signer().sign(event.event_hash)
     return event
 
 

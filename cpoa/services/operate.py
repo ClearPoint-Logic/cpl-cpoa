@@ -17,12 +17,13 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
 from cpoa.loader import list_fixture_names, load_manifest_by_name
-from cpoa.schemas import Actor, EvidenceEvent, Signature, Subject
+from cpoa.schemas import Actor, EvidenceEvent, Subject
 from cpoa.services import hashing, manage
 from cpoa.services._helpers import is_action_capable, is_l2_plus
 from cpoa.services.discovery import run_discovery
 from cpoa.services.policy import propose_policy
 from cpoa.services.scoring import compute_score
+from cpoa.services.signing import get_signer
 from cpoa.services.validation_suite import run_validation_suite
 
 
@@ -216,10 +217,7 @@ def record_anomaly(
         payload_hash=hashing.payload_hash(payload),
     )
     hashing.link_event(event, state.last_event_hash)
-    event.signature = Signature(
-        type="local_hmac",
-        value="hmac:" + event.event_hash.split(":", 1)[-1][:24],
-    )
+    event.signature = get_signer().sign(event.event_hash)
     state.event_log.append(event.model_dump(mode="json"))
     state.last_event_hash = event.event_hash
     state.updated_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
