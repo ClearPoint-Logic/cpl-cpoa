@@ -4,6 +4,9 @@
 
 > **Google for Startups AI Agents Challenge — Track 1: Build (Net-New Agents)**
 
+**▶ Live judge demo:** https://cpoa-web-y4zowv3hva-uc.a.run.app — basic auth `judge` / `MLcdaYGa9XcHihAu`
+(see [`docs/submission/JUDGE_RUNBOOK.md`](docs/submission/JUDGE_RUNBOOK.md)). No CLI required.
+
 ---
 
 ## The workforce frame

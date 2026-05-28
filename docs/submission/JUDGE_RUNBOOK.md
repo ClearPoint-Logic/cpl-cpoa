@@ -4,8 +4,9 @@
 > ClearPoint Meridian architecture — not a claim that Meridian is live.
 
 ## Hosted access
-- **Judge UI:** `<WEB_URL>` _(filled after deploy)_
-- **Login (HTTP basic auth):** `<JUDGE_USER>` / `<JUDGE_PASS>` _(filled after deploy)_
+- **Judge UI:** https://cpoa-web-y4zowv3hva-uc.a.run.app
+- **Login (HTTP basic auth):** `judge` / `MLcdaYGa9XcHihAu`
+- **API (direct):** https://cpoa-api-y4zowv3hva-uc.a.run.app (same basic-auth credentials)
 - No CLI required — run everything from the **Test Agent Zoo**.
 
 ## 3-minute evaluation path
