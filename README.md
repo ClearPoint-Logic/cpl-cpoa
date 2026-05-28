@@ -51,6 +51,19 @@ design source) · **Model Context Protocol** (secure tool surface) · **Agent En
 The deterministic gate decision (score, caps, blockers, final decision) is computed by plain Python;
 Gemini contributes summaries, rationale, and explanations only.
 
+## Beyond the gate (production-hardening extras)
+
+- **Live Gemini narration** — each run offers an "Explain with Gemini" action that makes a real
+  Vertex AI call (the decision stays deterministic).
+- **A2A interoperability** — the agent publishes an Agent Card at `/.well-known/agent.json` and
+  accepts tasks at `/a2a/v1/message:send`, discoverable by other enterprise agents.
+- **Durable runs** — Firestore-backed run storage (`CPOA_STORAGE_MODE=firestore`) survives
+  scale-to-zero; in-memory fallback for local dev.
+- **Exports** — evidence bundles download as JSON, Markdown, **and PDF**.
+- **Observability** — onboarding emits Cloud Trace spans alongside the hash-chained evidence log.
+- **Vertex AI Search grounding** — retriever + seed script (`scripts/seed_vertex_search.py`) ready
+  behind `CPOA_GROUNDING_MODE=vertex_ai_search`; the local retriever is the default fallback.
+
 ## Repository layout
 
 ```
