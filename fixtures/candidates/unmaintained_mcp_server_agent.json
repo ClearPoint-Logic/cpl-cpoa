@@ -15,7 +15,7 @@
     "language": "go",
     "deployment_target": "cloud_run",
     "region": "us-central1",
-    "service_account_or_identity": "sa-legacy@clearpoint-operations-agent.iam"
+    "service_account_or_identity": "sa-legacy@cpoa-demo-fixtures.iam.gserviceaccount.com"
   },
   "models": [
     {"provider": "google", "model": "gemini-2.5-flash", "purpose": "reasoning", "criticality": "required"}

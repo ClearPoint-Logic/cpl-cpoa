@@ -11,8 +11,34 @@ _BADGE = {
 }
 
 
+# Common Unicode punctuation that the PDF's Helvetica core font (Latin-1) can't
+# render. We transliterate to ASCII equivalents *before* the latin-1 fallback,
+# so copy/pasted content with smart quotes or em-dashes renders cleanly instead
+# of becoming "?" placeholders. (Codex L2.)
+_PUNCT_FALLBACK = str.maketrans({
+    "—": "-",   # — em dash
+    "–": "-",   # – en dash
+    "−": "-",   # − minus sign
+    "‘": "'",   # ‘ left single quote
+    "’": "'",   # ’ right single quote / apostrophe
+    "“": '"',   # “ left double quote
+    "”": '"',   # ” right double quote
+    "…": "...", # … horizontal ellipsis
+    "•": "*",   # • bullet
+    " ": " ",   # NBSP -> regular space
+    "​": "",    # zero-width space -> drop
+})
+
+
 def _ascii(s: str | None) -> str:
-    return (s or "").encode("latin-1", "replace").decode("latin-1")
+    """Coerce s to a Latin-1-safe string for fpdf2's core Helvetica font.
+
+    Pipeline: Unicode punctuation -> ASCII equivalent, then latin-1 with replace
+    for anything still outside that codepage. Latin-1 covers most accented
+    Western characters (é, ñ, ü, ...) so those survive; only true non-Latin
+    scripts (CJK, Cyrillic, emoji) fall through to '?'.
+    """
+    return (s or "").translate(_PUNCT_FALLBACK).encode("latin-1", "replace").decode("latin-1")
 
 
 def bundle_to_pdf(bundle: EvidenceBundle) -> bytes:

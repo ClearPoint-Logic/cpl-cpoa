@@ -5,21 +5,40 @@ description = "ClearPoint Onboarding Agent — net-new ADK/Gemini multi-agent sy
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary — ClearPoint Logic. Challenge/judge access only." }
+# Runtime dependencies. The exact pin matrix used by CI + Cloud Run lives in
+# requirements.txt (kept in lock-step with requirements-dev.txt for tests).
+# The version floors below encode the minimum compatible API surface — code
+# imports were audited via AST walk + entrypoint inventory (Codex L3).
 dependencies = [
-    "google-adk",
-    "google-cloud-aiplatform",
-    "mcp",
-    "fastapi",
-    "uvicorn[standard]",
-    "pydantic>=2",
-    "pydantic-settings",
-    "python-dotenv",
-    "pyyaml",
-    "httpx",
+    # Core web + agent stack
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30,<1",
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.5,<3",
+    "httpx>=0.27,<1",
+    "python-dotenv>=1.0,<2",
+    "PyYAML>=6.0,<7",
+    "python-multipart>=0.0.20,<1",  # FastAPI form parsing
+    "slowapi>=0.1.9,<1",            # per-IP rate limiting (Codex H4)
+    # Google Cloud / Vertex AI / ADK
+    "google-adk>=2.0,<3",
+    "google-cloud-aiplatform>=1.70,<2",
+    "google-cloud-firestore>=2.20,<3",       # run persistence
+    "google-cloud-discoveryengine>=0.13,<1", # Vertex AI Search grounding
+    "google-cloud-trace>=1.16,<2",           # OpenTelemetry exporter target
+    "google-genai>=1.0,<2",                  # direct Gemini narration calls
+    # Model Context Protocol
+    "mcp>=1.20,<2",
+    # Observability
+    "opentelemetry-api>=1.30,<2",
+    "opentelemetry-sdk>=1.30,<2",
+    "opentelemetry-exporter-gcp-trace>=1.10,<2",
+    # PDF evidence bundle
+    "fpdf2>=2.7,<3",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "coverage>=7.6", "ruff>=0.6", "mypy>=1.10"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
