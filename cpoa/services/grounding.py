@@ -1,15 +1,17 @@
 """Grounding / RAG (§7.9, FR-080..084).
 
 A local keyword/tag retriever over the sanitized public corpus, returning
-``GroundingRef``s with source attribution. A Vertex AI Search retriever can be
-swapped in when available (FR-081); the local retriever is the fallback (FR-082)
-and keeps the demo reproducible offline. Pure Python apart from reading the corpus
+``GroundingRef``s with source attribution. A Vertex AI Search retriever is
+swapped in via ``CPOA_GROUNDING_MODE=vertex_ai_search`` when a Discovery Engine
+datastore is configured; the local retriever is the deterministic fallback so
+the demo runs reproducibly offline. Pure Python apart from reading the corpus
 files in the repo.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -90,8 +92,20 @@ def _default_retriever() -> LocalRetriever:
     return LocalRetriever()
 
 
-def get_retriever(mode: str = "local"):
-    """Return a retriever for the configured grounding mode (FR-081/082)."""
+def configured_mode() -> str:
+    """Read CPOA_GROUNDING_MODE; default 'local' so the gate is reproducible offline."""
+    return os.environ.get("CPOA_GROUNDING_MODE", "local").strip() or "local"
+
+
+def get_retriever(mode: str | None = None):
+    """Return a retriever for the configured grounding mode (FR-081/082).
+
+    If ``mode`` is omitted, falls back to ``CPOA_GROUNDING_MODE`` from the
+    environment. Vertex AI Search is used when the mode is ``vertex_ai_search``
+    and the required env (project + datastore id) is present; otherwise the
+    deterministic local retriever is used.
+    """
+    mode = mode or configured_mode()
     if mode == "vertex_ai_search":
         try:  # pragma: no cover - exercised only when Vertex AI Search is configured
             from .grounding_vertex import VertexSearchRetriever
@@ -105,8 +119,13 @@ def get_retriever(mode: str = "local"):
 def get_grounding_for_policy(
     manifest: CandidateAgentManifest, discovery: DiscoveryReport, retriever=None
 ) -> list[GroundingRef]:
-    """Retrieve grounding refs relevant to this agent's risk profile (FR-083)."""
-    retriever = retriever or _default_retriever()
+    """Retrieve grounding refs relevant to this agent's risk profile (FR-083).
+
+    Uses the env-configured retriever (Vertex AI Search when
+    ``CPOA_GROUNDING_MODE=vertex_ai_search``); falls back to the local
+    corpus retriever otherwise.
+    """
+    retriever = retriever or get_retriever()
     refs: dict[str, GroundingRef] = {}
 
     def add(query: str, tags: list[str], k: int = 1) -> None:

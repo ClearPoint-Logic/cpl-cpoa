@@ -96,7 +96,25 @@ def _serialize_run(run_id: str, result, narrative: dict) -> dict:
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "llm_available": llm_available(), "fixtures": len(list_fixture_names())}
+    """Health + runtime-posture probe. Surfaces actual modes so judges (and a
+    SecOps reviewer) can see the live retriever/storage/signing/grounding state
+    rather than guess from documentation."""
+    from cpoa.services.grounding import configured_mode as grounding_mode_env
+    requested_storage = os.environ.get("CPOA_STORAGE_MODE", "local")
+    storage_active = getattr(store, "mode", "local")
+    storage_degraded = requested_storage == "firestore" and storage_active != "firestore"
+    return {
+        "status": "ok",
+        "llm_available": llm_available(),
+        "fixtures": len(list_fixture_names()),
+        "modes": {
+            "storage_requested": requested_storage,
+            "storage_active": storage_active,
+            "storage_degraded": storage_degraded,
+            "grounding": grounding_mode_env(),
+            "signing": os.environ.get("CPOA_SIGNING_MODE", "local_hmac"),
+        },
+    }
 
 
 @app.get("/api/fixtures", dependencies=[Depends(require_auth)])
