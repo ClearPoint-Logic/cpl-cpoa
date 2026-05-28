@@ -152,6 +152,24 @@ def _ov005_budget(manifest, discovery, cid) -> list[ValidationFinding]:
     )]
 
 
+def _ov002_dependency_health(manifest, cid) -> list[ValidationFinding]:
+    """Unmaintained/unversioned MCP dependency (NSA MCP CSI: vulnerability tracking)."""
+    rm = manifest.registry_metadata
+    if not rm:
+        return []
+    status = str(rm.annotations.get("mcp_dependency_status", "")).lower()
+    last_patch = str(rm.annotations.get("mcp_last_patch", "")).lower()
+    if status in {"archived", "unmaintained", "unversioned"} or last_patch in {"none", "unknown"}:
+        return [_f(
+            cid, "OV-002", "medium",
+            "Unmaintained or unversioned MCP dependency",
+            "Pin the MCP server to a maintained, versioned release; record patch history; "
+            "re-validate before onboarding (NSA MCP CSI: supported components / vulnerability tracking).",
+            description=f"Dependency status='{status or 'n/a'}', last_patch='{last_patch or 'n/a'}'.",
+        )]
+    return []
+
+
 def run_validation_suite(
     manifest: CandidateAgentManifest,
     discovery: DiscoveryReport,
@@ -162,6 +180,7 @@ def run_validation_suite(
     findings: list[ValidationFinding] = []
     findings += _ov001_owner_purpose(manifest, discovery, cid)
     findings += _ov002_high_risk_tool(manifest, cid)
+    findings += _ov002_dependency_health(manifest, cid)
     findings += _ov003_sensitive_data(manifest, discovery, cid)
     findings += _ov004_prompt_injection(manifest, cid)
     findings += _ov005_budget(manifest, discovery, cid)

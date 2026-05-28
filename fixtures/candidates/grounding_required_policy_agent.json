@@ -1,0 +1,39 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "grounding-required-008",
+  "name": "Cross-Border Finance Assistant",
+  "origin": "gemini_enterprise",
+  "declared_purpose": "Answer customer finance questions that may involve regulated obligations depending on jurisdiction.",
+  "owner": {
+    "name": "Mara Diaz",
+    "email": "mara@example.com",
+    "team": "Customer Finance",
+    "role": "Product Lead"
+  },
+  "runtime": {
+    "framework": "adk",
+    "language": "python",
+    "deployment_target": "cloud_run",
+    "region": "europe-west1",
+    "service_account_or_identity": "sa-finance@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-pro", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {"tool_id": "kb_search", "name": "Knowledge Base Search", "protocol": "mcp", "description": "Search the internal finance knowledge base.", "risk_tier": "read_only", "side_effects": "none"}
+  ],
+  "data_access": {
+    "declared_data_classes": ["financial", "customer_pii", "confidential"],
+    "memory_enabled": true,
+    "retention_days": 90
+  },
+  "autonomy": {"level": "L2_draft", "human_approval_required": true},
+  "budget": {"monthly_usd": 120, "per_run_usd": 2, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "google_agent_registry_fixture",
+    "version": "1.0.0",
+    "capabilities": ["finance_qa"],
+    "annotations": {"regulatory_ambiguity": "eu_vs_us_jurisdiction"}
+  }
+}

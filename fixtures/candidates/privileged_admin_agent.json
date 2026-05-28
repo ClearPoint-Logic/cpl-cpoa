@@ -1,0 +1,47 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "privileged-admin-006",
+  "name": "IT Automation Agent",
+  "origin": "custom",
+  "declared_purpose": "Automate IT onboarding by managing access groups and service accounts.",
+  "owner": {
+    "name": "Jordan Kim",
+    "email": "jordan@example.com",
+    "team": "IT Platform",
+    "role": "SRE"
+  },
+  "runtime": {
+    "framework": "adk",
+    "language": "python",
+    "deployment_target": "gke",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-itauto@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-pro", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {
+      "tool_id": "iam_admin",
+      "name": "IAM Admin",
+      "protocol": "sdk",
+      "description": "Modify IAM access groups and create or disable service accounts.",
+      "risk_tier": "privileged_admin",
+      "auth_scope": "iam:admin",
+      "side_effects": "access_change"
+    }
+  ],
+  "data_access": {
+    "declared_data_classes": ["internal", "secrets"],
+    "memory_enabled": false,
+    "retention_days": 30
+  },
+  "autonomy": {"level": "L4_bounded_autonomous", "human_approval_required": false},
+  "budget": {"monthly_usd": 150, "per_run_usd": 3, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "manual",
+    "version": "0.5.0",
+    "capabilities": ["iam_admin"],
+    "annotations": {}
+  }
+}

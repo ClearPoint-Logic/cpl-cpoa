@@ -1,0 +1,41 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "crm-write-002",
+  "name": "Sales Ops CRM Agent",
+  "origin": "custom",
+  "declared_purpose": "Update CRM opportunity and contact records each night.",
+  "runtime": {
+    "framework": "langchain",
+    "language": "python",
+    "deployment_target": "cloud_run",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-salesops@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-flash", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {
+      "tool_id": "crm_update",
+      "name": "CRM Update",
+      "protocol": "rest",
+      "description": "Create and update CRM opportunity and contact records.",
+      "risk_tier": "external_write",
+      "auth_scope": "crm:write",
+      "side_effects": "external_message"
+    }
+  ],
+  "data_access": {
+    "declared_data_classes": ["internal", "customer_pii"],
+    "memory_enabled": false,
+    "retention_days": 30
+  },
+  "autonomy": {"level": "L3_execute_with_approval", "human_approval_required": true},
+  "budget": {"monthly_usd": 100, "per_run_usd": 2, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "manual",
+    "version": "0.3.0",
+    "capabilities": ["crm_write"],
+    "annotations": {}
+  }
+}

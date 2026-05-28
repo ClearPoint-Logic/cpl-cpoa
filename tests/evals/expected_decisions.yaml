@@ -1,0 +1,44 @@
+# Expected onboarding decisions per fixture (§18.1, extended to all 8).
+# Fixture key == fixtures/candidates/<key>.json. The deterministic engine must
+# produce one of `allowed_decisions` (or `expected_decision`) and surface every
+# test in `must_have_tests`. Must-ship fixtures gate the submission (AC #10-13).
+
+safe_research_agent:
+  tier: must_ship
+  expected_decision: Ready
+  must_not_have_severities: [critical, high]
+
+crm_write_missing_owner:
+  tier: must_ship
+  expected_decision: Blocked Pending Remediation
+  must_have_tests: [OV-001]
+
+healthcare_phi_support_agent:
+  tier: must_ship
+  expected_decision: Ready with Conditions
+  must_have_tests: [OV-003]
+
+budget_runaway_research_agent:
+  tier: must_ship
+  expected_decision: Ready with Conditions
+  must_have_tests: [OV-005]
+
+prompt_injected_mcp_agent:
+  tier: must_ship
+  expected_decision: Blocked Pending Remediation
+  must_have_tests: [OV-004]
+
+privileged_admin_agent:
+  tier: stretch
+  expected_decision: Blocked Pending Remediation
+  must_have_tests: [OV-002]
+
+unmaintained_mcp_server_agent:
+  tier: stretch
+  allowed_decisions: [Ready with Conditions, Blocked Pending Remediation]
+  must_have_tests: [OV-002]
+
+grounding_required_policy_agent:
+  tier: stretch
+  expected_decision: Ready with Conditions
+  must_have_tests: [OV-003]

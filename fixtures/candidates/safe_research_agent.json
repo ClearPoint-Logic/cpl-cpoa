@@ -1,0 +1,47 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "safe-research-001",
+  "name": "Safe Research Agent",
+  "origin": "google_adk",
+  "declared_purpose": "Search public web sources and summarize findings for analysts.",
+  "owner": {
+    "name": "Dana Lee",
+    "email": "dana@example.com",
+    "team": "Research",
+    "role": "Lead Analyst"
+  },
+  "runtime": {
+    "framework": "adk",
+    "language": "python",
+    "deployment_target": "cloud_run",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-research@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-flash", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {
+      "tool_id": "web_search",
+      "name": "Web Search",
+      "protocol": "mcp",
+      "description": "Search public web pages and return text snippets.",
+      "risk_tier": "read_only",
+      "auth_scope": "public",
+      "side_effects": "none"
+    }
+  ],
+  "data_access": {
+    "declared_data_classes": ["public"],
+    "memory_enabled": false,
+    "retention_days": 7
+  },
+  "autonomy": {"level": "L1_recommend", "human_approval_required": true},
+  "budget": {"monthly_usd": 50, "per_run_usd": 1, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "google_agent_registry_fixture",
+    "version": "1.0.0",
+    "capabilities": ["search", "summarize"],
+    "annotations": {}
+  }
+}

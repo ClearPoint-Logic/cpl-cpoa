@@ -1,0 +1,41 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "budget-runaway-004",
+  "name": "Deep Research Agent",
+  "origin": "google_adk",
+  "declared_purpose": "Run multi-step, multi-model deep research over public sources.",
+  "owner": {
+    "name": "Ravi Shah",
+    "email": "ravi@example.com",
+    "team": "R&D",
+    "role": "Staff Engineer"
+  },
+  "runtime": {
+    "framework": "adk",
+    "language": "python",
+    "deployment_target": "cloud_run",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-research2@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-pro", "purpose": "reasoning", "criticality": "required"},
+    {"provider": "google", "model": "gemini-2.5-flash", "purpose": "generation", "criticality": "optional"}
+  ],
+  "tools": [
+    {"tool_id": "web_search", "name": "Web Search", "protocol": "mcp", "description": "Search public web.", "risk_tier": "read_only", "side_effects": "none"},
+    {"tool_id": "doc_fetch", "name": "Doc Fetch", "protocol": "mcp", "description": "Fetch public documents.", "risk_tier": "read_only", "side_effects": "none"}
+  ],
+  "data_access": {
+    "declared_data_classes": ["public"],
+    "memory_enabled": false,
+    "retention_days": 7
+  },
+  "autonomy": {"level": "L2_draft", "human_approval_required": true},
+  "budget": {"monthly_usd": 20, "per_run_usd": 1, "premium_model_allowed": true},
+  "registry_metadata": {
+    "registry_source": "manual",
+    "version": "0.9.0",
+    "capabilities": ["deep_research"],
+    "annotations": {}
+  }
+}
