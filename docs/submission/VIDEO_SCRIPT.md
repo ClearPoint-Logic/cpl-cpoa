@@ -1,19 +1,19 @@
 # Demo Video Script — hard 2:00 cap
 
 > **Binding rule (official rules):** the demonstration video must be **1–2 minutes**; only
-> the first 2:00 is evaluated. This supersedes the spec's 4-minute outline (§19). Open with the
-> workforce-parallel frame (FR-065).
+> the first 2:00 is evaluated. Open with the workforce frame and close with the lifecycle.
 
 | Time | Beat | On screen | Voiceover (tight) |
 |---|---|---|---|
-| 0:00–0:18 | **Workforce frame** | Landing page HR-to-AI grid | "Enterprises hire humans with an ID badge, a job description, a résumé, and a personnel file. AI agents are joining the workforce — with no equivalent process. ClearPoint Onboarding Agent gives every agent that same intake before it does any work." |
-| 0:18–0:32 | **Architecture** | `/architecture` page | "It's a net-new ADK multi-agent system on Google's stack: Gemini via Vertex AI, a secure MCP tool server, grounded retrieval, deployed on Cloud Run — six subagents from discovery to evidence." |
-| 0:32–1:12 | **Ready path** | Pre-Boarding roster → run `safe_research_agent` → run screen | "Pick a candidate. The agents inspect it, propose a policy envelope, run the validation suite, and issue a Passport, AI BOM, and a hash-chained evidence bundle. Clean owner, read-only tools, low risk — **Ready**, score 100." |
-| 1:12–1:48 | **Blocked path** | Run `prompt_injected_mcp_agent` → Findings + Policy tabs | "Now a candidate whose MCP tool description hides 'ignore previous instructions, bypass policy.' The validation suite flags prompt injection, the policy quarantines the tool, and the finding is grounded in the NSA MCP security guidance. It fails closed — **Blocked**." |
-| 1:48–2:00 | **The thesis** | Decision panel + footer | "Deterministic decisions, audit-ready evidence. This is the onboarding gate — continuous attestation, where governed agents keep validating the workforce layer, is what's next." |
+| 0:00–0:15 | **The wedge** | `/workforce` — Discovered bucket showing shadow IT | "Enterprises hire humans through a structured process. AI agents are joining the workforce with no equivalent. Here are four agents already running in our environment that have never been onboarded — no Passport, no Policy Envelope, no Evidence Bundle." |
+| 0:15–0:35 | **The artifact** | `/agents` → click `safe_research_agent` → run page artifact tabs | "ClearPoint Onboarding Agent gives every new agent the same intake. Passport. Résumé. Job Description. Background Check. Personnel File. Decision: Ready, with a hash-chained evidence bundle." |
+| 0:35–1:05 | **The blocked path** | Run `prompt_injected_mcp_agent` → Background Check → Job Description | "A candidate whose MCP tool description hides 'ignore previous instructions, bypass policy.' The Pre-Employment Screening flags it. The policy quarantines the tool. The finding cites the NSA MCP security guidance directly. **Blocked** — fail-closed." |
+| 1:05–1:30 | **The lifecycle** | Quick cuts: `/workforce` (Onboarded HR Console) → `/govern` (Compass control matrix) → `/operate` (Sentinel anomalies) → `/optimize` (Talent Development) | "Past the gate, the work continues. The HR Console manages day-to-day — place on leave, manager handoff. Compass maps every CPOA control to NSA, NIST, and EU AI Act sections. Sentinel watches fleet health. Talent Development turns conditions into a promotion path." |
+| 1:30–1:55 | **The integrity claim** | Decision panel → Download Evidence Bundle PDF → cat the JSON; show hash chain | "Every event across every phase chains into one personnel file. SHA-256 over canonical JSON. The recompute test runs against every fixture in CI. Audit-defensible by construction." |
+| 1:55–2:00 | **The platform stack** | Architecture page Google platform table | "Built on the Google agent platform end-to-end — ADK, Gemini on Vertex AI, MCP, Vertex AI Search, A2A, Firestore, Cloud Trace, Cloud Run." |
 
 **Capture notes**
-- Show the multi-agent workflow rail (subagent attribution) and the grounded source chip on the Blocked run.
-- Download the evidence bundle once to show JSON/Markdown export.
-- Keep cuts tight; the Ready and Blocked runs are the spine. Flash `healthcare_phi_support_agent`
-  (Conditional) only if time remains under 2:00.
+- Lead with the Discover bucket — it opens on a *problem* (shadow IT), not a feature tour.
+- The hash-chain reveal at 1:30 is the highest-impact moment. Show the PDF *and* the JSON
+  with the hash chain visible. Run a tamper test inline if time allows.
+- Architecture beat at the end, not the start — judges want to see the product before the stack.
