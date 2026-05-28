@@ -1,14 +1,15 @@
 """ADK/Gemini configuration (Vertex backend per challenge rules).
 
 Gemini runs via Vertex AI (GOOGLE_GENAI_USE_VERTEXAI=TRUE) — AI Studio is not
-eligible for challenge credits. Cost-light default model is gemini-2.5-flash.
+eligible for challenge credits. Default model is gemini-3.5-flash (Vertex "global" location).
 """
 
 from __future__ import annotations
 
 import os
 
-DEFAULT_FAST_MODEL = "gemini-2.5-flash"
+# Gemini 3.5 Flash is served in the Vertex "global" location (set GOOGLE_CLOUD_LOCATION=global).
+DEFAULT_FAST_MODEL = "gemini-3.5-flash"
 DEFAULT_PRO_MODEL = "gemini-2.5-pro"
 
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Deploy API + MCP + Web to Cloud Run via Cloud Build (amd64). Light-touch:
-# scale-to-zero, gemini-2.5-flash, Cloud Run orchestrator runtime (Agent Engine is
+# scale-to-zero, gemini-3.5-flash (Vertex global), Cloud Run orchestrator runtime (Agent Engine is
 # the documented primary per CPOA-D019 / NFR-015). Prints the live URL + judge creds.
 set -euo pipefail
 
 PROJECT="${GOOGLE_CLOUD_PROJECT:-clearpoint-operations-agent}"
-REGION="${GOOGLE_CLOUD_LOCATION:-us-central1}"
+REGION="${GOOGLE_CLOUD_LOCATION:-us-central1}"        # Cloud Run deploy region
+VERTEX_LOCATION="${CPL_VERTEX_LOCATION:-global}"      # Vertex/Gemini location (3.5 Flash is global)
 REPO="cpoa"
 AR="${REGION}-docker.pkg.dev/${PROJECT}/${REPO}"
 CB="infra/cloudrun/cloudbuild.yaml"
@@ -37,7 +38,7 @@ echo "== Build + deploy API =="
 submit "${AR}/api:latest" infra/cloudrun/Dockerfile.api
 gcloud run deploy cpoa-api --image "${AR}/api:latest" --region "${REGION}" \
   --allow-unauthenticated --min-instances=0 \
-  --set-env-vars "GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_LOCATION=${REGION},CPL_GEMINI_MODEL_FAST=gemini-2.5-flash,CPOA_JUDGE_BASIC_AUTH_USER=${JUDGE_USER},CPOA_JUDGE_BASIC_AUTH_PASS=${JUDGE_PASS},CPOA_CORS_ORIGINS=*" -q
+  --set-env-vars "GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_LOCATION=${VERTEX_LOCATION},CPL_GEMINI_MODEL_FAST=gemini-3.5-flash,CPOA_STORAGE_MODE=firestore,CPOA_JUDGE_BASIC_AUTH_USER=${JUDGE_USER},CPOA_JUDGE_BASIC_AUTH_PASS=${JUDGE_PASS},CPOA_CORS_ORIGINS=*" -q
 API_URL="$(gcloud run services describe cpoa-api --region "${REGION}" --format='value(status.url)')"
 echo "API_URL=${API_URL}"
 

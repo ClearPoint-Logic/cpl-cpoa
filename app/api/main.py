@@ -16,7 +16,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from agents.config import llm_available
+from agents.config import fast_model, llm_available
 from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
@@ -216,7 +216,7 @@ def narrate_run(run_id: str) -> dict:
     run["narrative"]["narrative"] = prose
     run["narrative"]["source"] = "gemini"
     store.save(run_id, run)
-    return {"narrative": prose, "source": "gemini", "model": "gemini-2.5-flash"}
+    return {"narrative": prose, "source": "gemini", "model": fast_model()}
 
 
 @app.get("/api/grounding-comparison/{name}", dependencies=[Depends(require_auth)])
