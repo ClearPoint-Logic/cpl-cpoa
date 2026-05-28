@@ -18,6 +18,24 @@ const SEV_CLS: Record<string, string> = {
   info: "text-slate-400",
 };
 
+// Event-type → human-readable, workforce-flavored label. Falls back to a Title-Cased
+// version of the raw event_type so new event types still display sensibly.
+const EVENT_LABEL: Record<string, string> = {
+  discovery_started: "Discovery — application intake",
+  discovery_completed: "Discovery — application review complete",
+  policy_proposed: "Policy proposed — job description drafted",
+  policy_grounded: "Policy grounded — public sources cited",
+  artifact_generated: "Artifacts generated — Passport, AI BOM, Policy",
+  validation_started: "Pre-employment screening — started",
+  validation_completed: "Pre-employment screening — complete",
+  evidence_appended: "Evidence appended — personnel file updated",
+  decision_rendered: "Decision rendered — Ready / Conditional / Blocked",
+  explanation_drafted: "Explanation drafted — onboarding summary",
+};
+function eventLabel(t: string): string {
+  return EVENT_LABEL[t] ?? t.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4">
@@ -101,7 +119,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                     {i + 1}
                   </span>
                   <div>
-                    <span className="font-medium text-cpl-charcoal">{e.event_type}</span>
+                    <span className="font-medium text-cpl-charcoal">{eventLabel(e.event_type)}</span>
                     <span className="ml-2 text-[11px] text-on-surface-variant">· {e.actor.id}</span>
                     <p className="text-slate-500">{e.summary}</p>
                   </div>
