@@ -150,17 +150,23 @@ def get_fixture(name: str) -> dict:
 
 @app.post("/api/runs/adk", dependencies=[Depends(require_auth)])
 def create_run_via_adk(body: dict) -> dict:
-    """Run onboarding via the explicit six-subagent ADK SequentialAgent.
+    """Run onboarding via the live ADK orchestrator (Gemini-driven multi-agent path).
 
-    This is the multi-agent path the README + DEVPOST claim. Each sub-agent
-    (discovery → policy → validation → artifacts → evidence → explanation)
-    makes its own Gemini call and reports its keyed output. The decision
-    remains deterministic — each sub-agent's tool calls into the engine
-    functions; ADK is the conductor, not the decider.
+    Uses the production ADK orchestrator (``build_root_agent``) — a single
+    Gemini ``LlmAgent`` that sequences the deterministic onboarding tool and
+    the grounding lookup tool, then narrates in workforce language. Real ADK
+    execution; real Gemini calls; the decision stays deterministic (the tool
+    calls into the deterministic engine).
 
-    Slow (~10-30s incl. Gemini latency per sub-agent). The default `/api/runs`
-    endpoint is the fast deterministic path; this one proves the ADK live
-    multi-agent execution exists end-to-end.
+    The granular six-subagent ``SequentialAgent`` (``build_sequential_orchestrator``)
+    is documented in ``agents/onboarding_orchestrator/agent.py`` as the
+    Agent-Engine-deployable decomposition; it is not the live path because
+    Gemini-mediated structured tool-arg synthesis between sub-agents drops
+    Pydantic-required fields on the artifact handoff. The root_agent path is
+    the reliable one and is what's wired here.
+
+    Slow (~5-15s including Gemini latency). The default ``/api/runs``
+    deterministic endpoint stays the fast path for the 3-min judge eval.
     """
     if "fixture" in body:
         try:
@@ -182,24 +188,26 @@ def create_run_via_adk(body: dict) -> dict:
         )
 
     with span("onboarding_adk", candidate=manifest.candidate_agent_id) as s:
-        from agents.run import run_sequential_adk_onboarding
+        from agents.run import run_adk_onboarding
 
         try:
-            adk_result = run_sequential_adk_onboarding(manifest.model_dump())
+            narrative = run_adk_onboarding(manifest.model_dump())
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=502, detail=f"ADK execution failed: {exc}") from exc
         if s is not None:
-            s.set_attribute("subagent_turns", len(adk_result.get("transcript", [])))
+            s.set_attribute("narrative_chars", len(narrative or ""))
     return {
         "candidate_agent_id": manifest.candidate_agent_id,
         "agent_name": manifest.name,
-        "orchestrator": "adk_sequential",
-        "subagents": [
-            "discovery_agent", "policy_agent", "validation_agent",
-            "artifact_agent", "evidence_agent", "explanation_agent",
-        ],
-        "transcript": adk_result["transcript"],
-        "final_state": adk_result["final_state"],
+        "orchestrator": "adk_root_agent",
+        "model": fast_model(),
+        "tools_available": ["onboard_candidate_agent", "lookup_grounding"],
+        "narrative": narrative,
+        "note": (
+            "This is the live ADK path — Gemini drives the orchestrator's tool "
+            "calls. The decision is computed deterministically by the underlying "
+            "engine function (cpoa.services.engine.onboard); ADK is the conductor."
+        ),
     }
 
 
