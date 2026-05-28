@@ -4,6 +4,7 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/workforce", label: "Workforce" },
   { href: "/agents", label: "Pre-Boarding" },
+  { href: "/govern", label: "Compass" },
   { href: "/grounding", label: "Grounding" },
   { href: "/architecture", label: "Architecture" },
   { href: "/judge", label: "Judge Access" },
