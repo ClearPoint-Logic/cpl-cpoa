@@ -235,3 +235,51 @@ def test_remediate_rejects_unknown_phase_and_missing_ref() -> None:
     assert (
         client.post("/api/workforce/agent-1/remediate", json={"phase": "govern"}).status_code == 422
     )
+
+
+# --- Demo reset: wipe lifecycle state back to pristine -----------------------
+
+
+def test_demo_reset_clears_all_lifecycle_state() -> None:
+    # Seed lifecycle state two ways: a Manage action and a full lifecycle run.
+    client.post("/api/workforce/a/action", json={"action": "place_on_leave", "payload": {"reason": "x"}})
+    client.post("/api/workforce/b/run-lifecycle", json={})
+    assert len(client.get("/api/workforce/states").json()) == 2
+
+    # Reset wipes every tracked agent and reports how many were cleared.
+    r = client.post("/api/demo/reset")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["status"] == "reset"
+    assert body["cleared"] == 2
+
+    # The HR Console is empty; a fresh read re-derives the default active state.
+    assert client.get("/api/workforce/states").json() == []
+    assert client.get("/api/workforce/a/state").json()["status"] == "active"
+
+
+def test_demo_reset_restores_flagged_govern_gap() -> None:
+    """The headline demo loop: resolving a Govern gap flips it to pass; Reset
+    must bring the flagged gap back so the demo can be re-run from scratch."""
+    run = client.post("/api/runs", json={"fixture": "budget_runaway_research_agent"}).json()
+    cid, rid = run["candidate_agent_id"], run["run_id"]
+
+    gap = client.get(
+        f"/api/workforce/{cid}/lifecycle-detail", params={"run_id": rid}
+    ).json()["govern"]["gaps"][0]
+    client.post(
+        f"/api/workforce/{cid}/remediate",
+        json={"phase": "govern", "ref_id": gap["control_id"], "title": gap["control_name"]},
+    )
+    resolved = client.get(
+        f"/api/workforce/{cid}/lifecycle-detail", params={"run_id": rid}
+    ).json()
+    assert resolved["govern"]["status"] == "pass"
+
+    assert client.post("/api/demo/reset").status_code == 200
+
+    pristine = client.get(
+        f"/api/workforce/{cid}/lifecycle-detail", params={"run_id": rid}
+    ).json()
+    assert pristine["govern"]["status"] == "flagged"
+    assert pristine["govern"]["gaps"][0]["resolved"] is False

@@ -577,6 +577,25 @@ def list_workforce_states() -> list[dict]:
     return manage.list_states()
 
 
+# --- Demo controls ----------------------------------------------------------
+# A single Reset that returns the lifecycle demo to its pristine state, so a
+# judge (or the next demo run) starts clean without a manual Firestore edit.
+
+
+@app.post("/api/demo/reset", dependencies=[Depends(require_auth)])
+def reset_demo() -> dict:
+    """Reset the lifecycle demo to its pristine state.
+
+    Clears every agent's management/lifecycle personnel file — the advance and
+    remediation events plus the remediation ledger — so flagged cards re-derive
+    as flagged (e.g. the budget-runaway agent's Govern gap reappears) and the HR
+    Console roster empties until agents are advanced again. Onboarding runs are a
+    separate store and are intentionally left intact. Returns the number of agent
+    states cleared.
+    """
+    return {"status": "reset", "cleared": manage.clear_all()}
+
+
 # --- Lifecycle continuation (Manage → Govern → Operate → Optimize) ----------
 #
 # After onboarding seals the Personnel File, the agent advances through the

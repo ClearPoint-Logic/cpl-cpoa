@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useCompass } from "@/components/Compass";
+import { api } from "@/lib/api";
 
 type NavItem = { href: string; label: string; hint?: string };
 
@@ -60,7 +61,7 @@ export function Nav() {
             <NavMenu label="Workforce" items={WORKFORCE} align="left" />
           </li>
           <li>
-            <NavMenu label="Demo" items={DEMO} align="right" />
+            <NavMenu label="Demo" items={DEMO} align="right" footer={<ResetDemoItem />} />
           </li>
         </ul>
 
@@ -76,7 +77,17 @@ export function Nav() {
   );
 }
 
-function NavMenu({ label, items, align }: { label: string; items: NavItem[]; align: "left" | "right" }) {
+function NavMenu({
+  label,
+  items,
+  align,
+  footer,
+}: {
+  label: string;
+  items: NavItem[];
+  align: "left" | "right";
+  footer?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -129,8 +140,88 @@ function NavMenu({ label, items, align }: { label: string; items: NavItem[]; ali
               )}
             </Link>
           ))}
+          {footer && (
+            <>
+              <div className="border-t border-outline-variant/40" />
+              {footer}
+            </>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+// Reset the lifecycle demo to its pristine state. Two-click confirm (so an
+// errant click never wipes mid-demo state), then a reload so every surface —
+// the roster and the per-phase lifecycle cards — re-derives from the clean
+// store. Onboarding runs are untouched server-side.
+type ResetPhase = "idle" | "confirm" | "working" | "done" | "error";
+
+function resetLabel(phase: ResetPhase): { icon: string; text: string; tone: string } {
+  switch (phase) {
+    case "confirm":
+      return {
+        icon: "restart_alt",
+        text: "Click again to confirm",
+        tone: "bg-surface-container text-status-blocked",
+      };
+    case "working":
+      return { icon: "progress_activity", text: "Resetting…", tone: "text-on-surface-variant" };
+    case "done":
+      return { icon: "check_circle", text: "Demo reset", tone: "text-status-ready" };
+    case "error":
+      return { icon: "error", text: "Reset failed — try again", tone: "text-status-blocked" };
+    default:
+      return {
+        icon: "restart_alt",
+        text: "Reset demo",
+        tone: "text-on-surface-variant hover:bg-surface-container hover:text-status-blocked",
+      };
+  }
+}
+
+function ResetDemoItem() {
+  const [phase, setPhase] = useState<ResetPhase>("idle");
+
+  // Auto-disarm the confirm prompt if the user hesitates.
+  useEffect(() => {
+    if (phase !== "confirm") return;
+    const t = setTimeout(() => setPhase("idle"), 4000);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  async function handle() {
+    if (phase === "idle" || phase === "error") {
+      setPhase("confirm");
+      return;
+    }
+    if (phase === "confirm") {
+      setPhase("working");
+      try {
+        await api.resetDemo();
+        setPhase("done");
+        setTimeout(() => window.location.reload(), 700);
+      } catch {
+        setPhase("error");
+      }
+    }
+  }
+
+  const { icon, text, tone } = resetLabel(phase);
+
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={handle}
+      disabled={phase === "working" || phase === "done"}
+      className={`flex w-full items-center gap-2 px-3 py-2 text-left transition-colors ${tone}`}
+    >
+      <span className={`material-symbols-outlined text-[16px] ${phase === "working" ? "animate-spin" : ""}`}>
+        {icon}
+      </span>
+      <span className="block text-xs font-semibold uppercase tracking-wider">{text}</span>
+    </button>
   );
 }

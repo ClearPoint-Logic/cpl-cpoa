@@ -209,6 +209,22 @@ def save_state(state: LifecycleState) -> None:
     _save(state)
 
 
+def clear_all() -> int:
+    """Clear every agent's lifecycle/management state — the demo **Reset**.
+
+    Wipes the configured store (the same effect as deleting the lifecycle
+    documents by hand), returning the lifecycle demo to its pristine state: with
+    no ledger, a flagged Govern card re-derives as flagged and the HR Console
+    roster is empty until agents are advanced again. The onboarding runs live in
+    a separate store and are left untouched (they re-derive deterministically).
+    Returns the number of agent states cleared.
+    """
+    store = _get_store()
+    cleared = len(store.all())
+    store.clear()
+    return cleared
+
+
 def reset_for_tests() -> None:
     """Reset the lifecycle store; tests call this in setup.
 

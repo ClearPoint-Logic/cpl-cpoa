@@ -127,6 +127,23 @@ def test_list_states_returns_every_tracked_agent() -> None:
     assert {s["candidate_agent_id"] for s in states} == {"agent-a", "agent-b"}
 
 
+def test_clear_all_empties_store_and_returns_count() -> None:
+    manage.apply_action("agent-a", "place_on_leave", {"reason": "one"})
+    manage.apply_action("agent-b", "manager_handoff", {"new_owner_email": "x@y"})
+    assert len(manage.list_states()) == 2
+
+    assert manage.clear_all() == 2
+    assert manage.list_states() == []
+
+    # A read after clearing re-derives a fresh, unpersisted default state.
+    assert manage.get_state("agent-a").status == "active"
+    assert manage.list_states() == []  # the default read did not persist
+
+
+def test_clear_all_on_empty_store_returns_zero() -> None:
+    assert manage.clear_all() == 0
+
+
 def test_event_signature_is_real_hmac() -> None:
     result = manage.apply_action("x", "place_on_leave", {"reason": "r"})
     event = result["event"]
