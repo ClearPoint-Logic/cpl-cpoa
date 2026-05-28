@@ -18,6 +18,7 @@ google-adk==2.1.0
 google-api-core==2.30.3
 google-auth==2.53.0
 google-cloud-core==2.6.0
+google-cloud-discoveryengine==0.19.0
 google-cloud-firestore==2.27.0
 google-cloud-trace==1.19.0
 google-genai==1.75.0

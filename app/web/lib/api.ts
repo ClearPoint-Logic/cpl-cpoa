@@ -22,5 +22,5 @@ export const api = {
     j<{ narrative: string; source: string; model: string }>(`/api/runs/${id}/narrate`, {
       method: "POST",
     }),
-  downloadUrl: (id: string, fmt: "json" | "md") => `/api/runs/${id}/download/${fmt}`,
+  downloadUrl: (id: string, fmt: "json" | "md" | "pdf") => `/api/runs/${id}/download/${fmt}`,
 };

@@ -232,9 +232,10 @@ export default function RunPage({ params }: { params: { id: string } }) {
                       {run.evidence_bundle.limitations.map((l: string, i: number) => <li key={i}>{l}</li>)}
                     </ul>
                   </Section>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <a href={api.downloadUrl(run.run_id, "json")} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Download JSON</a>
                     <a href={api.downloadUrl(run.run_id, "md")} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Download Markdown</a>
+                    <a href={api.downloadUrl(run.run_id, "pdf")} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Download PDF</a>
                   </div>
                 </>
               )}

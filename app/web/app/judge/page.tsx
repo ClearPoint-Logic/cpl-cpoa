@@ -49,6 +49,16 @@ export default function Judge() {
       </section>
 
       <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="font-semibold">Interoperability & exports</h2>
+        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
+          <li><strong>A2A:</strong> the agent publishes an Agent Card at <code className="rounded bg-slate-100 px-1">/.well-known/agent.json</code> and accepts tasks at <code className="rounded bg-slate-100 px-1">/a2a/v1/message:send</code> — discoverable by other enterprise agents.</li>
+          <li><strong>Live Gemini:</strong> each run offers an &ldquo;Explain with Gemini&rdquo; button (real Vertex AI call; the decision stays deterministic).</li>
+          <li><strong>Evidence export:</strong> every bundle downloads as JSON, Markdown, or PDF.</li>
+          <li><strong>Observability:</strong> onboarding runs emit Cloud Trace spans + a hash-chained evidence log.</li>
+        </ul>
+      </section>
+
+      <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="font-semibold">Known limitations (honest scope)</h2>
         <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
           {LIMITS.map((l, i) => <li key={i}>{l}</li>)}
