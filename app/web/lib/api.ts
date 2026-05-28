@@ -1,4 +1,11 @@
-import type { DiscoveryScanResult, FixtureCard, Run } from "./types";
+import type {
+  DiscoveryScanResult,
+  FixtureCard,
+  LifecycleAction,
+  LifecycleActionResult,
+  LifecycleState,
+  Run,
+} from "./types";
 
 // Relative paths; next.config rewrites /api/* to the FastAPI backend (dev + deploy).
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
@@ -28,5 +35,18 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(endpoints ? { endpoints } : {}),
+    }),
+  getLifecycleState: (candidateId: string) =>
+    j<LifecycleState>(`/api/workforce/${encodeURIComponent(candidateId)}/state`),
+  applyLifecycleAction: (
+    candidateId: string,
+    action: LifecycleAction,
+    payload: Record<string, unknown>,
+    actorId?: string,
+  ) =>
+    j<LifecycleActionResult>(`/api/workforce/${encodeURIComponent(candidateId)}/action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, payload, actor_id: actorId }),
     }),
 };
