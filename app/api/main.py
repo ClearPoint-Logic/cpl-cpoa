@@ -231,14 +231,16 @@ def grounding_comparison(name: str) -> dict:
 @app.get("/api/architecture")
 def architecture() -> dict:
     return {
-        "title": "ClearPoint Onboarding Agent — Google stack",
-        "intelligence": "Gemini via Vertex AI",
-        "orchestration": "Agent Development Kit (ADK) — root LlmAgent + 6 subagents",
-        "tools": "Model Context Protocol (HTTP MCP server, NSA security baseline)",
-        "grounding": "Vertex AI Search / RAG with local corpus fallback",
-        "runtime": "Agent Engine (orchestrator) + Cloud Run (UI, API, MCP)",
-        "observability": "Cloud Logging / Trace + hash-chained evidence",
-        "design": "Google Stitch → Next.js + Tailwind with CPL brand tokens",
+        "title": "ClearPoint Onboarding Agent — built on Google's agent platform",
+        "intelligence": "Gemini 3.5 Flash on Vertex AI (region: global)",
+        "orchestration": "Agent Development Kit (ADK) — root LlmAgent + six subagents",
+        "tools": "Model Context Protocol (HTTP MCP server, NSA MCP security baseline)",
+        "grounding": "Vertex AI Search (Discovery Engine) with local-corpus fallback",
+        "interoperability": "Agent-to-Agent (A2A) protocol — Agent Card at /.well-known/agent.json",
+        "persistence": "Firestore for durable runs across scale-to-zero",
+        "runtime": "Cloud Run (web, API, MCP) deployed via Cloud Build",
+        "observability": "Cloud Trace spans + SHA-256 hash-chained evidence",
+        "design": "Google Stitch → Next.js + Tailwind with Material 3 tokens",
     }
 
 
@@ -246,9 +248,10 @@ def architecture() -> dict:
 _A2A_CARD = {
     "name": "ClearPoint Onboarding Agent",
     "description": (
-        "Onboards AI agents into the enterprise workforce: inspects a candidate manifest and "
-        "issues an Agent Passport, Policy Envelope, AI BOM, and audit-ready Evidence Bundle with "
-        "a Ready / Ready with Conditions / Blocked Pending Remediation decision."
+        "The AI Workforce Management onboarding gate. Inspects a candidate AI agent manifest and "
+        "issues an Agent Passport, Policy Envelope, AI Bill of Materials, and a hash-chained "
+        "Evidence Bundle, with a deterministic Ready / Ready with Conditions / Blocked Pending "
+        "Remediation decision."
     ),
     "version": "0.4.0",
     "protocolVersion": "0.2.0",
@@ -259,8 +262,9 @@ _A2A_CARD = {
         {
             "id": "onboard_agent",
             "name": "Onboard a candidate AI agent",
-            "description": "Return an onboarding decision and workforce-management artifacts "
-                           "for a candidate agent manifest.",
+            "description": "Return an audit-ready onboarding decision and the workforce-management "
+                           "artifacts (Passport, Policy Envelope, AI BOM, Evidence Bundle) for a "
+                           "candidate agent manifest.",
             "tags": ["governance", "onboarding", "workforce", "ai-bom", "policy", "evidence"],
             "examples": ["Onboard this agent manifest and tell me if it is Ready, Conditional, or Blocked."],
         }

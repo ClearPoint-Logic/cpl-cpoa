@@ -3,9 +3,9 @@ import { Nav } from "@/components/Nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ClearPoint Onboarding Agent",
+  title: "ClearPoint Onboarding Agent — AI Workforce Management",
   description:
-    "A net-new ADK + Gemini multi-agent system that helps enterprises hire AI agents into the workforce.",
+    "The AI Workforce Management onboarding gate. Built on Google's agent platform — ADK, Gemini on Vertex AI, MCP, Vertex AI Search, Cloud Run, A2A — to hire AI agents the way enterprises hire humans.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto w-full max-w-7xl flex-grow px-4 py-8 sm:px-8">{children}</main>
         <footer className="mt-auto border-t border-outline-variant/40 bg-surface-dim">
           <div className="mx-auto max-w-7xl px-4 py-6 text-xs text-on-surface-variant sm:px-8">
-            © 2026 Mabry Ventures
+            © 2026 ClearPoint Logic
           </div>
         </footer>
       </body>

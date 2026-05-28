@@ -8,8 +8,6 @@ const PAIRS = [
   { human: "Personnel file", hIcon: "folder_shared", ai: "Evidence Bundle", aIcon: "verified_user", note: "the record that follows it forward" },
 ];
 
-const STACK = ["ADK", "Gemini · Vertex AI", "Google Stitch", "MCP", "Agent Engine", "Cloud Run", "Vertex AI Search"];
-
 export default function Home() {
   return (
     <div className="space-y-14">
@@ -25,10 +23,12 @@ export default function Home() {
               <span className="text-primary">Don&apos;t just deploy code.</span>
             </h1>
             <p className="text-lg text-on-surface-variant">
-              Every enterprise hires humans with an ID badge, a job description, a résumé, and a
-              personnel file. AI agents are joining the workforce — and most organizations have no
-              equivalent process. ClearPoint Onboarding Agent gives every new agent the same
-              structured intake, with an audit-ready decision at the gate.
+              Enterprises hire humans with an ID badge, a job description, a résumé, and a
+              personnel file. AI agents are joining the workforce with no equivalent process.
+              <strong className="font-semibold text-on-surface"> ClearPoint Onboarding Agent</strong> is
+              the AI Workforce Management onboarding gate — it issues every new agent an
+              Agent Passport, Policy Envelope, AI Bill of Materials, and a hash-chained
+              Evidence Bundle, with an audit-ready decision before it runs.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/agents" className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-hover">
@@ -63,18 +63,22 @@ export default function Home() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-heading text-xl font-semibold">Built on the Google stack</h2>
-        <div className="flex flex-wrap gap-2">
-          {STACK.map((s) => (
-            <span key={s} className="rounded-lg bg-surface-container-lowest px-3 py-1.5 text-sm text-on-surface-variant ring-1 ring-outline-variant/40">
-              {s}
-            </span>
-          ))}
-        </div>
-        <p className="max-w-2xl text-sm text-on-surface-variant">
-          The onboarding decision is computed deterministically (score, caps, blockers); Gemini
-          contributes summaries, rationale, and explanations. The onboarding gate is the start —
-          continuous attestation is the roadmap.
+        <h2 className="font-heading text-xl font-semibold">Built on Google&apos;s agent platform</h2>
+        <p className="max-w-3xl text-on-surface-variant">
+          Orchestrated with the <strong className="text-on-surface">Agent Development Kit</strong>,
+          reasoning with <strong className="text-on-surface">Gemini 3.5 Flash on Vertex AI</strong>,
+          tools served over the <strong className="text-on-surface">Model Context Protocol</strong>,
+          grounded with <strong className="text-on-surface">Vertex AI Search</strong>, designed in
+          <strong className="text-on-surface"> Google Stitch</strong>, observed with
+          <strong className="text-on-surface"> Cloud Trace</strong>, persisted in
+          <strong className="text-on-surface"> Firestore</strong>, deployed on
+          <strong className="text-on-surface"> Cloud Run</strong>, and discoverable via the
+          <strong className="text-on-surface"> Agent-to-Agent (A2A)</strong> protocol.
+        </p>
+        <p className="max-w-3xl text-sm text-on-surface-variant">
+          The onboarding decision — score, caps, blockers — is computed deterministically; Gemini
+          contributes summaries, rationale, and explanations. The onboarding gate is one phase of
+          the AI Workforce lifecycle; continuous attestation is the roadmap.
         </p>
       </section>
     </div>

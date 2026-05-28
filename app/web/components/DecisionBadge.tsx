@@ -1,17 +1,17 @@
-// Solid pill status badges per the Stitch design system (DESIGN.md "Decision Suite").
+// Decision indicator — bold colored uppercase label, no pill background.
+// AI Workforce Management design language: authoritative, sober, enterprise-grade.
 const MAP: Record<string, { label: string; cls: string }> = {
-  Ready: { label: "Ready", cls: "bg-status-ready text-white" },
-  "Ready with Conditions": { label: "Conditional", cls: "bg-status-conditional text-white" },
-  "Blocked Pending Remediation": { label: "Blocked", cls: "bg-status-blocked text-white" },
+  Ready: { label: "Ready", cls: "text-status-ready" },
+  "Ready with Conditions": { label: "Conditional", cls: "text-status-conditional" },
+  "Blocked Pending Remediation": { label: "Blocked", cls: "text-status-blocked" },
 };
 
 export function DecisionBadge({ decision, size = "md" }: { decision: string; size?: "sm" | "md" | "lg" }) {
-  const m = MAP[decision] ?? { label: decision, cls: "bg-on-surface-variant text-white" };
-  const sz =
-    size === "lg" ? "text-sm px-4 py-1.5" : size === "sm" ? "text-[11px] px-2.5 py-0.5" : "text-xs px-3 py-1";
+  const m = MAP[decision] ?? { label: decision, cls: "text-on-surface-variant" };
+  const sz = size === "lg" ? "text-base" : size === "sm" ? "text-[11px]" : "text-xs";
   return (
     <span
-      className={`inline-flex items-center rounded-full font-heading font-semibold uppercase tracking-wider ${m.cls} ${sz}`}
+      className={`inline-flex items-center font-heading font-bold uppercase tracking-[0.18em] ${m.cls} ${sz}`}
     >
       {m.label}
     </span>

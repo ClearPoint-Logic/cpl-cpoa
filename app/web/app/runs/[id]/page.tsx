@@ -100,7 +100,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   </span>
                   <div>
                     <span className="font-medium text-cpl-charcoal">{e.event_type}</span>
-                    <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500">{e.actor.id}</span>
+                    <span className="ml-2 text-[11px] text-on-surface-variant">· {e.actor.id}</span>
                     <p className="text-slate-500">{e.summary}</p>
                   </div>
                 </li>
@@ -178,13 +178,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   </Section>
                   {pol.grounding_refs?.length ? (
                     <Section title="Grounded sources">
-                      <div className="flex flex-wrap gap-2">
+                      <ul className="space-y-1 text-xs text-on-surface-variant">
                         {pol.grounding_refs.map((g: any, i: number) => (
-                          <span key={i} title={g.snippet} className="rounded-full bg-cpl-aqua/10 px-2.5 py-1 text-xs text-cpl-charcoal ring-1 ring-cpl-aqua/30">
-                            {g.source_id}
-                          </span>
+                          <li key={i} title={g.snippet}>
+                            <span className="font-semibold text-on-surface">{g.source_id}</span>
+                            {g.source_title ? ` — ${g.source_title}` : ""}
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </Section>
                   ) : null}
                   <Raw obj={pol} />
@@ -198,7 +199,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                         <li key={i} className="rounded-lg border border-slate-200 p-3">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-bold uppercase ${SEV_CLS[f.severity] ?? ""}`}>{f.severity}</span>
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">{f.test_id}</span>
+                            <span className="text-xs font-semibold text-on-surface-variant">{f.test_id}</span>
                             <span className="font-medium">{f.title}</span>
                             {f.blocks_ready_decision && <span className="text-xs text-decision-blocked">blocks Ready</span>}
                           </div>

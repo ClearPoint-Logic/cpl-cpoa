@@ -36,9 +36,11 @@ export default function AgentZoo() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-cpl-charcoal">Test Agent Zoo</h1>
-        <p className="text-slate-600">
-          Pick a candidate agent and run the onboarding workflow end to end.
+        <h1 className="font-heading text-2xl font-semibold text-cpl-charcoal">Agent Zoo</h1>
+        <p className="text-on-surface-variant">
+          Select a candidate agent and run it through the AI Workforce onboarding gate end-to-end.
+          Each fixture exercises a distinct production scenario — clean intake, governance gaps,
+          regulated data, budget exposure, prompt injection, and supply-chain risk.
         </p>
       </div>
 
@@ -60,22 +62,22 @@ export default function AgentZoo() {
                     <h3 className="font-heading text-lg font-semibold text-cpl-charcoal">{f.agent_name}</h3>
                     <DecisionBadge decision={f.expected_decision} size="sm" />
                   </div>
-                  <p className="mt-2 flex-1 text-sm text-slate-600">{f.business_story}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5 text-xs text-slate-500">
-                    <span className="rounded bg-slate-100 px-2 py-0.5">{f.autonomy}</span>
-                    {f.tools.map((t) => (
-                      <span key={t.name} className="rounded bg-slate-100 px-2 py-0.5">
-                        {t.name} · {t.risk_tier}
-                      </span>
-                    ))}
-                    {f.data_classes.map((d) => (
-                      <span key={d} className="rounded bg-cpl-aqua/10 px-2 py-0.5 text-cpl-charcoal">{d}</span>
-                    ))}
-                  </div>
+                  <p className="mt-2 flex-1 text-sm text-on-surface-variant">{f.business_story}</p>
+                  <dl className="mt-3 space-y-1 text-xs text-on-surface-variant">
+                    <div><span className="font-semibold text-on-surface">Autonomy</span> · {f.autonomy}</div>
+                    <div>
+                      <span className="font-semibold text-on-surface">Tools</span> ·{" "}
+                      {f.tools.length ? f.tools.map((t) => `${t.name} (${t.risk_tier})`).join(" · ") : "none"}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-on-surface">Data</span> ·{" "}
+                      {f.data_classes.length ? f.data_classes.join(", ") : "public"}
+                    </div>
+                  </dl>
                   <button
                     onClick={() => run(f.name)}
                     disabled={busy === f.name}
-                    className="mt-4 rounded-lg bg-cpl-blue px-4 py-2 text-sm font-semibold text-white hover:bg-cpl-blue/90 disabled:opacity-60"
+                    className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-60"
                   >
                     {busy === f.name ? "Onboarding…" : "Run onboarding →"}
                   </button>
