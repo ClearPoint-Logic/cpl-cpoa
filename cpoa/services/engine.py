@@ -34,6 +34,7 @@ from .evidence_log import EvidenceLog, build_bundle
 from .grounding import get_grounding_for_policy
 from .policy import propose_policy
 from .scoring import compute_score
+from .tracing import span
 from .validation_suite import run_validation_suite
 
 BLOCKED = "Blocked Pending Remediation"
@@ -71,14 +72,16 @@ def onboard(
     log.emit("onboarding.input.validated", "Manifest shape validated.",
              {"candidate_agent_id": cid}, actor_type="system")
     try:
-        discovery = run_discovery(manifest)
+        with span("cpoa.discovery", candidate=cid):
+            discovery = run_discovery(manifest)
         log.emit("onboarding.discovery.completed", discovery.summary, discovery,
                  actor_id="discovery_agent")
 
-        refs = grounding_refs if grounding_refs is not None else get_grounding_for_policy(
-            manifest, discovery
-        )
-        policy = propose_policy(manifest, discovery, policy_pack, refs)
+        with span("cpoa.policy", candidate=cid):
+            refs = grounding_refs if grounding_refs is not None else get_grounding_for_policy(
+                manifest, discovery
+            )
+            policy = propose_policy(manifest, discovery, policy_pack, refs)
         log.emit(
             "onboarding.policy.proposed",
             f"Proposed {len(policy.approval_rules)} approval rule(s); "
@@ -86,19 +89,25 @@ def onboard(
             policy, actor_id="policy_agent",
         )
 
-        validation_run = run_validation_suite(manifest, discovery, policy)
+        with span("cpoa.validation", candidate=cid):
+            validation_run = run_validation_suite(manifest, discovery, policy)
         log.emit("onboarding.validation.executed", validation_run.summary, validation_run,
                  actor_id="validation_agent")
 
-        score = compute_score(manifest, discovery, policy, validation_run, evidence_exported=True)
-        decision_result = decide(
-            manifest, discovery, policy, validation_run, score, evidence_exported=True
-        )
+        with span("cpoa.scoring_and_decision", candidate=cid) as s:
+            score = compute_score(manifest, discovery, policy, validation_run, evidence_exported=True)
+            decision_result = decide(
+                manifest, discovery, policy, validation_run, score, evidence_exported=True
+            )
+            if s is not None:
+                s.set_attribute("readiness_score", score.score)
+                s.set_attribute("decision", decision_result.decision)
 
-        ai_bom = build_ai_bom(manifest, discovery)
-        passport = build_passport(
-            manifest, discovery, policy, score, decision_result.decision, ai_bom.ai_bom_id
-        )
+        with span("cpoa.artifacts", candidate=cid):
+            ai_bom = build_ai_bom(manifest, discovery)
+            passport = build_passport(
+                manifest, discovery, policy, score, decision_result.decision, ai_bom.ai_bom_id
+            )
         log.emit(
             "onboarding.artifacts.generated",
             f"Passport {passport.passport_id}; readiness {score.score} ({score.band}).",
@@ -123,11 +132,12 @@ def onboard(
         bundle_id = new_bundle_id(passport.candidate_agent_id)
         approval_card.evidence_bundle_id = bundle_id
 
-        bundle = build_bundle(
-            decision_result.decision, passport, ai_bom, policy, score, validation_run,
-            approval_card, list(log.events),
-            bundle_id=bundle_id,
-        )
+        with span("cpoa.evidence_bundle", candidate=cid):
+            bundle = build_bundle(
+                decision_result.decision, passport, ai_bom, policy, score, validation_run,
+                approval_card, list(log.events),
+                bundle_id=bundle_id,
+            )
         log.emit("onboarding.evidence.bundle.exported",
                  f"Exported evidence bundle {bundle.bundle_id}.",
                  {"bundle_id": bundle.bundle_id, "bundle_hash": bundle.bundle_hash})
