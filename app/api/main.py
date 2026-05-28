@@ -21,7 +21,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import agent_discovery, engine, manage
+from cpoa.services import agent_discovery, engine, govern, manage
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -411,3 +411,13 @@ def apply_workforce_action(candidate_id: str, body: dict) -> dict:
 def list_workforce_states() -> list[dict]:
     """Return every agent currently tracked by the HR Console."""
     return manage.list_states()
+
+
+# --- Govern phase (Compass control mapping) ---------------------------------
+
+
+@app.get("/api/govern/controls")
+def govern_controls() -> dict:
+    """Live control matrix: each enforced control mapped to NSA MCP CSI /
+    NIST AI RMF / EU AI Act passages from the grounding corpus."""
+    return govern.control_matrix()
