@@ -79,7 +79,7 @@ cpoa/            Schemas (§11 data contracts) + deterministic services (hashing
 agents/          ADK orchestrator + six subagents (discovery, policy, artifact, validation, evidence, explanation)
 mcp_servers/     Secure HTTP MCP server exposing the onboarding tools
 app/             FastAPI backend (app/api) + Next.js judge UI (app/web)
-fixtures/        Agent Zoo (8 candidate manifests), policy pack, registry fixture
+fixtures/        Pre-Boarding roster (8 candidate manifests), policy pack, registry fixture
 corpus/          Grounded corpus (public sources: NSA MCP CSI, NIST AI RMF, EU AI Act) + attribution
 tests/           unit / integration / evals / security
 scripts/         run_demo.py (CLI), eval + Vertex AI Search seed scripts

@@ -36,11 +36,12 @@ export default function AgentZoo() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-cpl-charcoal">Agent Zoo</h1>
+        <h1 className="font-heading text-2xl font-semibold text-cpl-charcoal">Pre-Boarding</h1>
         <p className="text-on-surface-variant">
-          Select a candidate agent and run it through the AI Workforce onboarding gate end-to-end.
-          Each fixture exercises a distinct production scenario — clean intake, governance gaps,
-          regulated data, budget exposure, prompt injection, and supply-chain risk.
+          The roster of candidate AI agents awaiting their first day. Pick one and run it through
+          the onboarding gate end-to-end. Each candidate exercises a distinct production scenario —
+          clean intake, governance gaps, regulated data, budget exposure, prompt injection, and
+          supply-chain risk.
         </p>
       </div>
 

@@ -117,5 +117,5 @@ recommendation," not certified compliance.
 
 Public code repository linked in the submission. Hosted judge UI at
 [cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com), gated by HTTP basic auth
-(credentials in `JUDGE_RUNBOOK.md` and on the submission form). Open the **Agent Zoo** and run
-any fixture end-to-end — no CLI required. Evidence bundles export as JSON, Markdown, and PDF.
+(credentials in `JUDGE_RUNBOOK.md` and on the submission form). Open the **Pre-Boarding** roster
+and run any fixture end-to-end — no CLI required. Evidence bundles export as JSON, Markdown, and PDF.

@@ -34,7 +34,7 @@ export default function Judge() {
           The hosted UI is protected by HTTP basic auth. Credentials are provided in the Devpost
           submission and in{" "}
           <code className="rounded bg-surface-container px-1 text-on-surface">docs/submission/JUDGE_RUNBOOK.md</code>.
-          No CLI is required — every fixture runs from the Agent Zoo.
+          No CLI is required — every fixture runs from the Pre-Boarding roster.
         </p>
       </section>
 
@@ -45,7 +45,7 @@ export default function Judge() {
         <p className="text-sm text-on-surface-variant">
           Open the{" "}
           <Link href="/agents" className="text-primary underline">
-            Agent Zoo
+            Pre-Boarding
           </Link>{" "}
           and run any fixture end-to-end. Suggested order:{" "}
           <strong className="text-on-surface">safe_research_agent</strong> (Ready) →{" "}
