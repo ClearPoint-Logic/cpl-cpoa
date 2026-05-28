@@ -657,28 +657,56 @@ def optimize_plans() -> dict:
 # falls back to a deterministic grounded answer so the advisor is always useful.
 
 
+# Map a raw route/path (from the calling page) to a friendly, non-technical screen
+# name. Compass must never echo a raw path or run ID back to a business user.
+_FRIENDLY_PAGE: dict[str, str] = {
+    "/": "the home overview",
+    "run": "the agent's onboarding profile",
+    "/agents": "Pre-Boarding",
+    "/workforce": "the Workforce roster",
+    "/architecture": "Architecture",
+    "/compliance": "Compliance",
+    "/operate": "Operate",
+    "/optimize": "Talent Development",
+    "/grounding": "Grounding",
+}
+
+
+def _friendly_page(page: str | None) -> str:
+    """Resolve a raw page key/path to a human screen name (never leak a path)."""
+    if not page:
+        return "the platform"
+    if page in _FRIENDLY_PAGE:
+        return _FRIENDLY_PAGE[page]
+    if page.startswith("/runs"):
+        return "the agent's onboarding profile"
+    return "the platform"
+
+
 def _compass_facts(context: dict) -> tuple[dict, dict | None]:
-    """Build the grounding facts for a Compass turn; also return the loaded run."""
+    """Build the grounding facts for a Compass turn; also return the loaded run.
+
+    Facts are deliberately free of machine identifiers, paths, and infrastructure
+    names so the advisor speaks in plain business language (see _COMPASS_INSTRUCTION).
+    """
     facts: dict = {
-        "platform": "ClearPoint Workforce Agent — AI Workforce Management on Google Cloud",
-        "stack": ["ADK", "Gemini 3.5 Flash on Vertex AI", "MCP", "Vertex AI Search",
-                  "Cloud Run", "A2A", "Firestore", "Cloud Trace"],
+        "platform": "ClearPoint Workforce Agent — onboards and manages AI agents the "
+                    "way an enterprise hires and manages people",
         "lifecycle_phases": ["Discover", "Onboard", "Manage", "Govern", "Operate", "Optimize"],
-        "current_page": context.get("page"),
+        "current_screen": _friendly_page(context.get("page")),
     }
     run = store.get(context["run_id"]) if context.get("run_id") else None
     if run:
         state = manage.get_state(run.get("candidate_agent_id", ""))
-        facts["run"] = {
+        facts["agent"] = {
             "agent_name": run["agent_name"],
-            "candidate_agent_id": run["candidate_agent_id"],
             "decision": run["decision"],
             "readiness_score": run["score"]["score"],
             "band": run["score"]["band"],
             "blockers": run["blockers"],
             "conditions": run["conditions"],
             "findings": [
-                {"test_id": f["test_id"], "severity": f["severity"], "title": f["title"]}
+                {"severity": f["severity"], "title": f["title"]}
                 for f in run["validation_run"]["findings"]
             ],
             "grounded_sources": run["narrative"]["grounded_sources"],
@@ -712,8 +740,8 @@ def _compass_actions(run: dict | None) -> list[dict]:
         top = findings[0]
         actions.append({
             "id": "explain_finding", "kind": "ask",
-            "label": f"Explain finding {top['test_id']}",
-            "prompt": f"Explain finding {top['test_id']} ({top['title']}) and how to remediate it.",
+            "label": f"Explain: {top['title']}",
+            "prompt": f'Explain the finding "{top["title"]}" in plain language and how to resolve it.',
         })
     actions.append({
         "id": "open_compliance", "kind": "navigate",
@@ -723,15 +751,19 @@ def _compass_actions(run: dict | None) -> list[dict]:
 
 
 def _compass_deterministic_answer(message: str, run: dict | None) -> str:
-    """A grounded Markdown answer used when live Gemini is unavailable."""
+    """A grounded Markdown answer used when live Gemini is unavailable.
+
+    Plain business language — no machine codes, paths, or infrastructure names.
+    """
     if run:
-        # If the question names a specific finding, surface its remediation.
+        msg = message.lower()
+        # If the question names a specific finding (by code or title), surface its remediation.
         for f in run["validation_run"]["findings"]:
-            if f["test_id"].lower() in message.lower():
+            if f["test_id"].lower() in msg or (f["title"] and f["title"].lower() in msg):
                 return (
-                    f"**{f['test_id']} — {f['title']}** _({f['severity']})_\n\n"
+                    f"**{f['title']}** _({f['severity']})_\n\n"
                     f"{f.get('description') or ''}\n\n"
-                    f"**Remediation:** {f['recommended_remediation']}"
+                    f"**How to resolve it:** {f['recommended_remediation']}"
                 )
         lines = [
             f"**{run['agent_name']}** was evaluated by the onboarding gate.",
@@ -747,8 +779,8 @@ def _compass_deterministic_answer(message: str, run: dict | None) -> str:
         if findings:
             lines += [
                 "",
-                f"The pre-employment screening raised **{len(findings)} finding(s)**; the top "
-                f"item is `{findings[0]['test_id']}` — {findings[0]['title']}.",
+                f"The pre-employment screening raised **{len(findings)} finding(s)**; the "
+                f"most important is **{findings[0]['title']}**.",
             ]
         lines += [
             "",

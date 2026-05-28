@@ -132,3 +132,63 @@ def test_event_signature_is_real_hmac() -> None:
     # Real HMAC-SHA256 signature (64 hex chars after the "hmac-sha256:" prefix)
     assert event["signature"]["value"].startswith("hmac-sha256:")
     assert len(event["signature"]["value"].removeprefix("hmac-sha256:")) == 64
+
+
+# --- Post-onboarding lifecycle continuation (Manage → Govern → Operate → Optimize) ---
+#
+# Regression guard: each phase event_type MUST be a member of the EventType
+# Literal in cpoa.schemas.common, or EvidenceEvent construction raises a
+# pydantic ValidationError at runtime (which surfaced as a 500 on /advance).
+
+
+@pytest.mark.parametrize("phase", manage.PHASE_ORDER)
+def test_advance_phase_emits_valid_event_type(phase: str) -> None:
+    """Advancing any lifecycle phase must construct a schema-valid event.
+
+    This is the regression test for the lifecycle-advance 500: before the
+    EventType Literal included manage.activated / govern.controls_attested /
+    optimize.development_plan_accepted, this raised ValidationError.
+    """
+    result = manage.advance_phase(
+        "lifecycle-001",
+        phase,
+        summary=f"{phase} advanced",
+        detail={"phase": phase},
+        actor_id=f"{phase}@example.com",
+    )
+    assert result["phase"] == phase
+    event = result["event"]
+    assert event["event_type"] == manage._PHASE_EVENT_TYPE[phase]
+    assert event["event_hash"].startswith("sha256:")
+    assert event["signature"]["value"].startswith("hmac-sha256:")
+
+
+def test_advance_phase_rejects_unknown_phase() -> None:
+    with pytest.raises(ValueError, match="unknown phase"):
+        manage.advance_phase("x", "bogus", summary="s", detail={}, actor_id="a@b")
+
+
+def test_run_full_lifecycle_chains_all_four_phases() -> None:
+    """Advancing every phase in order yields a continuous hash chain and all
+    four phases reported complete."""
+    state = manage.get_state("lifecycle-002")
+    assert manage.completed_phases(state) == []
+    for phase in manage.PHASE_ORDER:
+        manage.advance_phase(
+            "lifecycle-002", phase,
+            summary=f"{phase} advanced", detail={"phase": phase},
+            actor_id=f"{phase}@example.com",
+        )
+    state = manage.get_state("lifecycle-002")
+    assert manage.completed_phases(state) == manage.PHASE_ORDER
+    assert [e["event_type"] for e in state.event_log] == [
+        "manage.activated",
+        "govern.controls_attested",
+        "operate.performance_reviewed",
+        "optimize.development_plan_accepted",
+    ]
+    # Hash chain links each event to the previous.
+    prev = None
+    for evt in state.event_log:
+        assert evt["previous_event_hash"] == prev
+        prev = evt["event_hash"]

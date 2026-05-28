@@ -5,20 +5,24 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCompass } from "@/components/Compass";
 
-// Primary lifecycle surfaces. Compass is no longer a page (it's the global
-// slide-over advisor); the Govern control matrix now lives under Demo > Compliance.
-const PRIMARY = [
-  { href: "/workforce", label: "Workforce" },
-  { href: "/agents", label: "Pre-Boarding" },
-  { href: "/operate", label: "Sentinel" },
-  { href: "/optimize", label: "Talent Dev" },
-  { href: "/architecture", label: "Architecture" },
+type NavItem = { href: string; label: string; hint?: string };
+
+// Every stage of the workforce process lives under one "Workforce" menu — the
+// six-phase lifecycle, in order. Census covers Discover + Manage; the remaining
+// phases map one-to-one. Operate replaces the old "Sentinel" page label
+// (Sentinel is the monitoring engine that runs behind the scenes).
+const WORKFORCE: NavItem[] = [
+  { href: "/workforce", label: "Census", hint: "Discover · Manage" },
+  { href: "/agents", label: "Pre-Boarding", hint: "Onboard" },
+  { href: "/compliance", label: "Compliance", hint: "Govern" },
+  { href: "/operate", label: "Operate", hint: "Operate" },
+  { href: "/optimize", label: "Talent Development", hint: "Optimize" },
 ];
 
-// Demo collateral — the judge-facing evidence surfaces.
-const DEMO = [
+// Demo collateral — the non-lifecycle "how it's built" evidence surfaces.
+const DEMO: NavItem[] = [
+  { href: "/architecture", label: "Architecture" },
   { href: "/grounding", label: "Grounding" },
-  { href: "/compliance", label: "Compliance" },
 ];
 
 function linkCls(active: boolean): string {
@@ -30,7 +34,6 @@ function linkCls(active: boolean): string {
 export function Nav() {
   const pathname = usePathname();
   const { openCompass } = useCompass();
-  const isActive = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline-variant/40 bg-surface/95 backdrop-blur">
@@ -43,21 +46,19 @@ export function Nav() {
           </span>
         </Link>
 
-        <ul className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto">
+        {/* No overflow-x clipping here: an absolutely-positioned dropdown panel must
+            be allowed to escape the bar, so the menus actually render. */}
+        <ul className="ml-auto flex min-w-0 items-center gap-0.5">
           <li>
             <Link href="/" className={linkCls(pathname === "/")}>
               Home
             </Link>
           </li>
-          {PRIMARY.map((l) => (
-            <li key={l.href}>
-              <Link href={l.href} className={linkCls(isActive(l.href))}>
-                {l.label}
-              </Link>
-            </li>
-          ))}
           <li>
-            <DemoMenu active={DEMO.some((d) => isActive(d.href))} />
+            <NavMenu label="Workforce" items={WORKFORCE} align="left" />
+          </li>
+          <li>
+            <NavMenu label="Demo" items={DEMO} align="right" />
           </li>
         </ul>
 
@@ -73,10 +74,12 @@ export function Nav() {
   );
 }
 
-function DemoMenu({ active }: { active: boolean }) {
+function NavMenu({ label, items, align }: { label: string; items: NavItem[]; align: "left" | "right" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href);
+  const active = items.some((it) => isActive(it.href));
 
   // Close on outside click or route change.
   useEffect(() => setOpen(false), [pathname]);
@@ -97,26 +100,31 @@ function DemoMenu({ active }: { active: boolean }) {
         aria-expanded={open}
         className={`flex items-center gap-0.5 ${linkCls(active)}`}
       >
-        Demo
+        {label}
         <span className="material-symbols-outlined text-[16px]">{open ? "arrow_drop_up" : "arrow_drop_down"}</span>
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-1 min-w-[10rem] overflow-hidden rounded-lg border border-outline-variant/40 bg-surface shadow-lg"
+          className={`absolute ${align === "right" ? "right-0" : "left-0"} top-full z-50 mt-1 min-w-[12rem] overflow-hidden rounded-lg border border-outline-variant/40 bg-surface shadow-lg`}
         >
-          {DEMO.map((d) => (
+          {items.map((it) => (
             <Link
-              key={d.href}
-              href={d.href}
+              key={it.href}
+              href={it.href}
               role="menuitem"
-              className={`block px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                pathname.startsWith(d.href)
+              className={`block px-3 py-2 transition-colors ${
+                isActive(it.href)
                   ? "bg-surface-container text-primary"
                   : "text-on-surface-variant hover:bg-surface-container hover:text-primary"
               }`}
             >
-              {d.label}
+              <span className="block text-xs font-semibold uppercase tracking-wider">{it.label}</span>
+              {it.hint && (
+                <span className="mt-0.5 block text-[10px] font-medium normal-case tracking-normal text-on-surface-variant/80">
+                  {it.hint}
+                </span>
+              )}
             </Link>
           ))}
         </div>

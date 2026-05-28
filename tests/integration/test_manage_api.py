@@ -85,3 +85,42 @@ def test_list_workforce_states_shows_every_tracked_agent() -> None:
     assert r.status_code == 200
     ids = {s["candidate_agent_id"] for s in r.json()}
     assert ids == {"a", "b"}
+
+
+# --- Lifecycle continuation endpoints (Manage → Govern → Operate → Optimize) ---
+# Regression for the live 500: advancing any phase must return 200, not blow up
+# constructing the EvidenceEvent with an unknown event_type.
+
+
+@pytest.mark.parametrize(
+    "phase,event_type",
+    [
+        ("manage", "manage.activated"),
+        ("govern", "govern.controls_attested"),
+        ("operate", "operate.performance_reviewed"),
+        ("optimize", "optimize.development_plan_accepted"),
+    ],
+)
+def test_advance_lifecycle_phase_returns_200(phase: str, event_type: str) -> None:
+    r = client.post("/api/workforce/agent-1/advance", json={"phase": phase})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["event"]["event_type"] == event_type
+    assert body["event"]["signature"]["value"].startswith("hmac-sha256:")
+
+
+def test_advance_lifecycle_rejects_unknown_phase() -> None:
+    r = client.post("/api/workforce/agent-1/advance", json={"phase": "bogus"})
+    assert r.status_code == 422
+
+
+def test_run_full_lifecycle_advances_every_phase() -> None:
+    r = client.post("/api/workforce/agent-1/run-lifecycle", json={})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    phases = [e["phase"] for e in body["events"]]
+    assert phases == manage.PHASE_ORDER
+    # Re-running is idempotent: every phase already attested, so no new events.
+    r2 = client.post("/api/workforce/agent-1/run-lifecycle", json={})
+    assert r2.status_code == 200
+    assert r2.json()["events"] == []

@@ -13,7 +13,7 @@ const LIFECYCLE = [
   { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
   { phase: "Manage", icon: "groups", href: "/workforce", note: "HR Console: place on leave, manager handoff, role change" },
   { phase: "Govern", icon: "policy", href: "/compliance", note: "Compliance: live control mapping to NSA / NIST / EU AI Act" },
-  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Sentinel: fleet health + deterministic anomaly rules" },
+  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Fleet health + deterministic anomaly rules, run by the Sentinel engine" },
   { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },
 ];
 

@@ -116,11 +116,16 @@ EventType = Literal[
     "onboarding.decision.issued",
     "onboarding.error.fail_closed",
     # Manage (HR Console lifecycle actions)
+    "manage.activated",
     "manage.placed_on_leave",
     "manage.returned_from_leave",
     "manage.ownership_transferred",
     "manage.scope_updated",
+    # Govern (control attestation)
+    "govern.controls_attested",
     # Operate (Sentinel runtime monitoring)
     "operate.anomaly_detected",
     "operate.performance_reviewed",
+    # Optimize (Talent Development)
+    "optimize.development_plan_accepted",
 ]
