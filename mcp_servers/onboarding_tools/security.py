@@ -5,19 +5,35 @@ validation (FR-092), message integrity — nonce/expiry/request-hash (FR-093),
 replay protection, output filtering for prompt-injection (FR-094), and audit
 logging (FR-095). Pure Python so tests/security can exercise each control without
 a running HTTP server.
+
+Audit-log emission (Codex M5): every audit record is appended to the in-memory
+``audit_log`` for in-process inspection AND emitted as a structured JSON log
+line via the ``cpoa.mcp.audit`` logger. On Cloud Run this lands in Cloud
+Logging as a JSON-payload entry with severity and trace_id ready for
+correlation. Local stdio dev sees the same lines on stderr.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from cpoa.services import hashing
 from cpoa.services.injection import scan_text
 
 from .tools import TOOL_REGISTRY
+
+# Structured audit logger — JSON payloads land in Cloud Logging on Cloud Run.
+_audit_logger = logging.getLogger("cpoa.mcp.audit")
+if not _audit_logger.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(message)s"))
+    _audit_logger.addHandler(_h)
+    _audit_logger.setLevel(logging.INFO)
+    _audit_logger.propagate = False
 
 
 # --- Exceptions (mapped to MCP errors by the server) ---
@@ -115,6 +131,15 @@ class SecureGateway:
                           decision=decision, reason=reason, trace_id=ctx.trace_id,
                           nonce=ctx.nonce, output_hash=output_hash)
         self.audit_log.append(rec)
+        # Codex M5 — structured emission for Cloud Logging correlation.
+        # Cloud Run's logging agent parses JSON stdout and surfaces severity +
+        # trace correlation in the Logs Explorer.
+        _audit_logger.info(json.dumps({
+            **asdict(rec),
+            "logger": "cpoa.mcp.audit",
+            "severity": "INFO" if decision == "allow" else "WARNING",
+            "session_id": ctx.session_id,
+        }))
         return rec
 
     def invoke(self, tool_name: str, payload: dict, ctx: SecurityContext) -> dict:

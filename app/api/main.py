@@ -15,6 +15,9 @@ import uuid
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from agents.config import fast_model, llm_available
 from agents.explanation import narrate_offline
@@ -30,6 +33,17 @@ from cpoa.services.tracing import span
 from .store import get_store
 
 app = FastAPI(title="ClearPoint Workforce Agent API", version="0.4.0")
+
+# Codex H4 — per-IP rate limiting on the runs endpoints. Modest limits keep
+# the demo abuse-resistant without blocking judges who run multiple fixtures.
+# Disabled when CPOA_RATE_LIMIT_DISABLE=1 (used by integration tests).
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[],
+    enabled=os.environ.get("CPOA_RATE_LIMIT_DISABLE", "0") != "1",
+)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -149,7 +163,8 @@ def get_fixture(name: str) -> dict:
 
 
 @app.post("/api/runs/adk", dependencies=[Depends(require_auth)])
-def create_run_via_adk(body: dict) -> dict:
+@limiter.limit("10/minute")  # H4 — Gemini cost guard; ADK path is ~10-30s each
+def create_run_via_adk(request: Request, body: dict) -> dict:
     """Run onboarding via the live ADK orchestrator (Gemini-driven multi-agent path).
 
     Uses the production ADK orchestrator (``build_root_agent``) — a single
@@ -212,7 +227,8 @@ def create_run_via_adk(body: dict) -> dict:
 
 
 @app.post("/api/runs", dependencies=[Depends(require_auth)])
-def create_run(body: dict) -> dict:
+@limiter.limit("60/minute")  # H4 — deterministic path; sub-ms; generous limit
+def create_run(request: Request, body: dict) -> dict:
     """Run onboarding for a fixture name or an inline candidate manifest."""
     if "fixture" in body:
         try:
@@ -270,7 +286,8 @@ def download_bundle(run_id: str, fmt: str) -> Response:
 
 
 @app.post("/api/runs/{run_id}/narrate", dependencies=[Depends(require_auth)])
-def narrate_run(run_id: str) -> dict:
+@limiter.limit("20/minute")  # H4 — Gemini cost guard
+def narrate_run(request: Request, run_id: str) -> dict:
     """Live Gemini (via Vertex/ADK) narration of a completed run. Decision stays fixed."""
     run = store.get(run_id)
     if not run:
