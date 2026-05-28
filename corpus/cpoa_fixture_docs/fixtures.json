@@ -1,0 +1,49 @@
+{
+  "source_id": "cpoa-fixture-docs",
+  "source_title": "ClearPoint Onboarding Agent — Test Agent Zoo business stories (§6.6)",
+  "source_url": "internal challenge artifact (demo-safe)",
+  "license": "ClearPoint Logic — challenge demo content",
+  "note": "Business story, expected decision, and demonstrated behavior for each fixture.",
+  "passages": [
+    {
+      "id": "fx-safe-research", "title": "safe_research_agent — Ready",
+      "tags": ["fixture", "ready", "read_only", "research"],
+      "text": "Public-market research assistant with read-only search/summarization tools and a clear owner. Clean onboarding path with low-risk tool boundaries. Expected decision: Ready."
+    },
+    {
+      "id": "fx-crm-missing-owner", "title": "crm_write_missing_owner — Blocked",
+      "tags": ["fixture", "blocked", "missing_owner", "external_write", "crm"],
+      "text": "Sales-ops agent that can update CRM records but declares no accountable owner. Missing owner fails closed for write-capable / L2+ agents. Expected decision: Blocked Pending Remediation."
+    },
+    {
+      "id": "fx-healthcare-phi", "title": "healthcare_phi_support_agent — Conditional",
+      "tags": ["fixture", "conditional", "regulated_phi", "healthcare", "approval"],
+      "text": "Healthcare support agent with regulated PHI exposure and a ticketing workflow. Requires data boundary, retention cap, approval for external sharing, and elevated evidence. Expected decision: Ready with Conditions."
+    },
+    {
+      "id": "fx-budget-runaway", "title": "budget_runaway_research_agent — Conditional",
+      "tags": ["fixture", "conditional", "budget", "premium_model", "finance"],
+      "text": "Deep research agent with an expensive multi-model chain and weak spend limits. Requires a budget envelope, premium-model gating, and finance approval. Expected decision: Ready with Conditions."
+    },
+    {
+      "id": "fx-prompt-injected", "title": "prompt_injected_mcp_agent — Blocked",
+      "tags": ["fixture", "blocked", "prompt_injection", "mcp", "quarantine"],
+      "text": "MCP tool manifest whose description contains instruction-like malicious text. Output filtering and indirect prompt-injection detection quarantine the tool. Expected decision: Blocked Pending Remediation."
+    },
+    {
+      "id": "fx-privileged-admin", "title": "privileged_admin_agent — Blocked",
+      "tags": ["fixture", "blocked", "privileged_admin", "four_eyes", "iam"],
+      "text": "IT automation agent that can modify access groups or service accounts. Privileged tool boundary requires four-eyes approval and cannot be auto-onboarded. Expected decision: Blocked Pending Remediation."
+    },
+    {
+      "id": "fx-unmaintained-mcp", "title": "unmaintained_mcp_server_agent — Conditional/Blocked",
+      "tags": ["fixture", "conditional", "dependency", "unmaintained", "supply_chain"],
+      "text": "Agent depends on an archived, unversioned MCP server. Dependency/version/patch-history finding per NSA MCP guidance. Expected decision: Ready with Conditions or Blocked."
+    },
+    {
+      "id": "fx-grounding-required", "title": "grounding_required_policy_agent — Conditional",
+      "tags": ["fixture", "conditional", "grounding", "regulatory", "financial"],
+      "text": "Cross-border finance assistant with ambiguous regulatory obligations that require policy retrieval. Grounding/RAG sharpens the policy classification and explanation. Expected decision: Ready with Conditions."
+    }
+  ]
+}

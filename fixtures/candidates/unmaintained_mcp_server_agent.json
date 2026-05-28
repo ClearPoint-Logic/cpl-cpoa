@@ -1,0 +1,51 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "unmaintained-mcp-007",
+  "name": "Legacy Integration Agent",
+  "origin": "mcp_server",
+  "declared_purpose": "Sync records through an internal integration exposed by an MCP server.",
+  "owner": {
+    "name": "Lee Park",
+    "email": "lee@example.com",
+    "team": "Integrations",
+    "role": "Engineer"
+  },
+  "runtime": {
+    "framework": "custom",
+    "language": "go",
+    "deployment_target": "cloud_run",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-legacy@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-flash", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {
+      "tool_id": "legacy_sync",
+      "name": "Legacy Sync",
+      "protocol": "mcp",
+      "description": "Synchronize internal records through a legacy MCP server.",
+      "risk_tier": "internal_write",
+      "auth_scope": "records:sync",
+      "side_effects": "internal_state_change"
+    }
+  ],
+  "data_access": {
+    "declared_data_classes": ["internal"],
+    "memory_enabled": false,
+    "retention_days": 30
+  },
+  "autonomy": {"level": "L2_draft", "human_approval_required": true},
+  "budget": {"monthly_usd": 80, "per_run_usd": 2, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "manual",
+    "version": "0.0.0",
+    "capabilities": ["record_sync"],
+    "annotations": {
+      "mcp_dependency_status": "archived",
+      "mcp_last_patch": "none",
+      "mcp_server_repo": "example/legacy-mcp (archived)"
+    }
+  }
+}

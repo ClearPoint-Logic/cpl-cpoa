@@ -1,0 +1,34 @@
+{
+  "candidate_agent_id": "grounding-required-008",
+  "ungrounded": {
+    "method": "single_ungrounded_model_call",
+    "explanation": "Cross-Border Finance Assistant handles its declared purpose; apply standard data handling and human review as appropriate. (No sources cited.)",
+    "grounding_refs": []
+  },
+  "grounded": {
+    "method": "grounded_multi_agent",
+    "explanation": "Cross-Border Finance Assistant: policy constraints are grounded in specific public guidance \u2014 [nist-ai-rmf#nist-govern-accountability] NIST AI Risk Management Framework (AI 100-1); [eu-ai-act#eu-art12-logging] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [eu-ai-act#eu-art10-data] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [cpoa-fixture-docs#fx-healthcare-phi] ClearPoint Onboarding Agent \u2014 Test Agent Zoo business stories (\u00a76.6). Each proposed control (owner accountability, data boundaries, human oversight, and record-keeping) maps to a cited source rather than a generic summary.",
+    "grounding_refs": [
+      {
+        "source_id": "nist-ai-rmf#nist-govern-accountability",
+        "source_title": "NIST AI Risk Management Framework (AI 100-1)",
+        "snippet": "The GOVERN function calls for clear roles, responsibilities, and lines of accountability for AI systems. Each system should have an accountable owner so that risk decisions and remediation have a responsible party. An agent with no accountable owner cannot be governed."
+      },
+      {
+        "source_id": "eu-ai-act#eu-art12-logging",
+        "source_title": "EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles",
+        "snippet": "Article 12 requires high-risk AI systems to automatically record events (logs) over their lifecycle to ensure traceability of functioning. A tamper-evident evidence trail of the onboarding decision supports this record-keeping obligation."
+      },
+      {
+        "source_id": "eu-ai-act#eu-art10-data",
+        "source_title": "EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles",
+        "snippet": "Article 10 sets data governance expectations for high-risk AI, including relevance, representativeness, and appropriate handling of personal data. Explicit data-class boundaries, retention caps, and approval for external sharing of regulated data support these expectations."
+      },
+      {
+        "source_id": "cpoa-fixture-docs#fx-healthcare-phi",
+        "source_title": "ClearPoint Onboarding Agent \u2014 Test Agent Zoo business stories (\u00a76.6)",
+        "snippet": "Healthcare support agent with regulated PHI exposure and a ticketing workflow. Requires data boundary, retention cap, approval for external sharing, and elevated evidence. Expected decision: Ready with Conditions."
+      }
+    ]
+  }
+}

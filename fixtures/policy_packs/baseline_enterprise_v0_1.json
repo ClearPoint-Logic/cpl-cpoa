@@ -1,0 +1,25 @@
+{
+  "policy_pack_id": "baseline_enterprise_v0_1",
+  "description": "Baseline enterprise workforce policy pack for the onboarding gate. Declarative defaults the Policy stage applies when proposing an envelope. Demo-safe; not a production policy.",
+  "defaults": {
+    "budget": {"monthly_usd": 100, "per_run_usd": 5, "on_breach": "require_approval"},
+    "retention_days": 30,
+    "sensitive_retention_cap_days": 30,
+    "premium_model_allowed": false
+  },
+  "denied_data_classes": ["secrets"],
+  "sensitive_data_classes": ["customer_pii", "regulated_phi", "financial", "secrets"],
+  "tool_risk_policy": {
+    "read_only": {"action": "allow"},
+    "internal_write": {"action": "allow", "note": "audit logging required"},
+    "external_write": {"action": "require_approval", "approver_role": "agent_owner", "mode": "single"},
+    "financial_action": {"action": "require_approval", "approver_role": "security", "mode": "four_eyes"},
+    "privileged_admin": {"action": "require_approval", "approver_role": "security", "mode": "four_eyes"}
+  },
+  "approval_matrix": [
+    {"condition": "external sharing of sensitive/regulated data", "approver_role": "compliance", "mode": "single"},
+    {"condition": "premium model usage", "approver_role": "finance", "mode": "single"},
+    {"condition": "re-enable a quarantined tool", "approver_role": "security", "mode": "four_eyes"}
+  ],
+  "kill_switch_triggers": ["budget_breach", "policy_violation", "unapproved_sensitive_data_egress", "prompt_injection_detected"]
+}

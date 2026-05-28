@@ -1,0 +1,33 @@
+{
+  "source_id": "cpoa-policy-pack",
+  "source_title": "ClearPoint Onboarding Agent — Demo Policy Pack & Workforce Frame",
+  "source_url": "internal challenge artifact (demo-safe)",
+  "license": "ClearPoint Logic — challenge demo content",
+  "note": "CPOA's own demo policy guidance; demo-safe, not production CAS/ECS or Anchor policy.",
+  "passages": [
+    {
+      "id": "cpoa-workforce-frame",
+      "title": "Workforce frame: hire, don't just deploy",
+      "tags": ["workforce", "passport", "policy_envelope", "ai_bom", "evidence_bundle", "owner"],
+      "text": "An agent is onboarded like an employee: a Passport (ID badge) establishes identity, a Policy Envelope (job description) bounds authority, an AI BOM (resume) inventories declared dependencies, and an Evidence Bundle (personnel file) follows it forward. Each requires an accountable owner before the agent acts."
+    },
+    {
+      "id": "cpoa-readiness-bands",
+      "title": "Readiness bands and the onboarding decision",
+      "tags": ["readiness", "score", "decision", "ready", "conditional", "blocked"],
+      "text": "The Passport Readiness Score yields a band: 80-100 Ready, 60-79 Ready with Conditions, below 60 Blocked Pending Remediation. Critical findings, a missing owner on an action-capable agent, or an evidence-export failure cap the score and force a Blocked or Conditional outcome (fail-closed)."
+    },
+    {
+      "id": "cpoa-approval-controls",
+      "title": "When human approval is required",
+      "tags": ["approval", "external_write", "financial_action", "privileged_admin", "premium_model", "regulated"],
+      "text": "High-impact writes, external communication, regulated-data sharing, premium-model spend, and privileged or financial actions require human approval; privileged-admin and financial tools require four-eyes approval and cannot be auto-onboarded."
+    },
+    {
+      "id": "cpoa-evidence-honesty",
+      "title": "Evidence honesty and demo limitations",
+      "tags": ["evidence", "limitations", "demo", "signature", "continuous_attestation"],
+      "text": "Evidence bundles carry explicit limitations: challenge demo, synthetic inputs, demo-stub signatures (not production attestation), onboarding gate only. Continuous attestation is roadmap, not a built feature."
+    }
+  ]
+}

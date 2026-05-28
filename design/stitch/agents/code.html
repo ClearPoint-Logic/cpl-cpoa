@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agent Zoo - ClearPoint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Lexend:wght@400;500;600;700&amp;family=Courier+Prime&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#b3c5ff",
+                        "on-secondary-fixed": "#151c21",
+                        "surface-charcoal": "#1F262B",
+                        "on-secondary-fixed-variant": "#41484d",
+                        "on-error-container": "#93000a",
+                        "status-blocked": "#EF4444",
+                        "on-secondary-container": "#5e656b",
+                        "surface": "#f7fafb",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#007d88",
+                        "primary-fixed": "#dbe1ff",
+                        "on-surface-variant": "#424655",
+                        "outline": "#737687",
+                        "on-primary-container": "#f6f5ff",
+                        "surface-container": "#ebeeef",
+                        "error": "#ba1a1a",
+                        "status-warning": "#F59E0B",
+                        "secondary-container": "#dce3ea",
+                        "tertiary-fixed": "#8ef2ff",
+                        "on-primary-fixed": "#00184a",
+                        "on-background": "#181c1d",
+                        "surface-dim": "#d7dadb",
+                        "aqua-accent": "#43CFDF",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "inverse-surface": "#2d3132",
+                        "primary": "#004ecb",
+                        "on-surface": "#181c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e6e9ea",
+                        "secondary-fixed": "#dce3ea",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#c0c7ce",
+                        "on-primary-fixed-variant": "#003fa5",
+                        "secondary": "#585f65",
+                        "surface-container-low": "#f1f4f5",
+                        "on-tertiary-container": "#e2fbff",
+                        "surface-container-highest": "#e0e3e4",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c2c6d8",
+                        "surface-tint": "#0054d7",
+                        "background": "#f7fafb",
+                        "status-ready": "#10B981",
+                        "on-tertiary-fixed": "#001f23",
+                        "tertiary": "#00626b",
+                        "tertiary-fixed-dim": "#4fd8e8",
+                        "surface-bright": "#f7fafb",
+                        "surface-variant": "#e0e3e4",
+                        "inverse-on-surface": "#eef1f2",
+                        "primary-container": "#0b65fc",
+                        "on-tertiary-fixed-variant": "#004f56"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "workflow-rail-height": "80px",
+                        "sidebar-width": "320px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "code-sm": ["Courier Prime"],
+                        "headline-md": ["Lexend"],
+                        "headline-xl": ["Lexend"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Lexend"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar (Web Only) -->
+<header class="hidden md:flex justify-between items-center h-workflow-rail-height px-margin-desktop w-full max-w-full bg-surface shadow-sm docked full-width top-0 sticky z-50">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-semibold text-primary tracking-tight">ClearPoint</h1>
+<nav class="flex items-center gap-4 ml-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-secondary-container/50 px-3 py-2 rounded-DEFAULT" href="#">Landing</a>
+<a class="text-primary border-b-2 border-primary font-semibold px-3 py-2" href="#">Agent Zoo</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-secondary-container/50 px-3 py-2 rounded-DEFAULT" href="#">My Runs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-secondary-container/50 px-3 py-2 rounded-DEFAULT" href="#">Architecture</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-secondary-container/50 px-3 py-2 rounded-DEFAULT" href="#">Judge Access</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-secondary-container/50 active:opacity-80 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-secondary-container/50 active:opacity-80 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden shadow-sm">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate executive in a modern office setting. The lighting is bright and even, reflecting a clean, corporate aesthetic. The subject is wearing a tailored suit, looking directly at the camera with a confident, neutral expression. The background is slightly blurred, showing hints of modern office architecture with light gray and cool blue tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_n-dR2ldToIrJnVctF7jSejWkIjBUrn7_QaTi2kibKyu5vva76IrmUwFBiiu_faXtXp1HEmtNNXmrWr-VTdgUb11r_D6gKOB_fx4hatU_CYXRfVztTatOqo_LHy7glas2eaVokqCUZC4ihg0AQgxjSb3CGJzdiF8Jw2fgA8P0Rj-i0DPqBtMigMryNzCzNg_VpdRoCQyGc4JotKhunxQ6cC_hejRHcSwkS-G3CeYXrVW7gcl1AE7r1ggOG2fhC8HTjCQfaigc-jU"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- SideNavBar (Mobile/Tablet Replacement or Persistent Sidebar) -->
+<aside class="hidden lg:flex flex-col h-screen w-sidebar-width fixed left-0 top-0 bg-surface-container-low shadow-md py-6 px-4 space-y-2 z-40 pt-[calc(80px+24px)] overflow-y-auto">
+<div class="mb-8 px-4">
+<h2 class="font-headline-md text-headline-md text-primary font-bold">Filters</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Refine candidate pool</p>
+</div>
+<!-- Risk Filters -->
+<div class="px-4 mb-6">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Risk Tier</h3>
+<div class="space-y-2">
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">Low Risk (Tier 1)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">Medium Risk (Tier 2)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">High Risk (Tier 3)</span>
+</label>
+</div>
+</div>
+<!-- Status Filters -->
+<div class="px-4 mb-6">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Decision Status</h3>
+<div class="space-y-2">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">Ready</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">Conditional</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="font-body-md text-body-md">Blocked</span>
+</label>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-sidebar-width p-margin-mobile md:p-margin-desktop bg-background min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="mb-gutter flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Agent Zoo</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Candidate Agents available for organizational deployment.</p>
+</div>
+<div class="relative w-full md:w-auto">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full md:w-64 pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" placeholder="Search personnel files..." type="text"/>
+</div>
+</div>
+<!-- Grid Layout (Bento-style candidate cards) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
+<!-- Card 1: Ready -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col hover:-translate-y-1 transition-transform duration-300 hover:shadow-md hover:border-primary/50 group">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-size: 28px;">search_check</span>
+</div>
+<span class="px-3 py-1 bg-status-ready rounded-full font-label-md text-label-md text-on-tertiary uppercase tracking-wider">Ready</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Safe Research</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 h-10 overflow-hidden">Enterprise-safe data gathering with automated PII redaction capabilities.</p>
+<div class="space-y-2 font-body-sm text-body-sm">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Model:</span>
+<span class="font-medium">GPT-4-Turbo</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Owner:</span>
+<span class="font-medium text-primary">InfoSec Team</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Risk Tier:</span>
+<span class="font-medium text-status-ready">Tier 1 (Low)</span>
+</div>
+</div>
+<div class="mt-4 flex gap-2 flex-wrap">
+<span class="inline-flex items-center px-2 py-1 bg-surface-container-high rounded font-code-sm text-code-sm text-on-surface-variant">
+<span class="material-symbols-outlined mr-1" style="font-size: 14px;">policy</span> SOC2 Compliant
+                                </span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant/30 mt-auto">
+<button class="w-full py-2 bg-primary text-on-primary font-body-md text-body-md font-medium rounded-lg hover:bg-on-primary-fixed-variant transition-colors">Run Onboarding</button>
+</div>
+</div>
+<!-- Card 2: Blocked -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col hover:-translate-y-1 transition-transform duration-300 hover:shadow-md hover:border-status-blocked/50 group relative">
+<div class="absolute inset-0 bg-status-blocked/5 pointer-events-none"></div>
+<div class="p-5 flex-1 z-10">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-status-blocked">
+<span class="material-symbols-outlined" style="font-size: 28px;">edit_document</span>
+</div>
+<span class="px-3 py-1 bg-status-blocked rounded-full font-label-md text-label-md text-on-tertiary uppercase tracking-wider">Blocked</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">CRM Write</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 h-10 overflow-hidden">Automated bulk-update agent for customer relationship management records.</p>
+<div class="space-y-2 font-body-sm text-body-sm">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Model:</span>
+<span class="font-medium">Claude 3 Opus</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Owner:</span>
+<span class="font-medium text-status-blocked flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Missing</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Risk Tier:</span>
+<span class="font-medium text-status-blocked">Tier 3 (High)</span>
+</div>
+</div>
+<div class="mt-4 flex gap-2 flex-wrap">
+<span class="inline-flex items-center px-2 py-1 bg-error-container rounded font-code-sm text-code-sm text-on-error-container border border-error/20">
+<span class="material-symbols-outlined mr-1" style="font-size: 14px;">gavel</span> Unverified Data Source
+                                </span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant/30 mt-auto z-10 flex gap-2">
+<button class="flex-1 py-2 bg-surface text-on-surface border border-outline-variant font-body-md text-body-md font-medium rounded-lg hover:bg-surface-container transition-colors">View Details</button>
+<button class="flex-1 py-2 bg-surface-container-highest text-outline font-body-md text-body-md font-medium rounded-lg cursor-not-allowed" disabled="">Run Onboarding</button>
+</div>
+</div>
+<!-- Card 3: Conditional -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col hover:-translate-y-1 transition-transform duration-300 hover:shadow-md hover:border-status-warning/50 group">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-status-warning">
+<span class="material-symbols-outlined" style="font-size: 28px;">health_and_safety</span>
+</div>
+<span class="px-3 py-1 bg-status-warning rounded-full font-label-md text-label-md text-on-tertiary uppercase tracking-wider">Conditional</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Healthcare PHI</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 h-10 overflow-hidden">Summarizes patient intake forms and extracts key health indicators.</p>
+<div class="space-y-2 font-body-sm text-body-sm">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Model:</span>
+<span class="font-medium">Llama 3 70B (Local)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Owner:</span>
+<span class="font-medium text-primary">Dr. S. Chen</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Risk Tier:</span>
+<span class="font-medium text-status-warning">Tier 2 (Med)</span>
+</div>
+</div>
+<div class="mt-4 flex gap-2 flex-wrap">
+<span class="inline-flex items-center px-2 py-1 bg-surface-container-high rounded font-code-sm text-code-sm text-on-surface-variant">
+<span class="material-symbols-outlined mr-1" style="font-size: 14px;">policy</span> HIPAA Review Req.
+                                </span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant/30 mt-auto flex gap-2">
+<button class="flex-1 py-2 bg-surface text-on-surface border border-outline-variant font-body-md text-body-md font-medium rounded-lg hover:bg-surface-container transition-colors">Audit File</button>
+<button class="flex-1 py-2 bg-primary text-on-primary font-body-md text-body-md font-medium rounded-lg hover:bg-on-primary-fixed-variant transition-colors">Request Override</button>
+</div>
+</div>
+<!-- Card 4: Ready -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col hover:-translate-y-1 transition-transform duration-300 hover:shadow-md hover:border-primary/50 group">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-size: 28px;">code</span>
+</div>
+<span class="px-3 py-1 bg-status-ready rounded-full font-label-md text-label-md text-on-tertiary uppercase tracking-wider">Ready</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Code Reviewer</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 h-10 overflow-hidden">Static analysis and syntax verification for internal pull requests.</p>
+<div class="space-y-2 font-body-sm text-body-sm">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Model:</span>
+<span class="font-medium">Claude 3 Sonnet</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Owner:</span>
+<span class="font-medium text-primary">DevOps Guild</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="text-on-surface-variant">Risk Tier:</span>
+<span class="font-medium text-status-ready">Tier 1 (Low)</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant/30 mt-auto">
+<button class="w-full py-2 bg-primary text-on-primary font-body-md text-body-md font-medium rounded-lg hover:bg-on-primary-fixed-variant transition-colors">Run Onboarding</button>
+</div>
+</div>
+<!-- Add 4 more similar cards to complete the 8 requested, varying content slightly for realism -->
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full py-4 mt-auto bg-surface-dim border-t border-outline-variant/30 flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-4 z-50 relative">
+<p class="font-body-sm text-body-sm text-secondary">© 2024 ClearPoint Gemini Enterprise. All Rights Reserved. Audit-Ready Clearance Level 4.</p>
+<div class="flex gap-4">
+<a class="font-body-sm text-body-sm text-secondary hover:text-primary hover:underline transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-secondary hover:text-primary hover:underline transition-colors" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-secondary hover:text-primary hover:underline transition-colors" href="#">Compliance Artifacts</a>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,33 @@
+{
+  "registry_source": "google_agent_registry_fixture",
+  "note": "Synthetic Google Agent Registry-style listing (FR-002). Used when real Agent Registry API access is unavailable; the adapter maps these entries onto CandidateAgentManifest.",
+  "agents": [
+    {
+      "candidate_agent_id": "safe-research-001",
+      "name": "Safe Research Agent",
+      "version": "1.0.0",
+      "origin": "google_adk",
+      "owner_email": "dana@example.com",
+      "capabilities": ["search", "summarize"],
+      "annotations": {"agent_identity": "demo-identity://safe-research-001", "gateway": "demo-gateway"}
+    },
+    {
+      "candidate_agent_id": "healthcare-phi-003",
+      "name": "Healthcare Support Agent",
+      "version": "1.2.0",
+      "origin": "gemini_enterprise",
+      "owner_email": "pat@example.com",
+      "capabilities": ["support", "ticketing"],
+      "annotations": {"agent_identity": "demo-identity://healthcare-phi-003", "gateway": "demo-gateway"}
+    },
+    {
+      "candidate_agent_id": "grounding-required-008",
+      "name": "Cross-Border Finance Assistant",
+      "version": "1.0.0",
+      "origin": "gemini_enterprise",
+      "owner_email": "mara@example.com",
+      "capabilities": ["finance_qa"],
+      "annotations": {"agent_identity": "demo-identity://grounding-required-008", "gateway": "demo-gateway"}
+    }
+  ]
+}

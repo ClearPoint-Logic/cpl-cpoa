@@ -1,0 +1,47 @@
+{
+  "schema_version": "candidate-agent-manifest/v0.1",
+  "candidate_agent_id": "healthcare-phi-003",
+  "name": "Healthcare Support Agent",
+  "origin": "gemini_enterprise",
+  "declared_purpose": "Assist support staff with patient questions and file resolution tickets.",
+  "owner": {
+    "name": "Pat Quinn",
+    "email": "pat@example.com",
+    "team": "Patient Support",
+    "role": "Support Manager"
+  },
+  "runtime": {
+    "framework": "adk",
+    "language": "python",
+    "deployment_target": "cloud_run",
+    "region": "us-central1",
+    "service_account_or_identity": "sa-health@clearpoint-operations-agent.iam"
+  },
+  "models": [
+    {"provider": "google", "model": "gemini-2.5-flash", "purpose": "reasoning", "criticality": "required"}
+  ],
+  "tools": [
+    {
+      "tool_id": "create_ticket",
+      "name": "Create Ticket",
+      "protocol": "rest",
+      "description": "Create a support ticket in the external ticketing system.",
+      "risk_tier": "external_write",
+      "auth_scope": "tickets:write",
+      "side_effects": "external_message"
+    }
+  ],
+  "data_access": {
+    "declared_data_classes": ["regulated_phi", "internal"],
+    "memory_enabled": true,
+    "retention_days": 30
+  },
+  "autonomy": {"level": "L3_execute_with_approval", "human_approval_required": true},
+  "budget": {"monthly_usd": 200, "per_run_usd": 3, "premium_model_allowed": false},
+  "registry_metadata": {
+    "registry_source": "google_agent_registry_fixture",
+    "version": "1.2.0",
+    "capabilities": ["support", "ticketing"],
+    "annotations": {}
+  }
+}

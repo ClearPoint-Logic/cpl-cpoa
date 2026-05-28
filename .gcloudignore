@@ -1,0 +1,19 @@
+# Keep Cloud Build upload context small. (gcloud uses this instead of .gitignore.)
+.git
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+.mypy_cache
+node_modules
+app/web/node_modules
+app/web/.next
+.next
+artifacts
+.cpoa_runs
+*.log
+design
+docs
+.github

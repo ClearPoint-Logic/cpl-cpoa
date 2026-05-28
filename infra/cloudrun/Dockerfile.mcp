@@ -1,0 +1,17 @@
+# Secure MCP server (streamable-HTTP). Build context = repo root.
+FROM python:3.13-slim
+
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY cpoa ./cpoa
+COPY mcp_servers ./mcp_servers
+COPY fixtures ./fixtures
+COPY corpus ./corpus
+
+# HTTP transport; auth token must be supplied at deploy (CPOA_MCP_AUTH_TOKEN).
+ENV CPOA_MCP_TRANSPORT=http PORT=8081
+CMD ["python", "-m", "mcp_servers.onboarding_tools.server"]

@@ -1,0 +1,28 @@
+# Generic Cloud Build: build one image from a chosen Dockerfile (amd64) and push.
+# Substitutions: _IMAGE, _DOCKERFILE, _API_BASE (consumed only by the web Dockerfile;
+# passing it to api/mcp is a harmless unused-arg warning).
+substitutions:
+  _IMAGE: ""
+  _DOCKERFILE: ""
+  _API_BASE: ""
+  _JUDGE_USER: ""
+  _JUDGE_PASS: ""
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - ${_DOCKERFILE}
+      - --build-arg
+      - CPOA_API_BASE=${_API_BASE}
+      - --build-arg
+      - CPOA_JUDGE_BASIC_AUTH_USER=${_JUDGE_USER}
+      - --build-arg
+      - CPOA_JUDGE_BASIC_AUTH_PASS=${_JUDGE_PASS}
+      - -t
+      - ${_IMAGE}
+      - .
+images:
+  - "${_IMAGE}"
+options:
+  logging: CLOUD_LOGGING_ONLY

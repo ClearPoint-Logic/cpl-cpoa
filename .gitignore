@@ -1,0 +1,45 @@
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+.coverage
+htmlcov/
+
+# --- Secrets / environment (NEVER commit) ---
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+service-account*.json
+gcp-key*.json
+*-credentials.json
+.gcp/
+
+# --- Node / Next.js (Stream C) ---
+node_modules/
+.next/
+out/
+app/web/node_modules/
+app/web/.next/
+*.tsbuildinfo
+npm-debug.log*
+
+# --- Runtime-generated artifacts (evidence bundles, run outputs) ---
+artifacts/
+.cpoa_runs/
+*.log
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/
+*.swp

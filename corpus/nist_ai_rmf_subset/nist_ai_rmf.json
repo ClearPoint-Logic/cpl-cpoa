@@ -1,0 +1,33 @@
+{
+  "source_id": "nist-ai-rmf",
+  "source_title": "NIST AI Risk Management Framework (AI 100-1)",
+  "source_url": "https://www.nist.gov/itl/ai-risk-management-framework",
+  "license": "public (U.S. Government work)",
+  "note": "Paraphrased summary of the four core functions, scoped to agent deployment; not verbatim text.",
+  "passages": [
+    {
+      "id": "nist-govern-accountability",
+      "title": "GOVERN: accountability, roles, and ownership",
+      "tags": ["owner", "accountability", "governance", "roles", "responsibility"],
+      "text": "The GOVERN function calls for clear roles, responsibilities, and lines of accountability for AI systems. Each system should have an accountable owner so that risk decisions and remediation have a responsible party. An agent with no accountable owner cannot be governed."
+    },
+    {
+      "id": "nist-map-context",
+      "title": "MAP: establish context, purpose, and intended use",
+      "tags": ["purpose", "context", "intended_use", "scope"],
+      "text": "The MAP function establishes the context and intended purpose of an AI system. A specific, declared purpose lets reviewers bound the system's scope of authority; a vague or missing purpose is itself a risk because authority cannot be scoped."
+    },
+    {
+      "id": "nist-measure-validation",
+      "title": "MEASURE: assess risks before and during deployment",
+      "tags": ["validation", "testing", "risk_assessment", "measure"],
+      "text": "The MEASURE function assesses, analyzes, and tracks AI risks using repeatable evaluations. Pre-deployment validation against known failure modes (for example, unsafe tool boundaries or sensitive-data handling) provides evidence for an onboarding decision."
+    },
+    {
+      "id": "nist-manage-controls",
+      "title": "MANAGE: prioritize and apply controls; record decisions",
+      "tags": ["controls", "approval", "budget", "data_boundary", "manage", "record"],
+      "text": "The MANAGE function allocates resources to treat the highest risks and documents the controls applied. Boundaries on tools, data, providers, and budget, plus human approval for high-impact actions, are management controls that should be recorded as evidence."
+    }
+  ]
+}
