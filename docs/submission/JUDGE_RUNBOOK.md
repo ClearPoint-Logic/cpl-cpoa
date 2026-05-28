@@ -9,13 +9,13 @@
 - **Login (HTTP basic auth):** `judge` / `MLcdaYGa9XcHihAu`
 - **API (direct):** behind the same hostname; identical basic-auth credentials
 - **A2A Agent Card:** `/.well-known/agent.json` (open for discovery)
-- No CLI required — every fixture runs from the **Agent Zoo**.
+- No CLI required — every fixture runs from the **Pre-Boarding** roster.
 
 ## 3-minute evaluation path
 1. Open the UI → you'll be prompted for the basic-auth credentials above.
 2. **Home** shows the workforce frame (passport / job description / résumé / personnel file) and
    the Google platform stack.
-3. **Agent Zoo** → run **`safe_research_agent`** → **Ready** (score 100; clean evidence bundle).
+3. **Pre-Boarding** → run **`safe_research_agent`** → **Ready** (score 100; clean evidence bundle).
 4. Run **`prompt_injected_mcp_agent`** → **Blocked** — see the OV-004 prompt-injection finding, the
    quarantined tool in the Policy tab, and the grounded NSA MCP source citation; fail-closed.
 5. Run **`healthcare_phi_support_agent`** → **Ready with Conditions** (regulated-data controls).
