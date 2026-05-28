@@ -191,5 +191,64 @@ def apply_action(
     }
 
 
+# --- Post-onboarding lifecycle phases ---------------------------------------
+#
+# Beyond the day-to-day Manage actions above, an onboarded agent advances through
+# the remaining AI Workforce Management phases — Manage → Govern → Operate →
+# Optimize. Each advance appends a *real* signed, hash-chained event to the same
+# personnel file, so the chain is continuous from intake all the way through the
+# lifecycle (no faked transitions). The human-readable summary + detail payload
+# are computed by the caller (API layer) from live Govern/Operate/Optimize data
+# so this module stays dependency-free.
+
+_PHASE_EVENT_TYPE: dict[str, str] = {
+    "manage": "manage.activated",
+    "govern": "govern.controls_attested",
+    "operate": "operate.performance_reviewed",
+    "optimize": "optimize.development_plan_accepted",
+}
+
+# Canonical advance order for the "run full lifecycle" shortcut.
+PHASE_ORDER: list[str] = ["manage", "govern", "operate", "optimize"]
+
+
+def completed_phases(state: LifecycleState) -> list[str]:
+    """Phases already attested on this agent's personnel file (by event_type)."""
+    seen = {e.get("event_type") for e in state.event_log}
+    return [phase for phase, et in _PHASE_EVENT_TYPE.items() if et in seen]
+
+
+def advance_phase(
+    candidate_agent_id: str,
+    phase: str,
+    *,
+    summary: str,
+    detail: dict,
+    actor_id: str,
+) -> dict:
+    """Advance one onboarded agent into the given lifecycle phase.
+
+    Appends a signed, hash-chained ``<phase>`` event to the personnel file and
+    returns the new state + the event. Raises ``ValueError`` for unknown phases.
+    """
+    if phase not in _PHASE_EVENT_TYPE:
+        raise ValueError(f"unknown phase: {phase} (expected one of {PHASE_ORDER})")
+
+    state = get_state(candidate_agent_id)
+    event = _emit(
+        state=state,
+        event_type=_PHASE_EVENT_TYPE[phase],
+        summary=summary,
+        payload={"phase": phase, **detail},
+        actor_id=actor_id,
+    )
+    event_dict = event.model_dump(mode="json")
+    state.event_log.append(event_dict)
+    state.last_event_hash = event.event_hash
+    state.updated_at = _now_iso()
+
+    return {"state": state.to_dict(), "event": event_dict, "phase": phase}
+
+
 def list_states() -> list[dict]:
     return [s.to_dict() for s in _STATE.values()]

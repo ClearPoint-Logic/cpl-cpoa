@@ -61,6 +61,48 @@ def narrate_with_llm(result: OnboardingResult, model: str | None = None) -> str:
     return narrate_facts(narrate_offline(result), model)
 
 
+# --- Compass: in-platform advisor -------------------------------------------
+
+_COMPASS_INSTRUCTION = (
+    "You are Compass, the in-platform advisor for the ClearPoint Workforce Agent — an AI "
+    "Workforce Management platform built on Google Cloud (Agent Development Kit, Gemini on "
+    "Vertex AI, Model Context Protocol, Vertex AI Search, Cloud Run, and the Agent-to-Agent "
+    "protocol). You help the user understand the current screen, interpret onboarding "
+    "decisions, findings, policy envelopes, and the six-phase agent lifecycle (Discover, "
+    "Onboard, Manage, Govern, Operate, Optimize). Answer in concise, well-structured Markdown "
+    "— short paragraphs, **bold** for key terms, and bullet lists where they help. Keep "
+    "answers under ~150 words. Ground every claim in the provided context facts. The "
+    "decision, score, and findings are final and deterministic: never change or invent them."
+)
+
+
+def _compass_agent(model: str | None = None):  # pragma: no cover
+    """A tool-less Gemini agent for a single Compass advisory turn."""
+    from google.adk.agents import LlmAgent
+
+    return LlmAgent(
+        name="compass_agent",
+        model=model or fast_model(),
+        description="In-platform advisor for the ClearPoint Workforce Agent.",
+        instruction=_COMPASS_INSTRUCTION,
+    )
+
+
+def compass_answer(message: str, facts: dict, model: str | None = None) -> str:  # pragma: no cover
+    """Single live Gemini call: Compass answers a question grounded in the given facts."""
+    if not llm_available():
+        raise RuntimeError("Gemini/Vertex not configured (GOOGLE_GENAI_USE_VERTEXAI + project).")
+    prompt = (
+        "Answer the user's question for the current platform context. Use Markdown and stay "
+        "under ~150 words. The context facts below are authoritative — do not contradict or "
+        "restate them verbatim, synthesize a helpful answer.\n\nCONTEXT FACTS:\n"
+        + json.dumps(facts)
+        + "\n\nUSER QUESTION:\n"
+        + message
+    )
+    return asyncio.run(_run_agent_async(_compass_agent(model), prompt))
+
+
 def run_adk_onboarding(manifest_dict: dict, model: str | None = None) -> str:  # pragma: no cover
     """Run the full live ADK orchestrator over a candidate manifest; returns its narrative."""
     if not llm_available():

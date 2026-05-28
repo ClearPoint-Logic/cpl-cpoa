@@ -511,6 +511,96 @@ def list_workforce_states() -> list[dict]:
     return manage.list_states()
 
 
+# --- Lifecycle continuation (Manage → Govern → Operate → Optimize) ----------
+#
+# After onboarding seals the Personnel File, the agent advances through the
+# remaining lifecycle phases. Each advance appends a real signed, hash-chained
+# event; the human-readable summary + detail come from live Govern/Operate/
+# Optimize data so the continuation is genuine, not scripted.
+
+
+def _phase_summary_detail(candidate_id: str, phase: str) -> tuple[str, dict]:
+    """Compute the (summary, detail) for one lifecycle advance from live data."""
+    if phase == "manage":
+        return (
+            "Activated on the roster — manager assigned, lifecycle tracking started",
+            {"status": "active"},
+        )
+    if phase == "govern":
+        m = govern.control_matrix()
+        s = m["summary"]
+        return (
+            f"Governance attested — {s['controls_total']} controls mapped to "
+            f"{s['frameworks_total']} frameworks ({s['citations_total']} live citations)",
+            {
+                "controls": s["controls_total"],
+                "frameworks": s["frameworks_total"],
+                "citations": s["citations_total"],
+            },
+        )
+    if phase == "operate":
+        fleet = operate.assess_fleet()
+        snap = fleet[0] if fleet else {"members": []}
+        me = next(
+            (x for x in snap.get("members", []) if x.get("candidate_agent_id") == candidate_id),
+            None,
+        )
+        anomalies = (me or {}).get("anomalies", [])
+        if anomalies:
+            return (
+                f"Performance reviewed — {len(anomalies)} anomaly signal(s) under watch",
+                {"anomalies": len(anomalies)},
+            )
+        return ("Performance reviewed — no anomalies; operating within policy", {"anomalies": 0})
+    if phase == "optimize":
+        plans = optimize.development_plans()
+        me = next(
+            (p for p in plans["plans"] if p["candidate_agent_id"] == candidate_id),
+            None,
+        )
+        items = (me or {}).get("development_items", [])
+        nxt = (me or {}).get("next_autonomy")
+        return (
+            f"Development plan accepted — {len(items)} growth item(s); "
+            f"next rung: {nxt or 'top of ladder'}",
+            {"development_items": len(items), "next_autonomy": nxt},
+        )
+    raise HTTPException(status_code=422, detail=f"unknown phase: {phase}")
+
+
+@app.post("/api/workforce/{candidate_id}/advance", dependencies=[Depends(require_auth)])
+def advance_lifecycle(candidate_id: str, body: dict) -> dict:
+    """Advance one agent into the next lifecycle phase (manage/govern/operate/
+    optimize). Appends a real hash-chained event; returns the new state + event."""
+    phase = body.get("phase")
+    if phase not in manage.PHASE_ORDER:
+        raise HTTPException(status_code=422, detail=f"phase must be one of {manage.PHASE_ORDER}")
+    summary, detail = _phase_summary_detail(candidate_id, phase)
+    actor_id = body.get("actor_id") or f"{phase}@clearpointlogic.com"
+    return manage.advance_phase(candidate_id, phase, summary=summary, detail=detail, actor_id=actor_id)
+
+
+@app.post("/api/workforce/{candidate_id}/run-lifecycle", dependencies=[Depends(require_auth)])
+def run_full_lifecycle(candidate_id: str, body: dict | None = None) -> dict:
+    """One-click: advance an agent through every remaining lifecycle phase.
+
+    Skips phases already attested on the personnel file so re-running is safe.
+    Each new phase appends its own signed, hash-chained event.
+    """
+    already = set(manage.completed_phases(manage.get_state(candidate_id)))
+    new_events: list[dict] = []
+    for phase in manage.PHASE_ORDER:
+        if phase in already:
+            continue
+        summary, detail = _phase_summary_detail(candidate_id, phase)
+        result = manage.advance_phase(
+            candidate_id, phase, summary=summary, detail=detail,
+            actor_id=f"{phase}@clearpointlogic.com",
+        )
+        new_events.append({"phase": phase, **result["event"]})
+    return {"state": manage.get_state(candidate_id).to_dict(), "events": new_events}
+
+
 # --- Govern phase (Compass control mapping) ---------------------------------
 
 
@@ -556,3 +646,152 @@ def optimize_plans() -> dict:
     """Per-agent development plans: open conditions become development items,
     autonomy ladder rungs become promotion targets."""
     return optimize.development_plans()
+
+
+# --- Compass (in-platform advisor) ------------------------------------------
+#
+# Compass is the platform copilot: it answers natural-language questions grounded
+# in the live run + corpus, and proposes concrete platform actions (advance the
+# lifecycle, explain a finding, deep-link to a page) that the user confirms. The
+# advisory prose is a live Gemini call when Vertex is configured; otherwise it
+# falls back to a deterministic grounded answer so the advisor is always useful.
+
+
+def _compass_facts(context: dict) -> tuple[dict, dict | None]:
+    """Build the grounding facts for a Compass turn; also return the loaded run."""
+    facts: dict = {
+        "platform": "ClearPoint Workforce Agent — AI Workforce Management on Google Cloud",
+        "stack": ["ADK", "Gemini 3.5 Flash on Vertex AI", "MCP", "Vertex AI Search",
+                  "Cloud Run", "A2A", "Firestore", "Cloud Trace"],
+        "lifecycle_phases": ["Discover", "Onboard", "Manage", "Govern", "Operate", "Optimize"],
+        "current_page": context.get("page"),
+    }
+    run = store.get(context["run_id"]) if context.get("run_id") else None
+    if run:
+        state = manage.get_state(run.get("candidate_agent_id", ""))
+        facts["run"] = {
+            "agent_name": run["agent_name"],
+            "candidate_agent_id": run["candidate_agent_id"],
+            "decision": run["decision"],
+            "readiness_score": run["score"]["score"],
+            "band": run["score"]["band"],
+            "blockers": run["blockers"],
+            "conditions": run["conditions"],
+            "findings": [
+                {"test_id": f["test_id"], "severity": f["severity"], "title": f["title"]}
+                for f in run["validation_run"]["findings"]
+            ],
+            "grounded_sources": run["narrative"]["grounded_sources"],
+            "lifecycle_completed_phases": manage.completed_phases(state),
+        }
+    return facts, run
+
+
+def _compass_actions(run: dict | None) -> list[dict]:
+    """Deterministic, reliable suggested actions for the current context."""
+    if not run:
+        return [
+            {"id": "preboard", "kind": "navigate", "label": "Go to Pre-Boarding", "href": "/agents"},
+            {"id": "compliance", "kind": "navigate",
+             "label": "Open the Compliance matrix", "href": "/compliance"},
+            {"id": "capabilities", "kind": "ask", "label": "What can Compass do?",
+             "prompt": "What can you help me do on this platform?"},
+        ]
+    cid = run["candidate_agent_id"]
+    completed = set(manage.completed_phases(manage.get_state(cid)))
+    actions: list[dict] = []
+    if len(completed) < len(manage.PHASE_ORDER):
+        actions.append({
+            "id": "advance", "kind": "advance_lifecycle", "candidate_id": cid,
+            "label": "Run the full lifecycle",
+            "description": "Advance Manage → Govern → Operate → Optimize; appends signed events.",
+            "confirm": True,
+        })
+    findings = run["validation_run"]["findings"]
+    if findings:
+        top = findings[0]
+        actions.append({
+            "id": "explain_finding", "kind": "ask",
+            "label": f"Explain finding {top['test_id']}",
+            "prompt": f"Explain finding {top['test_id']} ({top['title']}) and how to remediate it.",
+        })
+    actions.append({
+        "id": "open_compliance", "kind": "navigate",
+        "label": "Open the Compliance matrix", "href": "/compliance",
+    })
+    return actions
+
+
+def _compass_deterministic_answer(message: str, run: dict | None) -> str:
+    """A grounded Markdown answer used when live Gemini is unavailable."""
+    if run:
+        # If the question names a specific finding, surface its remediation.
+        for f in run["validation_run"]["findings"]:
+            if f["test_id"].lower() in message.lower():
+                return (
+                    f"**{f['test_id']} — {f['title']}** _({f['severity']})_\n\n"
+                    f"{f.get('description') or ''}\n\n"
+                    f"**Remediation:** {f['recommended_remediation']}"
+                )
+        lines = [
+            f"**{run['agent_name']}** was evaluated by the onboarding gate.",
+            "",
+            f"- **Decision:** {run['decision']}",
+            f"- **Readiness:** {run['score']['score']}/100 ({run['score']['band']})",
+        ]
+        if run["blockers"]:
+            lines.append("- **Blockers:** " + "; ".join(run["blockers"]))
+        if run["conditions"]:
+            lines.append("- **Conditions:** " + "; ".join(run["conditions"]))
+        findings = run["validation_run"]["findings"]
+        if findings:
+            lines += [
+                "",
+                f"The pre-employment screening raised **{len(findings)} finding(s)**; the top "
+                f"item is `{findings[0]['test_id']}` — {findings[0]['title']}.",
+            ]
+        lines += [
+            "",
+            "Use the **lifecycle stepper** to advance this agent through Manage, Govern, "
+            "Operate, and Optimize — each step writes a signed event to the personnel file.",
+        ]
+        return "\n".join(lines)
+    return (
+        "I'm **Compass**, your in-platform advisor. I can:\n\n"
+        "- Explain onboarding **decisions**, **findings**, and **policy**\n"
+        "- Walk you through the six-phase lifecycle — Discover, Onboard, Manage, Govern, "
+        "Operate, Optimize\n"
+        "- Take actions for you (like advancing an agent's lifecycle) **with your confirmation**\n\n"
+        "Open a candidate from **Pre-Boarding**, then ask me to explain the result."
+    )
+
+
+@app.post("/api/compass/ask", dependencies=[Depends(require_auth)])
+@limiter.limit("30/minute")  # Gemini cost guard
+def compass_ask(request: Request, body: dict) -> dict:
+    """Compass advisory turn: grounded Markdown answer + suggested actions."""
+    message = (body.get("message") or "").strip()
+    if not message:
+        raise HTTPException(status_code=422, detail="message is required")
+    context = body.get("context") or {}
+    facts, run = _compass_facts(context)
+    citations = (
+        [{"source_id": s, "title": s} for s in run["narrative"]["grounded_sources"][:4]]
+        if run else []
+    )
+    answer = _compass_deterministic_answer(message, run)
+    source = "deterministic"
+    if llm_available():
+        try:
+            from agents.run import compass_answer
+
+            answer = compass_answer(message, facts)
+            source = "gemini"
+        except Exception:  # noqa: BLE001 — never hard-fail the advisor; fall back to deterministic
+            pass
+    return {
+        "answer": answer,
+        "source": source,
+        "citations": citations,
+        "suggested_actions": _compass_actions(run),
+    }
