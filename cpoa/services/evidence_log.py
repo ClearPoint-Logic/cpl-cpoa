@@ -1,7 +1,8 @@
 """Evidence writer (§9.3.6): hash-chained event log + bundle assembly + exports.
 
-Implements the §11.8 serialization rule via cpoa.services.hashing. Demo signatures
-are clearly labeled (`demo_stub`), never claimed as production attestation.
+Implements the §11.8 serialization rule via cpoa.services.hashing. Signatures
+are real — HMAC-SHA256 by default (local_hmac mode) or Cloud KMS asymmetric
+signing when ``CPOA_SIGNING_MODE=kms`` is configured. See ``signing.py``.
 """
 
 from __future__ import annotations
@@ -17,24 +18,29 @@ from cpoa.schemas import (
     EvidenceEvent,
     PassportReadinessScore,
     PolicyEnvelope,
-    Signature,
     Subject,
     ValidationRun,
 )
 from cpoa.schemas.common import Decision
 
 from . import hashing
+from .signing import Signer, get_signer
 
 
 class EvidenceLog:
     """Append-only hash-chained event log for one onboarding run."""
 
     def __init__(self, candidate_agent_id: str, trace_id: str | None = None,
-                 session_id: str | None = None, signature_mode: str = "stub") -> None:
+                 session_id: str | None = None, signature_mode: str | None = None,
+                 signer: Signer | None = None) -> None:
         self.candidate_agent_id = candidate_agent_id
         self.trace_id = trace_id or f"trace-{uuid.uuid4().hex[:12]}"
         self.session_id = session_id or f"session-{uuid.uuid4().hex[:12]}"
-        self.signature_mode = signature_mode
+        # Real signer by default (HMAC-SHA256 with the deployment secret).
+        # signature_mode is preserved for back-compat but ignored in favor of
+        # the env-configured signer unless an explicit signer is injected.
+        self.signature_mode = signature_mode  # informational
+        self.signer = signer or get_signer()
         self.events: list[EvidenceEvent] = []
 
     def emit(self, event_type: str, summary: str, payload: object,
@@ -51,12 +57,7 @@ class EvidenceLog:
             payload_hash=hashing.payload_hash(payload),
         )
         hashing.link_event(event, prev)
-        # Demo-only signature over the (already computed) event hash. Clearly labeled.
-        if self.signature_mode == "stub":
-            event.signature = Signature(
-                type="demo_stub",
-                value="demo:" + event.event_hash.split(":", 1)[-1][:24],
-            )
+        event.signature = self.signer.sign(event.event_hash)
         self.events.append(event)
         return event
 

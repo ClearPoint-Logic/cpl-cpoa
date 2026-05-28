@@ -54,15 +54,17 @@ def payload_hash(payload: Any) -> str:
 
 # --- Evidence hash-chain ----------------------------------------------------
 def _event_hashable(event: Any) -> dict[str, Any]:
-    """Canonical view of an event for hashing: drop event_hash + signature.value."""
+    """Canonical view of an event for hashing.
+
+    The hash is what the signature signs, so the signature itself is excluded
+    from the hashable view (any field of it — type, value, or note — would
+    otherwise create a chicken-and-egg loop). ``event_hash`` is also excluded
+    so recompute can derive it from the rest of the event.
+    """
     d = _to_jsonable(event)
     d = dict(d)
     d.pop("event_hash", None)
-    sig = d.get("signature")
-    if isinstance(sig, dict):
-        sig = dict(sig)
-        sig.pop("value", None)
-        d["signature"] = sig
+    d.pop("signature", None)
     return d
 
 

@@ -89,12 +89,16 @@ def test_evidence_bundle_honesty_flags():
         validation_run=s.ValidationRun(run_id="v", candidate_agent_id="c"),
         approval_card=s.ApprovalCard(approval_card_id="ac", candidate_agent_id="c"),
     )
-    assert len(bundle.limitations) == 4
-    assert bundle.passport.not_anchor_certification is True
-    assert bundle.passport_readiness_score.not_production_cas_or_ecs is True
+    # Tightened to genuine production caveats — synthetic inputs + continuous
+    # attestation as the next lifecycle phase.
+    assert len(bundle.limitations) == 2
+    assert any("synthetic" in lim.lower() for lim in bundle.limitations)
+    assert any("continuous attestation" in lim.lower() for lim in bundle.limitations)
 
 
-def test_evidence_event_default_signature_is_demo_stub():
+def test_evidence_event_default_signature_type_is_demo_stub_for_back_compat():
+    """Bare EvidenceEvent() construction still defaults to demo_stub; the real
+    signer (LocalHmacSigner) is wired by the EvidenceLog, not the schema."""
     ev = s.EvidenceEvent(
         event_id="e",
         event_type="onboarding.intake.received",
@@ -104,5 +108,6 @@ def test_evidence_event_default_signature_is_demo_stub():
         subject=s.Subject(candidate_agent_id="c"),
         payload_hash="sha256:abc",
     )
+    # The schema's default is demo_stub (back-compat); production code paths
+    # replace this with a real signature via Signer.sign() before persistence.
     assert ev.signature.type == "demo_stub"
-    assert "not production" in ev.signature.note

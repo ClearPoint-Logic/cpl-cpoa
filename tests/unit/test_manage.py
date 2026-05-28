@@ -125,8 +125,10 @@ def test_list_states_returns_every_tracked_agent() -> None:
     assert {s["candidate_agent_id"] for s in states} == {"agent-a", "agent-b"}
 
 
-def test_event_signature_is_hmac_typed() -> None:
+def test_event_signature_is_real_hmac() -> None:
     result = manage.apply_action("x", "place_on_leave", {"reason": "r"})
     event = result["event"]
     assert event["signature"]["type"] == "local_hmac"
-    assert event["signature"]["value"].startswith("hmac:")
+    # Real HMAC-SHA256 signature (64 hex chars after the "hmac-sha256:" prefix)
+    assert event["signature"]["value"].startswith("hmac-sha256:")
+    assert len(event["signature"]["value"].removeprefix("hmac-sha256:")) == 64
