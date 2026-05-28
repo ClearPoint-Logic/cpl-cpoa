@@ -18,22 +18,35 @@ const SEV_CLS: Record<string, string> = {
   info: "text-slate-400",
 };
 
-// Event-type → human-readable, workforce-flavored label. Falls back to a Title-Cased
-// version of the raw event_type so new event types still display sensibly.
+// Event-type → human-readable, workforce-flavored label. Keys match the
+// canonical EventType literal from cpoa.schemas.common; falls back to a
+// dot-stripped, Title-Cased version so a new event_type still displays sensibly.
 const EVENT_LABEL: Record<string, string> = {
-  discovery_started: "Discovery — application intake",
-  discovery_completed: "Discovery — application review complete",
-  policy_proposed: "Policy proposed — job description drafted",
-  policy_grounded: "Policy grounded — public sources cited",
-  artifact_generated: "Artifacts generated — Passport, AI BOM, Policy",
-  validation_started: "Pre-employment screening — started",
-  validation_completed: "Pre-employment screening — complete",
-  evidence_appended: "Evidence appended — personnel file updated",
-  decision_rendered: "Decision rendered — Ready / Conditional / Blocked",
-  explanation_drafted: "Explanation drafted — onboarding summary",
+  // Onboarding pipeline
+  "onboarding.intake.received": "Intake received — application packet on file",
+  "onboarding.input.validated": "Input validated — manifest shape accepted",
+  "onboarding.discovery.completed": "Discovery — application review complete",
+  "onboarding.policy.proposed": "Policy proposed — job description drafted",
+  "onboarding.artifacts.generated": "Artifacts generated — Passport, AI BOM, Approval Card",
+  "onboarding.validation.executed": "Pre-employment screening — complete",
+  "onboarding.approval.card.generated": "Approval card issued — human-in-the-loop hiring decision",
+  "onboarding.decision.issued": "Decision issued — Ready / Conditional / Blocked",
+  "onboarding.evidence.bundle.exported": "Personnel file sealed — hash-chained evidence bundle",
+  "onboarding.error.fail_closed": "Fail-closed — pipeline error routed to Blocked",
+  // Manage (HR Console)
+  "manage.placed_on_leave": "Placed on leave",
+  "manage.returned_from_leave": "Returned from leave",
+  "manage.ownership_transferred": "Manager handoff",
+  "manage.scope_updated": "Role change — scope updated",
+  // Operate (Sentinel)
+  "operate.anomaly_detected": "Anomaly detected — performance issue",
+  "operate.performance_reviewed": "Performance review",
 };
 function eventLabel(t: string): string {
-  return EVENT_LABEL[t] ?? t.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+  return EVENT_LABEL[t] ?? t
+    .replace(/^[a-z]+\./, "")
+    .replace(/[._]/g, " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

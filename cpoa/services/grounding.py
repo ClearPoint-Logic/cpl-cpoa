@@ -44,12 +44,14 @@ class Passage:
     title: str
     tags: tuple[str, ...]
     text: str
+    source_url: str | None = None
 
     def ref(self) -> GroundingRef:
         return GroundingRef(
             source_id=f"{self.source_id}#{self.passage_id}",
             source_title=self.source_title,
             snippet=self.text,
+            source_url=self.source_url,
         )
 
 
@@ -60,6 +62,7 @@ def load_corpus(corpus_dir: str | Path = CORPUS_DIR) -> list[Passage]:
         for p in doc.get("passages", []):
             passages.append(Passage(
                 source_id=doc["source_id"], source_title=doc["source_title"],
+                source_url=doc.get("source_url"),
                 passage_id=p["id"], title=p["title"], tags=tuple(p.get("tags", [])),
                 text=p["text"],
             ))
