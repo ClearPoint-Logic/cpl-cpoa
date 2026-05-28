@@ -8,6 +8,15 @@ const PAIRS = [
   { human: "Personnel file", hIcon: "folder_shared", ai: "Evidence Bundle", aIcon: "verified_user", note: "the record that follows it forward" },
 ];
 
+const LIFECYCLE = [
+  { phase: "Discover", icon: "radar", href: "/workforce", note: "Real HTTPS crawl of A2A Agent Cards; surface unmanaged shadow IT" },
+  { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
+  { phase: "Manage", icon: "groups", href: "/workforce", note: "HR Console: place on leave, manager handoff, role change" },
+  { phase: "Govern", icon: "policy", href: "/govern", note: "Compass: live control mapping to NSA / NIST / EU AI Act" },
+  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Sentinel: fleet health + deterministic anomaly rules" },
+  { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },
+];
+
 export default function Home() {
   return (
     <div className="space-y-14">
@@ -25,10 +34,11 @@ export default function Home() {
             <p className="text-lg text-on-surface-variant">
               Enterprises hire humans with an ID badge, a job description, a résumé, and a
               personnel file. AI agents are joining the workforce with no equivalent process.
-              <strong className="font-semibold text-on-surface"> ClearPoint Onboarding Agent</strong> is
-              the AI Workforce Management onboarding gate — it issues every new agent an
-              Agent Passport, Policy Envelope, AI Bill of Materials, and a hash-chained
-              Evidence Bundle, with an audit-ready decision before it runs.
+              <strong className="font-semibold text-on-surface"> ClearPoint Onboarding Agent</strong>{" "}
+              ships the first <strong className="font-semibold text-on-surface">six phases of AI
+              Workforce Management</strong> end-to-end — discover the unmanaged agents already
+              running, onboard new ones through a deterministic gate, then manage, govern,
+              operate, and grow them along an explicit autonomy ladder.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/agents" className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-hover">
@@ -62,6 +72,37 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-heading text-xl font-semibold">The AI Workforce Management lifecycle</h2>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Six phases shipped end-to-end. Every phase writes into one continuous,
+            hash-chained personnel file per agent.
+          </p>
+        </div>
+        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {LIFECYCLE.map((p, i) => (
+            <li key={p.phase}>
+              <Link
+                href={p.href}
+                className="group flex h-full items-start gap-3 rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 transition-colors hover:border-primary/40 hover:bg-surface-container"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20">
+                  <span className="material-symbols-outlined text-[20px]">{p.icon}</span>
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[10px] text-on-surface-variant">{(i + 1).toString().padStart(2, "0")}</span>
+                    <h3 className="font-heading text-base font-semibold text-on-surface">{p.phase}</h3>
+                  </div>
+                  <p className="mt-0.5 text-xs text-on-surface-variant">{p.note}</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="space-y-3">
         <h2 className="font-heading text-xl font-semibold">Built on Google&apos;s agent platform</h2>
         <p className="max-w-3xl text-on-surface-variant">
@@ -77,8 +118,9 @@ export default function Home() {
         </p>
         <p className="max-w-3xl text-sm text-on-surface-variant">
           The onboarding decision — score, caps, blockers — is computed deterministically; Gemini
-          contributes summaries, rationale, and explanations. The onboarding gate is one phase of
-          the AI Workforce lifecycle; continuous attestation is the roadmap.
+          contributes summaries, rationale, and explanations. Six lifecycle phases are shipped
+          here; the seventh, continuous attestation across every running interaction, is the
+          roadmap.
         </p>
       </section>
     </div>
