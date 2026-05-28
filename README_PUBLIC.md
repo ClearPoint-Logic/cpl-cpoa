@@ -1,4 +1,4 @@
-# ClearPoint Onboarding Agent — public submission README
+# ClearPoint Workforce Agent — public submission README
 
 > This is the sanitized, public-facing README used on the `public-safe-export` branch for challenge
 > judging. It contains no ClearPoint Logic proprietary material. For the full canonical README see
@@ -9,7 +9,7 @@ with a passport, a job description, a résumé, and a personnel file at the gate
 
 > **Google for Startups AI Agents Challenge — Track 1: Build (Net-New Agents)**
 
-ClearPoint Onboarding Agent inspects a candidate AI agent and issues the workforce-management package
+ClearPoint Workforce Agent inspects a candidate AI agent and issues the workforce-management package
 an enterprise needs before letting that agent operate: an **Agent Passport** (ID badge), a **Policy
 Envelope** (job description), an **AI Bill of Materials** (résumé), a readiness score, Onboarding
 Validation Suite findings, an approval card, and an audit-ready **Evidence Bundle** (personnel file) —

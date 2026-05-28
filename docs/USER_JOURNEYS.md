@@ -1,6 +1,6 @@
-# User Journeys — ClearPoint Onboarding Agent
+# User Journeys — ClearPoint Workforce Agent
 
-This document maps the named personas who interact with CPOA to the concrete
+This document maps the named personas who interact with CWA to the concrete
 paths through the product, the artifacts they touch, and the success criterion
 for each journey. Every journey runs against the deployed demo at
 https://cpoa.clearpointlogic.com (basic-auth credentials in the Devpost
@@ -14,7 +14,7 @@ submission), against a local `pytest -q`, or both.
 > across cloud, identity, and AI security. Cares about: provable controls,
 > audit trail integrity, regulatory mapping.
 
-**Pre-condition.** Sarah is evaluating CPOA as a candidate AI Workforce
+**Pre-condition.** Sarah is evaluating CWA as a candidate AI Workforce
 Management onboarding gate for her enterprise.
 
 **Steps.**
@@ -162,14 +162,14 @@ testing-instructions field.
    agents); click **Re-scan directory** to confirm the scan is real.
 3. **Pre-Boarding** → run `safe_research_agent` → **Ready** in under a second.
 4. Run `prompt_injected_mcp_agent` → **Blocked**, citing the NSA MCP source.
-5. **Compass** → see the live control matrix mapping every CPOA control to
+5. **Compass** → see the live control matrix mapping every CWA control to
    real regulatory passages.
 6. **Sentinel** → see fleet health with deterministic anomalies.
 7. **Talent Dev** → see per-agent development plans on the autonomy ladder.
 8. Download an Evidence Bundle as PDF — open it, see the hash chain, see the
    cited sources, see the deterministic decision rationale.
 
-**Success.** Judge can verify, in ~3 minutes, that CPOA ships six phases of
+**Success.** Judge can verify, in ~3 minutes, that CWA ships six phases of
 the AI Workforce Management lifecycle on Google's agent platform with a
 mechanically defensible audit trail.
 

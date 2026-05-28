@@ -29,7 +29,7 @@ from cpoa.services.tracing import span
 
 from .store import get_store
 
-app = FastAPI(title="ClearPoint Onboarding Agent API", version="0.4.0")
+app = FastAPI(title="ClearPoint Workforce Agent API", version="0.4.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -312,7 +312,7 @@ def grounding_comparison(name: str) -> dict:
 @app.get("/api/architecture")
 def architecture() -> dict:
     return {
-        "title": "ClearPoint Onboarding Agent — built on Google's agent platform",
+        "title": "ClearPoint Workforce Agent — built on Google's agent platform",
         "intelligence": "Gemini 3.5 Flash on Vertex AI (region: global)",
         "orchestration": "Agent Development Kit (ADK) — root LlmAgent + six subagents",
         "tools": "Model Context Protocol (HTTP MCP server, NSA MCP security baseline)",
@@ -327,7 +327,7 @@ def architecture() -> dict:
 
 # --- A2A protocol surface (Agent-to-Agent interoperability) -----------------
 _A2A_CARD = {
-    "name": "ClearPoint Onboarding Agent",
+    "name": "ClearPoint Workforce Agent",
     "description": (
         "The AI Workforce Management onboarding gate. Inspects a candidate AI agent manifest and "
         "issues an Agent Passport, Policy Envelope, AI Bill of Materials, and a hash-chained "

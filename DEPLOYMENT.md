@@ -1,6 +1,6 @@
-# Deployment Guide — ClearPoint Onboarding Agent
+# Deployment Guide — ClearPoint Workforce Agent
 
-End-to-end deploy of CPOA to Google Cloud Run with a custom domain, Firestore
+End-to-end deploy of CWA to Google Cloud Run with a custom domain, Firestore
 persistence, Vertex AI Search grounding, and Cloud Trace observability.
 
 ## Prerequisites

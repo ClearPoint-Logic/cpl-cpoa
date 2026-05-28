@@ -1,4 +1,4 @@
-# Judge Runbook — ClearPoint Onboarding Agent
+# Judge Runbook — ClearPoint Workforce Agent
 
 > Track 1 (Build, Net-New). The first six phases of AI Workforce Management — Discover, Onboard,
 > Manage, Govern, Operate, Optimize — shipped end-to-end on Google's agent platform
@@ -31,7 +31,7 @@
 
 4. Run **`healthcare_phi_support_agent`** → **Ready with Conditions** (regulated-data controls).
 
-5. **Compass** tab → the live control matrix. Every CPOA control (OV-001..005, MCP NSA baseline,
+5. **Compass** tab → the live control matrix. Every CWA control (OV-001..005, MCP NSA baseline,
    hash-chained evidence) mapped to specific NSA MCP CSI / NIST AI RMF / EU AI Act passages.
    Citations resolve **live** against the same corpus the grounded policy agent uses.
 

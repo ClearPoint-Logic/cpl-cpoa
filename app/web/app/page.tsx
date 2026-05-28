@@ -34,7 +34,7 @@ export default function Home() {
             <p className="text-lg text-on-surface-variant">
               Enterprises hire humans with an ID badge, a job description, a résumé, and a
               personnel file. AI agents are joining the workforce with no equivalent process.
-              <strong className="font-semibold text-on-surface"> ClearPoint Onboarding Agent</strong>{" "}
+              <strong className="font-semibold text-on-surface"> ClearPoint Workforce Agent</strong>{" "}
               ships the first <strong className="font-semibold text-on-surface">six phases of AI
               Workforce Management</strong> end-to-end — discover the unmanaged agents already
               running, onboard new ones through a deterministic gate, then manage, govern,

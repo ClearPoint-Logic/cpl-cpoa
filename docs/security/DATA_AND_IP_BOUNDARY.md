@@ -4,7 +4,7 @@
 - **All candidate manifests are synthetic** (`fixtures/candidates/`). No real customer data, no
   production telemetry.
 - **Grounded corpus is public** (`corpus/`): NSA MCP CSI, NIST AI RMF, EU AI Act (paraphrased,
-  attributed), plus CPOA's own demo policy/fixture notes.
+  attributed), plus CWA's own demo policy/fixture notes.
 - Generated artifacts (passports, bundles) describe synthetic agents only.
 
 ## What this repo intentionally excludes (protected IP)

@@ -1,6 +1,6 @@
-# Threat Model — ClearPoint Onboarding Agent
+# Threat Model — ClearPoint Workforce Agent
 
-This document records what CPOA is defending against, how each control
+This document records what CWA is defending against, how each control
 mitigates the risk, and what is explicitly out of scope.
 
 ## Surfaces in scope

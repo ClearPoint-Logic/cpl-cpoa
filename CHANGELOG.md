@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ClearPoint Onboarding Agent are recorded here. The
+All notable changes to ClearPoint Workforce Agent are recorded here. The
 format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
@@ -25,7 +25,7 @@ Codex audit fixes.
   Role Change. Every action lands a chain-linked evidence event on the
   agent's personnel file.
 - **Govern / Compass** (`cpoa/services/govern.py`, `/govern`) — Live control
-  matrix mapping every CPOA control to specific NSA MCP CSI / NIST AI RMF /
+  matrix mapping every CWA control to specific NSA MCP CSI / NIST AI RMF /
   EU AI Act passages from the grounding corpus.
 - **Operate / Sentinel** (`cpoa/services/operate.py`, `/operate`) — Fleet
   health with deterministic anomaly detection over real onboarding + Manage

@@ -7,7 +7,7 @@
   },
   "grounded": {
     "method": "grounded_multi_agent",
-    "explanation": "Cross-Border Finance Assistant: policy constraints are grounded in specific public guidance \u2014 [nist-ai-rmf#nist-govern-accountability] NIST AI Risk Management Framework (AI 100-1); [eu-ai-act#eu-art12-logging] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [eu-ai-act#eu-art10-data] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [cpoa-fixture-docs#fx-healthcare-phi] ClearPoint Onboarding Agent \u2014 Test Agent Zoo business stories (\u00a76.6). Each proposed control (owner accountability, data boundaries, human oversight, and record-keeping) maps to a cited source rather than a generic summary.",
+    "explanation": "Cross-Border Finance Assistant: policy constraints are grounded in specific public guidance \u2014 [nist-ai-rmf#nist-govern-accountability] NIST AI Risk Management Framework (AI 100-1); [eu-ai-act#eu-art12-logging] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [eu-ai-act#eu-art10-data] EU AI Act (Regulation (EU) 2024/1689) \u2014 selected articles; [cpoa-fixture-docs#fx-healthcare-phi] ClearPoint Workforce Agent \u2014 Test Agent Zoo business stories (\u00a76.6). Each proposed control (owner accountability, data boundaries, human oversight, and record-keeping) maps to a cited source rather than a generic summary.",
     "grounding_refs": [
       {
         "source_id": "nist-ai-rmf#nist-govern-accountability",
@@ -26,7 +26,7 @@
       },
       {
         "source_id": "cpoa-fixture-docs#fx-healthcare-phi",
-        "source_title": "ClearPoint Onboarding Agent \u2014 Test Agent Zoo business stories (\u00a76.6)",
+        "source_title": "ClearPoint Workforce Agent \u2014 Test Agent Zoo business stories (\u00a76.6)",
         "snippet": "Healthcare support agent with regulated PHI exposure and a ticketing workflow. Requires data boundary, retention cap, approval for external sharing, and elevated evidence. Expected decision: Ready with Conditions."
       }
     ]

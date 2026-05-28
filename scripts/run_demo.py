@@ -79,7 +79,7 @@ def run(manifest_path: Path, out_dir: str) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="ClearPoint Onboarding Agent — CLI demo")
+    ap = argparse.ArgumentParser(description="ClearPoint Workforce Agent — CLI demo")
     ap.add_argument("--candidate", help="path to a candidate manifest JSON")
     ap.add_argument("--fixture", help="fixture name, e.g. safe_research_agent")
     ap.add_argument("--out", default="artifacts/runs", help="output directory for artifacts")
