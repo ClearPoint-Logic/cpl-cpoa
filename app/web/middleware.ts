@@ -19,7 +19,7 @@ export function middleware(req: NextRequest) {
   }
   return new NextResponse("Authentication required", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="ClearPoint Onboarding Agent — Judge Access"' },
+    headers: { "WWW-Authenticate": 'Basic realm="ClearPoint Onboarding Agent Judge Access"' },
   });
 }
 

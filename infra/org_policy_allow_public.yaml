@@ -1,0 +1,7 @@
+# Project-scoped override allowing public (allUsers) IAM members on Cloud Run, so the
+# judge UI is reachable. Gated at the app layer by HTTP basic auth. Reversible:
+#   gcloud org-policies delete iam.allowedPolicyMemberDomains --project=clearpoint-operations-agent
+name: projects/clearpoint-operations-agent/policies/iam.allowedPolicyMemberDomains
+spec:
+  rules:
+    - allowAll: true
