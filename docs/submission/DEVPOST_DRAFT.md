@@ -14,19 +14,34 @@ finance leader, compliance counsel, and business owner already understands a pas
 description, a résumé, and a personnel file. **AI Workforce Management** is the category. The
 onboarding gate is the entry point.
 
+### How this sits with Google's Gemini Enterprise Agent Platform
+
+Google's Gemini Enterprise Agent Platform (April 2026) ships **Agent Registry**, **Agent
+Identity**, **Agent Gateway**, dynamic **AI Bill of Materials**, and **Agent Anomaly Detection** as
+platform primitives. ClearPoint Onboarding Agent is **not** a competing platform — it is the
+workforce/HR **application layer** that consumes those primitives. The platform gives you the
+registry; CPOA is the **HR department that decides who gets hired into it** and produces the
+audit-grade evidence the platform expects. The terms *Agent Passport*, *AIBOM*, and *Evidence
+Bundle* are now widely used in the agent-governance space (Cubitrek Agent Passport v0.1, ERC-8004,
+the open `agent-passport-system` library, EU AI Act audit plugins). What makes CPOA distinct is
+the workforce framing: a Pre-Boarding roster, deterministic Ready / Conditional / Blocked
+decisions narrated by Gemini, and a hash-chained personnel file produced before the agent's first
+day on the job.
+
 ## What it does
 
 ClearPoint Onboarding Agent inspects a candidate AI agent (an ADK / Gemini Enterprise / MCP /
 registry-style manifest) and generates the workforce-management package required **before** the
 agent is permitted to operate in production:
 
-- **Agent Passport** — identity, owner, trust tier (the ID badge)
-- **Policy Envelope** — authorized scope of action with caps and conditions (the job description)
-- **AI Bill of Materials** — declared models, tools, dependencies, and provenance (the résumé)
-- **Passport Readiness Score** with explicit blockers and conditions
-- **Onboarding Validation Suite** findings (OV-001..005, fail-closed)
-- **Approval Card** for the human in the loop
-- **Evidence Bundle** — hash-chained, audit-ready (the personnel file)
+- **Agent Passport** — identity, owner, trust tier (the **ID badge**)
+- **Policy Envelope** — authorized scope of action with caps and conditions (the **job description**)
+- **AI Bill of Materials** — declared models, tools, dependencies, and provenance (the **résumé**)
+- **Passport Readiness Score** — Day-1 readiness with explicit blockers and conditions
+- **Onboarding Validation Suite** — pre-employment screening across five fail-closed checks
+  (OV-001..005)
+- **Approval Card** — the human-in-the-loop hiring decision
+- **Evidence Bundle** — hash-chained, audit-ready (the **personnel file**)
 
 It ends in a clear decision — **Ready**, **Ready with Conditions**, or **Blocked Pending
 Remediation** — with traceable evidence for security, compliance, finance, and the business
@@ -70,15 +85,22 @@ outputs that cite specific source sections.
 
 - A net-new ADK / Gemini agent that **onboards other agents** into the AI workforce — a category
   most organizations haven't yet named.
-- **Eight fixture agents** across safe, missing-owner, regulated-data, budget, prompt-injection,
-  privileged-admin, unmaintained-MCP, and grounding-dependent scenarios — **5/5 must-ship
-  decisions correct, 8/8 overall**, fully reproducible offline.
-- Automated Passport, AI BOM, Policy Envelope, and Evidence Bundle generation with deterministic
-  scoring and a SHA-256 hash chain over canonical JSON.
-- NSA MCP security baseline implemented and **tested** — 19 security tests pass.
-- Live on a custom domain at [cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com),
+- **Eight candidate agents on the Pre-Boarding roster** across safe, missing-owner, regulated-data,
+  budget, prompt-injection, privileged-admin, unmaintained-MCP, and grounding-dependent scenarios —
+  **5/5 must-ship decisions correct, 8/8 overall**, fully reproducible offline.
+- Automated Passport, AI BOM, Policy Envelope, and Evidence Bundle generation with **deterministic
+  scoring** and a **SHA-256 hash chain over canonical JSON** — every event is tamper-evident.
+- **Onboarding Validation Suite — five fail-closed pre-employment screening checks** (OV-001..005)
+  spanning identity, governance, regulated data, security posture, and supply chain.
+- **Six purpose-built ADK subagents** (discovery, grounded policy, artifact, validation, evidence,
+  explanation) under a root `LlmAgent` — at or above the multi-agent depth of prior ADK-hackathon
+  winners.
+- **NSA MCP security baseline** implemented and **tested** — 19 security tests pass across auth,
+  RBAC, message integrity, replay protection, output filtering, and audit logging.
+- **Sub-second deterministic decision** on every fixture; live Gemini narration on demand.
+- Live on a **custom domain** at [cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com),
   judge-gated, with PDF / Markdown / JSON evidence export and real Cloud Trace spans.
-- A2A discoverable, so peer enterprise agents can call onboarding as a skill.
+- **A2A-discoverable** — peer enterprise agents can call onboarding as a skill.
 
 ## What we learned
 

@@ -50,15 +50,28 @@ only.** The gate is reliable, reproducible, and audit-defensible by construction
 
 ## What ships in this repository
 
-- A net-new ADK multi-agent workflow with six purpose-built subagents
+- A net-new ADK multi-agent workflow with six purpose-built subagents (discovery, grounded policy,
+  artifact, validation, evidence, explanation) under a root `LlmAgent`
 - A real HTTP MCP server with auth, RBAC, message integrity, replay protection, strict schemas,
   output filtering, and audit logging — **19 security tests** pass
-- Eight candidate-agent fixtures spanning safe intake, missing governance, regulated data, budget
-  exposure, prompt injection, privileged admin, unmaintained MCP, and grounding-dependent
-  scenarios — **5/5 must-ship decisions correct, 8/8 overall**, fully reproducible offline
-- Tamper-evident SHA-256 hash chain over canonical JSON for every evidence bundle
+- A **Pre-Boarding roster** of eight candidate agents spanning safe intake, missing governance,
+  regulated data, budget exposure, prompt injection, privileged admin, unmaintained MCP, and
+  grounding-dependent scenarios — **5/5 must-ship decisions correct, 8/8 overall**, fully
+  reproducible offline
+- **Pre-employment screening** via the Onboarding Validation Suite — five fail-closed checks
+  (OV-001..005) across identity, governance, regulated data, security posture, and supply chain
+- Tamper-evident SHA-256 hash chain over canonical JSON for every Evidence Bundle (the personnel
+  file) — every event in the run is verifiable
 - A2A discoverability so other enterprise agents can invoke onboarding as a skill
 - Cloud Run deployment, custom domain, judge-gated UI, PDF / Markdown / JSON evidence export
+
+### How this complements Google's Gemini Enterprise Agent Platform
+
+Google's Gemini Enterprise Agent Platform ships **Agent Registry**, **Agent Identity**, **Agent
+Gateway**, dynamic **AIBOM**, and **Agent Anomaly Detection** as platform primitives. CPOA is the
+workforce/HR **application layer** that consumes those primitives — the **Pre-Boarding gate**
+that produces the audit-grade evidence the platform expects, with a deterministic Ready /
+Conditional / Blocked decision narrated by Gemini.
 
 ## Honest scope (please read)
 
