@@ -22,5 +22,6 @@ ARG CPOA_API_BASE=http://localhost:8080
 ENV CPOA_API_BASE=${CPOA_API_BASE}
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/public ./public
 EXPOSE 8080
 CMD ["node", "server.js"]
