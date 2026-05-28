@@ -3,27 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import type {
-  DiscoveredAgent,
-  DiscoveryScanResult,
-  FixtureCard,
-  LifecycleAction,
-  LifecycleState,
-} from "@/lib/types";
+import type { DiscoveredAgent, DiscoveryScanResult } from "@/lib/types";
 
-// Discover phase of the AI Workforce Management lifecycle.
-//
-// Three tabs: Discovered (unmanaged / shadow IT — real A2A crawl results),
-// Pre-Boarding (candidates awaiting the onboarding gate), Onboarded (governed
-// agents from the registry). Each section uses workforce/HR vocabulary; the
-// crawl itself is a real HTTP scan of A2A Agent Cards.
+// Hire = the Discover phase of the AI Workforce lifecycle. A real HTTP crawl of
+// A2A Agent Cards surfaces agents operating without a Passport (shadow IT) so
+// they can be routed into the onboarding gate. Onboarding candidates live on
+// Pre-Boarding; the governed roster + HR Console live on the Roster (Manage) page.
 
-type Tab = "Discovered" | "Pre-Boarding" | "Onboarded";
-
-export default function Workforce() {
+export default function Hire() {
   const [scan, setScan] = useState<DiscoveryScanResult | null>(null);
-  const [fixtures, setFixtures] = useState<FixtureCard[]>([]);
-  const [tab, setTab] = useState<Tab>("Discovered");
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
 
@@ -42,7 +30,6 @@ export default function Workforce() {
 
   useEffect(() => {
     runScan();
-    api.listFixtures().then(setFixtures).catch((e) => setError(String(e)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -50,7 +37,7 @@ export default function Workforce() {
     () => scan?.results.filter((r) => r.status === "unknown") ?? [],
     [scan],
   );
-  const onboarded = useMemo(
+  const governed = useMemo(
     () => scan?.results.filter((r) => r.status === "known") ?? [],
     [scan],
   );
@@ -59,51 +46,27 @@ export default function Workforce() {
     [scan],
   );
 
-  const counts = {
-    Discovered: unmanaged.length,
-    "Pre-Boarding": fixtures.length,
-    Onboarded: onboarded.length,
-  };
-
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-heading text-2xl font-semibold">Workforce</h1>
-        <p className="text-on-surface-variant">
-          The AI workforce census. <strong className="text-on-surface">Discovered</strong> agents
-          are operating in the environment without a Passport — shadow IT, found via a real
-          Agent-to-Agent (A2A) directory crawl. <strong className="text-on-surface">Pre-Boarding</strong>{" "}
-          holds candidates awaiting the gate. <strong className="text-on-surface">Onboarded</strong>{" "}
-          are governed agents on the active roster.
+        <h1 className="font-heading text-2xl font-semibold">Hire</h1>
+        <p className="max-w-3xl text-on-surface-variant">
+          The <strong className="text-on-surface">Discover</strong> phase. A real
+          Agent-to-Agent (A2A) directory crawl finds agents operating in the environment
+          without a Passport — <strong className="text-on-surface">shadow IT</strong>.
+          Route a candidate into the onboarding gate from here. Onboard them on{" "}
+          <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>;
+          manage the governed roster on the{" "}
+          <Link href="/roster" className="text-primary underline">Roster</Link>.
         </p>
       </header>
 
       {/* Top-line metrics */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <MetricCard label="Discovered (unmanaged)" value={counts.Discovered} tone="warn" />
-        <MetricCard label="Pre-Boarding" value={counts["Pre-Boarding"]} tone="info" />
-        <MetricCard label="Onboarded" value={counts.Onboarded} tone="ok" />
+        <MetricCard label="Discovered (unmanaged)" value={unmanaged.length} tone="warn" />
+        <MetricCard label="Already governed" value={governed.length} tone="ok" />
+        <MetricCard label="Endpoints scanned" value={scan?.summary.scanned ?? 0} tone="info" />
       </section>
-
-      {/* Tabs */}
-      <div role="tablist" className="flex flex-wrap gap-1 border-b border-outline-variant/40">
-        {(["Discovered", "Pre-Boarding", "Onboarded"] as Tab[]).map((t) => (
-          <button
-            key={t}
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={`rounded-t-md px-4 py-2 text-sm font-medium ${
-              tab === t
-                ? "border-b-2 border-primary text-primary"
-                : "text-on-surface-variant hover:text-on-surface"
-            }`}
-          >
-            {t}{" "}
-            <span className="ml-1 text-xs text-on-surface-variant">({counts[t]})</span>
-          </button>
-        ))}
-      </div>
 
       {error && (
         <div role="alert" className="rounded-lg border border-decision-blocked/30 bg-decision-blocked/5 p-3 text-sm text-decision-blocked">
@@ -111,18 +74,13 @@ export default function Workforce() {
         </div>
       )}
 
-      {/* Tab contents */}
-      {tab === "Discovered" && (
-        <DiscoveredSection
-          agents={unmanaged}
-          unreachable={unreachable}
-          scope={scan?.scope}
-          scanning={scanning}
-          onRescan={runScan}
-        />
-      )}
-      {tab === "Pre-Boarding" && <PreBoardingSection fixtures={fixtures} />}
-      {tab === "Onboarded" && <OnboardedSection agents={onboarded} />}
+      <DiscoveredSection
+        agents={unmanaged}
+        unreachable={unreachable}
+        scope={scan?.scope}
+        scanning={scanning}
+        onRescan={runScan}
+      />
     </div>
   );
 }
@@ -264,206 +222,5 @@ function DiscoveredSection({
         </p>
       )}
     </section>
-  );
-}
-
-function PreBoardingSection({ fixtures }: { fixtures: FixtureCard[] }) {
-  return (
-    <section className="space-y-3">
-      <p className="text-sm text-on-surface-variant">
-        Candidates awaiting their first day. Each is exercised end-to-end through the
-        Onboarding gate from the <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>{" "}
-        roster.
-      </p>
-      <ul className="grid gap-3 md:grid-cols-2">
-        {fixtures.map((f) => (
-          <li
-            key={f.name}
-            className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 text-sm"
-          >
-            <div className="font-heading text-base font-semibold text-on-surface">{f.agent_name}</div>
-            <p className="mt-1 line-clamp-3 text-xs text-on-surface-variant">{f.business_story}</p>
-            <p className="mt-2 text-[11px] text-on-surface-variant">
-              Expected: <span className="font-semibold text-on-surface">{f.expected_decision}</span>{" "}
-              · Tier: {f.tier}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function OnboardedSection({ agents }: { agents: DiscoveredAgent[] }) {
-  return (
-    <section className="space-y-3">
-      <p className="text-sm text-on-surface-variant">
-        Governed agents on the active roster — each carries a current Passport, Policy Envelope,
-        AI Bill of Materials, and a hash-chained Personnel File. Use the HR Console below to
-        place an agent on leave, hand off to a new manager, or update its role; every action
-        appends a real evidence event to the agent&apos;s personnel file.
-      </p>
-      {agents.length === 0 ? (
-        <p className="text-on-surface-variant">No governed agents detected in this scan.</p>
-      ) : (
-        <ul className="grid gap-4">
-          {agents.map((a) => (
-            <OnboardedAgentCard key={a.endpoint} agent={a} />
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-function OnboardedAgentCard({ agent }: { agent: DiscoveredAgent }) {
-  const candidateId = agent.candidate_agent_id ?? "";
-  const [state, setState] = useState<LifecycleState | null>(null);
-  const [busy, setBusy] = useState<LifecycleAction | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [showLog, setShowLog] = useState(false);
-
-  useEffect(() => {
-    if (!candidateId) return;
-    api.getLifecycleState(candidateId).then(setState).catch((e) => setError(String(e)));
-  }, [candidateId]);
-
-  async function act(action: LifecycleAction, payload: Record<string, unknown>) {
-    setBusy(action);
-    setError(null);
-    try {
-      const r = await api.applyLifecycleAction(candidateId, action, payload);
-      setState(r.state);
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  function promptAndHandoff() {
-    const v = window.prompt("New owner email:");
-    if (v && v.includes("@")) act("manager_handoff", { new_owner_email: v });
-  }
-
-  function promptAndPlaceOnLeave() {
-    const v = window.prompt("Reason for placing on leave (will be recorded):", "");
-    act("place_on_leave", { reason: v ?? "" });
-  }
-
-  function promptAndReturn() {
-    const v = window.prompt("Return note (will be recorded):", "");
-    act("return_from_leave", { reason: v ?? "" });
-  }
-
-  const status = state?.status ?? "active";
-  const onLeave = status === "on_leave";
-  const owner = state?.owner_email ?? agent.matched_registry_entry?.owner_email ?? "—";
-
-  return (
-    <li
-      className={`rounded-xl border-2 p-5 text-sm ${
-        onLeave
-          ? "border-decision-conditional/40 bg-decision-conditional/5"
-          : "border-decision-ready/30 bg-decision-ready/5"
-      }`}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="font-heading text-base font-semibold text-on-surface">
-            {agent.agent_card?.name ?? candidateId}
-          </h3>
-          <p className="text-xs text-on-surface-variant">
-            {candidateId} · {agent.matched_registry_entry?.origin}
-          </p>
-        </div>
-        <span
-          className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-            onLeave
-              ? "bg-decision-conditional/15 text-decision-conditional"
-              : "bg-decision-ready/15 text-decision-ready"
-          }`}
-        >
-          {onLeave ? "On leave" : "On staff"}
-        </span>
-      </div>
-
-      <p className="mt-2 text-xs text-on-surface-variant">{agent.agent_card?.description}</p>
-
-      <dl className="mt-3 grid gap-x-6 gap-y-1 text-xs text-on-surface-variant sm:grid-cols-2">
-        <div>
-          <dt className="inline font-semibold text-on-surface">Manager: </dt>
-          <dd className="inline">{owner}</dd>
-        </div>
-        {state?.updated_at && (
-          <div>
-            <dt className="inline font-semibold text-on-surface">Updated: </dt>
-            <dd className="inline">{state.updated_at}</dd>
-          </div>
-        )}
-      </dl>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {onLeave ? (
-          <button
-            onClick={promptAndReturn}
-            disabled={busy !== null}
-            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-60"
-          >
-            {busy === "return_from_leave" ? "Returning…" : "Return from leave"}
-          </button>
-        ) : (
-          <button
-            onClick={promptAndPlaceOnLeave}
-            disabled={busy !== null}
-            className="rounded-lg border border-outline px-3 py-1.5 text-xs font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
-          >
-            {busy === "place_on_leave" ? "Placing on leave…" : "Place on leave"}
-          </button>
-        )}
-        <button
-          onClick={promptAndHandoff}
-          disabled={busy !== null}
-          className="rounded-lg border border-outline px-3 py-1.5 text-xs font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
-        >
-          {busy === "manager_handoff" ? "Handing off…" : "Manager handoff"}
-        </button>
-        <button
-          onClick={() => act("role_change", { scope_changes: { reviewed_at: new Date().toISOString() } })}
-          disabled={busy !== null}
-          className="rounded-lg border border-outline px-3 py-1.5 text-xs font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
-        >
-          {busy === "role_change" ? "Updating…" : "Role change (review)"}
-        </button>
-        {state && state.event_log.length > 0 && (
-          <button
-            onClick={() => setShowLog((v) => !v)}
-            className="rounded-lg px-2 py-1.5 text-xs font-semibold text-primary hover:underline"
-          >
-            {showLog ? "Hide" : "Show"} personnel-file events ({state.event_log.length})
-          </button>
-        )}
-      </div>
-
-      {showLog && state?.event_log.length ? (
-        <ol className="mt-3 space-y-1 border-t border-outline-variant/40 pt-3 text-xs">
-          {state.event_log.map((evt) => (
-            <li key={evt.event_id} className="flex items-start gap-2">
-              <span className="font-mono text-[10px] text-on-surface-variant">
-                {evt.timestamp.slice(0, 19).replace("T", " ")}
-              </span>
-              <span className="font-semibold text-on-surface">{evt.event_type}</span>
-              <span className="text-on-surface-variant">{evt.summary}</span>
-            </li>
-          ))}
-        </ol>
-      ) : null}
-
-      {error && (
-        <p role="alert" className="mt-2 text-xs text-decision-blocked">
-          {error}
-        </p>
-      )}
-    </li>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import type { LifecyclePhase, LifecycleState, Run } from "@/lib/types";
+import type { LifecycleDetail, LifecyclePhase, LifecycleState, Run } from "@/lib/types";
 import { DecisionBadge } from "@/components/DecisionBadge";
 import { useCompass } from "@/components/Compass";
 
@@ -34,6 +36,7 @@ const EVENT_LABEL: Record<string, string> = {
   "onboarding.decision.issued": "Decision issued — Ready / Conditional / Blocked",
   "onboarding.evidence.bundle.exported": "Personnel file sealed — hash-chained evidence bundle",
   "onboarding.error.fail_closed": "Fail-closed — pipeline error routed to Blocked",
+  "onboarding.remediated": "Remediated — blocker fixed and re-screened clean",
   // Manage (HR Console)
   "manage.activated": "Manage — activated into the managed roster",
   "manage.placed_on_leave": "Placed on leave",
@@ -42,11 +45,14 @@ const EVENT_LABEL: Record<string, string> = {
   "manage.scope_updated": "Role change — scope updated",
   // Govern
   "govern.controls_attested": "Govern — controls attested against frameworks",
+  "govern.gap_remediated": "Govern — control gap remediated",
   // Operate (Sentinel)
   "operate.anomaly_detected": "Anomaly detected — performance issue",
   "operate.performance_reviewed": "Operate — performance reviewed",
+  "operate.anomaly_resolved": "Operate — anomaly resolved",
   // Optimize
   "optimize.development_plan_accepted": "Optimize — development plan accepted",
+  "optimize.item_resolved": "Optimize — development item resolved",
 };
 function eventLabel(t: string): string {
   return EVENT_LABEL[t] ?? t
@@ -90,14 +96,300 @@ function Raw({ obj }: { obj: unknown }) {
   );
 }
 
+// --- Lifecycle phase detail cards -------------------------------------------
+// After a phase is attested, expand it into a rich card that shows *what* that
+// phase assessed — placement + passport (Manage), controls + frameworks
+// (Govern), the performance review (Operate), the development plan (Optimize).
+
+function StatusPill({ status }: { status: "pass" | "flagged" }) {
+  return status === "flagged" ? (
+    <span className="inline-flex items-center gap-1 rounded bg-decision-conditional/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-decision-conditional">
+      <span className="material-symbols-outlined text-[12px]">warning</span> Flagged
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded bg-decision-ready/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-decision-ready">
+      <span className="material-symbols-outlined text-[12px]">check_circle</span> Passed
+    </span>
+  );
+}
+
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  if (value === null || value === undefined || value === "") return null;
+  return (
+    <div>
+      <dt className="text-[10px] uppercase tracking-wider text-slate-400">{label}</dt>
+      <dd className="text-xs font-medium text-cpl-charcoal">{value}</dd>
+    </div>
+  );
+}
+
+function CardShell({
+  title,
+  status,
+  children,
+}: {
+  title: string;
+  status: "pass" | "flagged";
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{title}</span>
+        <StatusPill status={status} />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function ResolvedPill() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded bg-decision-ready/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-decision-ready">
+      <span className="material-symbols-outlined text-[12px]">check_circle</span> Resolved
+    </span>
+  );
+}
+
+function ResolveButton({ label, busy, onClick }: { label: string; busy: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={busy}
+      className="mt-1.5 inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-primary/90 disabled:opacity-50"
+    >
+      <span className="material-symbols-outlined text-[12px]">{busy ? "hourglass_empty" : "build"}</span>
+      {busy ? "Resolving…" : label}
+    </button>
+  );
+}
+
+type ResolveHandler = (phase: LifecyclePhase, refId: string, title: string, summary: string) => void;
+
+function PhaseDetailCard({
+  phase,
+  detail,
+  onResolve,
+  resolving,
+}: {
+  phase: LifecyclePhase;
+  detail: LifecycleDetail;
+  onResolve: ResolveHandler;
+  resolving: string | null;
+}) {
+  if (phase === "manage") {
+    const d = detail.manage;
+    return (
+      <CardShell title="Placement & assignment" status={d.status}>
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+          <Field label="Manager" value={d.manager_name} />
+          <Field label="Manager email" value={d.manager_email} />
+          <Field label="Team" value={d.team} />
+          <Field label="Role" value={d.role} />
+          <Field label="Roster status" value={d.roster_status} />
+          <Field label="Trust tier" value={d.trust_tier} />
+          <Field label="Autonomy" value={d.autonomy} />
+          <Field label="Kill-switch" value={d.kill_switch} />
+          <Field label="Runtime" value={d.runtime} />
+          <Field label="Deployment" value={d.deployment} />
+          <Field label="Region" value={d.region} />
+          <Field label="Owner verification" value={d.owner_status} />
+        </dl>
+      </CardShell>
+    );
+  }
+  if (phase === "govern") {
+    const d = detail.govern;
+    return (
+      <CardShell title="Controls attested" status={d.status}>
+        <p className="text-xs text-slate-600">
+          <span className="font-semibold text-cpl-charcoal">{d.controls}</span> controls mapped across{" "}
+          <span className="font-semibold text-cpl-charcoal">{d.frameworks}</span> frameworks ·{" "}
+          <span className="font-semibold text-cpl-charcoal">{d.citations}</span> live citations
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {d.framework_names.map((f) => (
+            <span key={f} className="rounded bg-cpl-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-cpl-blue">
+              {f}
+            </span>
+          ))}
+        </div>
+        {d.gaps.length > 0 && (
+          <div className="mt-2 space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wider text-decision-conditional">
+              Control gaps to attest
+            </p>
+            {d.gaps.map((g) => (
+              <div
+                key={g.finding_id}
+                className="rounded border border-decision-conditional/30 bg-decision-conditional/5 p-2 text-[11px]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-bold uppercase text-decision-conditional">
+                    {g.control_id} · {g.severity}
+                  </span>
+                  {g.resolved && <ResolvedPill />}
+                </div>
+                <p className="font-medium text-cpl-charcoal">{g.title}</p>
+                <p className="text-slate-600">↳ {g.remediation}</p>
+                {!g.resolved && (
+                  <ResolveButton
+                    label="Attest & remediate"
+                    busy={resolving === g.control_id}
+                    onClick={() => onResolve("govern", g.control_id, g.control_name, g.remediation)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        <ul className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+          {d.control_list.map((c) => (
+            <li key={c.control_id} className="flex items-center gap-1.5 text-[11px] text-slate-600">
+              <span className="font-mono text-[10px] text-slate-400">{c.control_id}</span>
+              <span>{c.name}</span>
+            </li>
+          ))}
+        </ul>
+        <Link href="/compliance" className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
+          View the full compliance matrix →
+        </Link>
+      </CardShell>
+    );
+  }
+  if (phase === "operate") {
+    const d = detail.operate;
+    return (
+      <CardShell title="Performance review" status={d.status}>
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+          <Field label="Readiness" value={d.readiness_score != null ? `${d.readiness_score}/100` : null} />
+          <Field label="Decision" value={d.onboarding_decision} />
+          <Field label="Open conditions" value={d.open_findings} />
+          <Field label="Risk tier" value={d.risk_tier} />
+        </dl>
+        {d.anomalies.length > 0 ? (
+          <ul className="mt-2 space-y-1">
+            {d.anomalies.map((a) => (
+              <li
+                key={a.rule_id}
+                className="rounded border border-decision-conditional/30 bg-decision-conditional/5 p-2 text-[11px]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-bold uppercase text-decision-conditional">
+                    {a.rule_id} · {a.severity}
+                  </span>
+                  {a.resolved && <ResolvedPill />}
+                </div>
+                <p className="text-slate-600">{a.summary}</p>
+                {!a.resolved && (
+                  <ResolveButton
+                    label="Resolve anomaly"
+                    busy={resolving === a.rule_id}
+                    onClick={() => onResolve("operate", a.rule_id, a.summary, `Resolved ${a.rule_id}`)}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-[11px] font-medium text-decision-ready">
+            No anomalies — operating within policy.
+          </p>
+        )}
+        <Link href="/operate" className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
+          Open the Sentinel fleet view →
+        </Link>
+      </CardShell>
+    );
+  }
+  const d = detail.optimize;
+  return (
+    <CardShell title="Development plan" status={d.status}>
+      <p className="text-xs text-slate-600">
+        Autonomy ladder:{" "}
+        <span className="font-mono text-cpl-charcoal">{d.current_autonomy ?? "—"}</span>
+        <span className="mx-1 text-slate-400">→</span>
+        <span className="font-mono text-cpl-charcoal">{d.next_autonomy ?? "top of ladder"}</span>
+        {d.ready_for_promotion ? (
+          <span className="ml-2 rounded bg-decision-ready/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-decision-ready">
+            Ready to promote
+          </span>
+        ) : (
+          <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-slate-500">
+            Hold
+          </span>
+        )}
+      </p>
+      {d.development_items.length > 0 && (
+        <div className="mt-2">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400">Growth items</p>
+          <ul className="mt-1 space-y-1">
+            {d.development_items.map((it) => (
+              <li key={it.finding_id} className="rounded border border-slate-200 bg-white p-2 text-[11px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-cpl-charcoal">{it.title}</span>
+                  {it.resolved && <ResolvedPill />}
+                </div>
+                <p className="text-slate-600">↳ {it.remediation}</p>
+                {!it.resolved && (
+                  <ResolveButton
+                    label="Complete item"
+                    busy={resolving === it.finding_id}
+                    onClick={() => onResolve("optimize", it.finding_id, it.title, it.remediation)}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {d.promotion_blockers.length > 0 && (
+        <div className="mt-2">
+          <p className="text-[10px] uppercase tracking-wider text-decision-blocked">Promotion blockers</p>
+          <ul className="mt-1 space-y-1">
+            {d.promotion_blockers.map((b) => (
+              <li
+                key={b.finding_id}
+                className="rounded border border-decision-blocked/30 bg-decision-blocked/5 p-2 text-[11px]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-decision-blocked">{b.title}</span>
+                  {b.resolved && <ResolvedPill />}
+                </div>
+                <p className="text-slate-600">↳ {b.remediation}</p>
+                {!b.resolved && (
+                  <ResolveButton
+                    label="Resolve blocker"
+                    busy={resolving === b.finding_id}
+                    onClick={() => onResolve("optimize", b.finding_id, b.title, b.remediation)}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <Link href="/optimize" className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
+        Open Talent Development →
+      </Link>
+    </CardShell>
+  );
+}
+
 export default function RunPage({ params }: { params: { id: string } }) {
   const { openCompass } = useCompass();
+  const router = useRouter();
   const [run, setRun] = useState<Run | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("Passport");
   const [lifecycle, setLifecycle] = useState<LifecycleState | null>(null);
   const [lifecycleErr, setLifecycleErr] = useState<string | null>(null);
+  const [detail, setDetail] = useState<LifecycleDetail | null>(null);
   const [advancing, setAdvancing] = useState(false);
+  const [resolving, setResolving] = useState<string | null>(null);
+  const [remediating, setRemediating] = useState(false);
+  const [remediateErr, setRemediateErr] = useState<string | null>(null);
 
   useEffect(() => {
     api.getRun(params.id).then(setRun).catch((e) => setError(String(e)));
@@ -115,6 +407,21 @@ export default function RunPage({ params }: { params: { id: string } }) {
       cancelled = true;
     };
   }, [run]);
+
+  // Load the rich per-phase detail (placement, controls, performance, plan).
+  // Re-fetched after each advance so Operate's live signals stay current. The
+  // detail is a display enhancement, so failures degrade silently.
+  useEffect(() => {
+    if (!run) return;
+    let cancelled = false;
+    api
+      .lifecycleDetail(run.candidate_agent_id, run.run_id)
+      .then((d) => !cancelled && setDetail(d))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [run, lifecycle]);
 
   async function advanceOne(phase: LifecyclePhase) {
     if (!run || advancing) return;
@@ -144,8 +451,53 @@ export default function RunPage({ params }: { params: { id: string } }) {
     }
   }
 
+  // Resolve a flagged lifecycle item. Writes a real signed, hash-chained
+  // remediation event, then refreshes lifecycle state (which re-fetches the
+  // per-phase detail so the card flips flagged → passed in place).
+  async function resolveItem(
+    phase: LifecyclePhase,
+    refId: string,
+    title: string,
+    summary: string,
+  ) {
+    if (!run || resolving) return;
+    setResolving(refId);
+    setLifecycleErr(null);
+    try {
+      const r = await api.remediate(run.candidate_agent_id, phase, refId, title, summary);
+      setLifecycle(r.state);
+    } catch (e) {
+      setLifecycleErr(String(e));
+    } finally {
+      setResolving(null);
+    }
+  }
+
+  // Remediate a Blocked run: quarantine the prompt-injection, re-run onboarding
+  // on the sanitized manifest, then jump to the cleared re-run.
+  async function remediateRun() {
+    if (!run || remediating) return;
+    setRemediating(true);
+    setRemediateErr(null);
+    try {
+      const cleared = await api.remediateRun(run.run_id);
+      router.push(`/runs/${cleared.run_id}`);
+    } catch (e) {
+      setRemediateErr(String(e));
+      setRemediating(false);
+    }
+  }
+
   if (error) return <p role="alert" className="text-decision-blocked">Could not load run: {error}</p>;
   if (!run) return <p className="text-slate-500">Loading run…</p>;
+
+  // Prompt-injection hero: a Blocked run that carries an OV-004 finding can be
+  // remediated (quarantine the tool) and re-run. Hide the CTA once it has been.
+  const injectionFinding = run.validation_run?.findings?.find((f) => f.test_id === "OV-004");
+  const canRemediate =
+    run.decision === "Blocked Pending Remediation" &&
+    !!injectionFinding &&
+    !run.remediated_by_run_id;
 
   const doneTypes = new Set((lifecycle?.event_log ?? []).map((e) => e.event_type));
   const isPhaseDone = (phase: LifecyclePhase) => doneTypes.has(PHASE_EVENT_TYPE[phase]);
@@ -176,6 +528,113 @@ export default function RunPage({ params }: { params: { id: string } }) {
           <div><dt className="text-slate-400">Trust tier</dt><dd>{p.trust_tier}</dd></div>
         </dl>
       </section>
+
+      {/* Prompt-injection hero — the sad path and its one-click fix. */}
+      {canRemediate && (
+        <section className="rounded-xl border-2 border-decision-blocked/40 bg-decision-blocked/5 p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-decision-blocked">gpp_maybe</span>
+                <h2 className="font-heading text-lg font-semibold text-decision-blocked">
+                  Blocked — prompt injection detected
+                </h2>
+              </div>
+              <p className="mt-1 text-sm text-slate-600">
+                {injectionFinding?.title}. {injectionFinding?.recommended_remediation}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Remediating quarantines the offending tool description — treating it as untrusted
+                data per the NSA MCP baseline — and re-runs the <em>same</em> deterministic
+                onboarding pipeline. Nothing is hand-scored: the candidate either clears or it doesn&apos;t.
+              </p>
+              {remediateErr && (
+                <p role="alert" className="mt-2 text-xs font-medium text-decision-blocked">
+                  {remediateErr}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={remediateRun}
+              disabled={remediating}
+              className="inline-flex items-center gap-2 rounded-lg bg-decision-blocked px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-decision-blocked/90 disabled:opacity-60"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {remediating ? "hourglass_empty" : "healing"}
+              </span>
+              {remediating ? "Remediating & re-running…" : "Remediate & re-run"}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* Original blocked run that has since been remediated. */}
+      {run.remediated_by_run_id && (
+        <section className="rounded-xl border border-decision-ready/40 bg-decision-ready/5 p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-decision-ready">verified</span>
+              <p className="text-sm text-slate-700">
+                This blocked candidate was remediated — the prompt injection was quarantined and
+                re-screened clean.
+              </p>
+            </div>
+            <Link
+              href={`/runs/${run.remediated_by_run_id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-decision-ready px-3 py-2 text-xs font-semibold text-white hover:bg-decision-ready/90"
+            >
+              View the cleared re-run
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Cleared re-run — provenance back to the blocked original. */}
+      {run.remediates_run_id && (
+        <section className="rounded-xl border border-decision-ready/40 bg-decision-ready/5 p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-decision-ready">healing</span>
+            <h2 className="font-heading text-base font-semibold text-decision-ready">
+              Remediated re-run — cleared
+            </h2>
+          </div>
+          <p className="mt-1 text-sm text-slate-600">
+            Produced by remediating a previously{" "}
+            <Link
+              href={`/runs/${run.remediates_run_id}`}
+              className="font-semibold text-primary hover:underline"
+            >
+              Blocked candidate
+            </Link>
+            . The same onboarding pipeline re-ran on the sanitized manifest.
+          </p>
+          {run.remediation_applied && run.remediation_applied.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {run.remediation_applied.map((r) => (
+                <li key={r.tool_id} className="text-xs text-slate-600">
+                  <span className="font-mono text-[10px] font-bold uppercase text-decision-ready">
+                    {r.control}
+                  </span>{" "}
+                  quarantined tool{" "}
+                  <span className="font-medium text-cpl-charcoal">{r.tool_id}</span> — stripped{" "}
+                  <span className="inline-flex flex-wrap gap-1 align-middle">
+                    {r.phrases.map((ph) => (
+                      <span
+                        key={ph}
+                        className="rounded bg-decision-blocked/10 px-1 py-0.5 font-mono text-[10px] text-decision-blocked"
+                      >
+                        &ldquo;{ph}&rdquo;
+                      </span>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
@@ -264,6 +723,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
                       <p className="text-xs text-slate-500">{evt ? evt.summary : ph.blurb}</p>
                       {evt && (
                         <p className="mt-0.5 font-mono text-[10px] text-slate-400">{evt.event_hash.slice(7, 21)}…</p>
+                      )}
+                      {done && detail && (
+                        <PhaseDetailCard
+                          phase={ph.phase}
+                          detail={detail}
+                          onResolve={resolveItem}
+                          resolving={resolving}
+                        />
                       )}
                     </div>
                     {isNext && (

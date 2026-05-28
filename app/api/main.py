@@ -24,7 +24,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import agent_discovery, engine, govern, manage, operate, optimize
+from cpoa.services import agent_discovery, engine, govern, manage, operate, optimize, remediation
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -251,6 +251,72 @@ def create_run(request: Request, body: dict) -> dict:
     run_id = f"run-{uuid.uuid4().hex[:12]}"
     payload = _serialize_run(run_id, result, narrate_offline(result))
     store.save(run_id, payload)
+    return payload
+
+
+@app.post("/api/runs/{run_id}/remediate", dependencies=[Depends(require_auth)])
+@limiter.limit("60/minute")
+def remediate_run(run_id: str, request: Request) -> dict:
+    """Remediate a Blocked run and re-run onboarding on the sanitized manifest.
+
+    The honest fix for the prompt-injection hero: the same OV-004 detector that
+    blocked the candidate is used to quarantine the offending tool description,
+    then the *same* deterministic pipeline re-runs and the candidate clears. A
+    new run is created and linked back to the original via ``remediates_run_id``;
+    a signed, hash-chained ``onboarding.remediated`` event is appended to the
+    original run's personnel file pointing forward to the cleared re-run.
+    """
+    original = store.get(run_id)
+    if not original:
+        raise HTTPException(status_code=404, detail="run not found")
+    manifest_data = original.get("candidate_manifest")
+    if not manifest_data:
+        raise HTTPException(status_code=422, detail="run has no manifest to remediate")
+
+    manifest = CandidateAgentManifest(**manifest_data)
+    sanitized, applied = remediation.sanitize_manifest(manifest)
+    if not applied:
+        raise HTTPException(
+            status_code=422,
+            detail="nothing to remediate — no prompt-injection content found in this manifest",
+        )
+
+    with span("remediation", candidate=manifest.candidate_agent_id) as s:
+        result = engine.onboard(sanitized)
+        if s is not None:
+            s.set_attribute("decision", result.decision)
+            s.set_attribute("readiness_score", result.score.score)
+
+    new_run_id = f"run-{uuid.uuid4().hex[:12]}"
+    payload = _serialize_run(new_run_id, result, narrate_offline(result))
+    payload["remediates_run_id"] = run_id
+    payload["remediation_applied"] = applied
+    store.save(new_run_id, payload)
+
+    # Close the loop on the ORIGINAL run's personnel file: append a real signed,
+    # hash-chained event that bridges the Blocked attempt to the cleared re-run.
+    quarantined = ", ".join(a["tool_id"] for a in applied if a.get("tool_id"))
+    events = list(original.get("events") or [])
+    prev_hash = events[-1].get("event_hash") if events else None
+    event = remediation.build_remediation_event(
+        manifest.candidate_agent_id,
+        previous_event_hash=prev_hash,
+        summary=(
+            f"Remediated prompt-injection in tool(s) [{quarantined}]; re-screened "
+            f"clean as {result.decision} (re-run {new_run_id})."
+        ),
+        payload={
+            "remediated_run_id": run_id,
+            "re_run_id": new_run_id,
+            "new_decision": result.decision,
+            "applied": applied,
+        },
+    )
+    events.append(event.model_dump(mode="json"))
+    original["events"] = events
+    original["remediated_by_run_id"] = new_run_id
+    store.save(run_id, original)
+
     return payload
 
 
@@ -599,6 +665,186 @@ def run_full_lifecycle(candidate_id: str, body: dict | None = None) -> dict:
         )
         new_events.append({"phase": phase, **result["event"]})
     return {"state": manage.get_state(candidate_id).to_dict(), "events": new_events}
+
+
+def _phase_detail_full(candidate_id: str, run: dict | None) -> dict:
+    """Rich, per-phase detail for the lifecycle cards on the run page.
+
+    This is the *displayable* expansion of what each advance event is hashed
+    over: the Manage placement (manager, team, passport posture), the Govern
+    controls attested, the Operate performance review, and the Optimize
+    development plan. Every value is derived live from the run's passport +
+    the Govern/Operate/Optimize services — nothing is scripted. Each phase also
+    carries a ``status`` ("pass"/"flagged") that the per-phase gating (Phase 3)
+    builds on.
+    """
+    passport = (run or {}).get("passport") or {}
+    p_owner = passport.get("owner") or {}
+    runtime = passport.get("runtime") or {}
+    manifest = (run or {}).get("candidate_manifest") or {}
+    m_owner = manifest.get("owner") or {}
+    autonomy = manifest.get("autonomy") or {}
+    state = manage.get_state(candidate_id)
+
+    manage_detail = {
+        "status": "pass",
+        "manager_name": m_owner.get("name") or p_owner.get("name"),
+        "manager_email": state.owner_email or m_owner.get("email") or p_owner.get("email"),
+        "team": m_owner.get("team"),
+        "role": m_owner.get("role"),
+        "owner_status": p_owner.get("status"),
+        "trust_tier": passport.get("trust_tier"),
+        "autonomy": autonomy.get("level"),
+        "runtime": runtime.get("framework"),
+        "deployment": runtime.get("deployment_target"),
+        "region": runtime.get("region"),
+        "kill_switch": passport.get("kill_switch_state"),
+        "roster_status": state.status,
+    }
+
+    # GOVERN — controls the agent must attest. Findings from the gate map to a
+    # control (test_id == control_id); each unresolved mapped finding is a gap.
+    m = govern.control_matrix()
+    s = m["summary"]
+    control_names = {c["control_id"]: c["name"] for c in m["controls"]}
+    findings = (((run or {}).get("validation_run") or {}).get("findings")) or []
+    govern_resolved = manage.resolved_refs(state, "govern")
+    gaps = []
+    for f in findings:
+        cid = f.get("test_id")
+        if cid not in control_names:
+            continue
+        gaps.append({
+            "control_id": cid,
+            "control_name": control_names[cid],
+            "finding_id": f.get("finding_id"),
+            "title": f.get("title"),
+            "severity": f.get("severity"),
+            "remediation": f.get("recommended_remediation"),
+            "blocks": bool(f.get("blocks_ready_decision")),
+            "resolved": cid in govern_resolved,
+        })
+    govern_detail = {
+        "status": "flagged" if any(not g["resolved"] for g in gaps) else "pass",
+        "controls": s["controls_total"],
+        "frameworks": s["frameworks_total"],
+        "citations": s["citations_total"],
+        "framework_names": [f["source_title"] for f in m["frameworks"]],
+        "control_list": [
+            {"control_id": c["control_id"], "name": c["name"], "category": c["category"]}
+            for c in m["controls"]
+        ],
+        "gaps": gaps,
+    }
+
+    # OPERATE — Sentinel anomalies, annotated with whether they've been resolved.
+    fleet = operate.assess_fleet()
+    snap = fleet[0] if fleet else {"members": []}
+    me = next(
+        (x for x in snap.get("members", []) if x.get("candidate_agent_id") == candidate_id),
+        None,
+    )
+    operate_resolved = manage.resolved_refs(state, "operate")
+    anomalies = [
+        {**a, "resolved": a.get("rule_id") in operate_resolved}
+        for a in (me or {}).get("anomalies", [])
+    ]
+    operate_detail = {
+        "status": "flagged" if any(not a["resolved"] for a in anomalies) else "pass",
+        "anomalies": anomalies,
+        "readiness_score": (me or {}).get("readiness_score"),
+        "open_findings": (me or {}).get("open_findings"),
+        "blocking_findings": (me or {}).get("blocking_findings"),
+        "risk_tier": (me or {}).get("risk_tier"),
+        "autonomy_level": (me or {}).get("autonomy_level"),
+        "onboarding_decision": (me or {}).get("onboarding_decision"),
+        "lifecycle_events_30d": (me or {}).get("lifecycle_events_30d"),
+    }
+
+    # OPTIMIZE — development items + promotion blockers, annotated as resolved.
+    plans = optimize.development_plans()
+    plan = next(
+        (p for p in plans["plans"] if p["candidate_agent_id"] == candidate_id),
+        None,
+    )
+    optimize_resolved = manage.resolved_refs(state, "optimize")
+    dev_items = [
+        {**it, "resolved": it.get("finding_id") in optimize_resolved}
+        for it in (plan or {}).get("development_items", [])
+    ]
+    prom_blockers = [
+        {**b, "resolved": b.get("finding_id") in optimize_resolved}
+        for b in (plan or {}).get("promotion_blockers", [])
+    ]
+    next_autonomy = (plan or {}).get("next_autonomy")
+    unresolved_growth = [x for x in dev_items + prom_blockers if not x["resolved"]]
+    optimize_detail = {
+        "status": "flagged" if unresolved_growth else "pass",
+        "current_autonomy": (plan or {}).get("current_autonomy"),
+        "next_autonomy": next_autonomy,
+        # Derived from the ledger: once every item is cleared, the agent is
+        # eligible for the next rung (the raw plan can't see the remediations).
+        "ready_for_promotion": next_autonomy is not None and not unresolved_growth,
+        "development_items": dev_items,
+        "promotion_blockers": prom_blockers,
+        "monthly_budget_usd": (plan or {}).get("monthly_budget_usd"),
+        "tools": (plan or {}).get("tools", []),
+    }
+
+    return {
+        "candidate_agent_id": candidate_id,
+        "manage": manage_detail,
+        "govern": govern_detail,
+        "operate": operate_detail,
+        "optimize": optimize_detail,
+    }
+
+
+@app.get("/api/workforce/{candidate_id}/lifecycle-detail", dependencies=[Depends(require_auth)])
+def lifecycle_detail(candidate_id: str, run_id: str | None = None) -> dict:
+    """Rich per-phase detail powering the lifecycle cards on the run page.
+
+    Pass the originating ``run_id`` so the Manage card can show the agent's
+    verified passport posture. Govern/Operate/Optimize are derived live from
+    their services and keyed to this ``candidate_id``.
+    """
+    run = store.get(run_id) if run_id else None
+    return _phase_detail_full(candidate_id, run)
+
+
+_REMEDIABLE_PHASES = {"govern", "operate", "optimize"}
+
+
+@app.post("/api/workforce/{candidate_id}/remediate", dependencies=[Depends(require_auth)])
+def remediate(candidate_id: str, body: dict) -> dict:
+    """Resolve a flagged lifecycle item (Govern gap, Operate anomaly, Optimize
+    growth item).
+
+    Appends a *real* signed, hash-chained remediation event to the agent's
+    personnel file and writes a ledger entry so the per-phase gating recomputes
+    the item as resolved. Body: ``{phase, ref_id, title?, summary?, actor_id?}``.
+    Returns ``{state, event}``. 422 for an unknown phase or a missing ref_id.
+    """
+    phase = body.get("phase")
+    ref_id = body.get("ref_id")
+    if phase not in _REMEDIABLE_PHASES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"phase must be one of {sorted(_REMEDIABLE_PHASES)}",
+        )
+    if not ref_id:
+        raise HTTPException(status_code=422, detail="ref_id is required")
+    try:
+        return manage.record_remediation(
+            candidate_id,
+            phase,
+            ref_id,
+            title=body.get("title") or ref_id,
+            summary=body.get("summary") or f"Remediated {ref_id}",
+            actor_id=body.get("actor_id") or "workforce.manager@clearpointlogic.com",
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 # --- Govern phase (Compass control mapping) ---------------------------------

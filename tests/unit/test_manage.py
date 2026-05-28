@@ -7,6 +7,8 @@ correctly through previous_event_hash.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from cpoa.services import manage
@@ -192,3 +194,90 @@ def test_run_full_lifecycle_chains_all_four_phases() -> None:
     for evt in state.event_log:
         assert evt["previous_event_hash"] == prev
         prev = evt["event_hash"]
+
+
+# --- Lifecycle store: in-memory default + durable (Firestore) persistence -----
+#
+# The store hands out *detached* copies (it serializes through to_dict /
+# from_dict), so callers that mutate a loaded state must write it back with
+# save_state. This is the contract operate.record_anomaly relies on, and the
+# mechanism that lets per-phase Resolve + advance events survive a Cloud Run
+# cold start when CPOA_STORAGE_MODE=firestore.
+
+
+def test_state_dict_round_trip_is_lossless() -> None:
+    manage.apply_action("round-trip", "place_on_leave", {"reason": "review"})
+    d = manage.get_state("round-trip").to_dict()
+    assert manage.LifecycleState.from_dict(d).to_dict() == d
+
+
+def test_get_state_returns_detached_copy_requiring_explicit_save() -> None:
+    # A loaded state mutated in place does NOT persist on its own …
+    scratch = manage.get_state("detach")
+    scratch.notes = "scratch"
+    assert manage.get_state("detach").notes == ""
+    # … but save_state writes it back (the contract operate.record_anomaly uses).
+    durable = manage.get_state("detach")
+    durable.notes = "persisted"
+    manage.save_state(durable)
+    assert manage.get_state("detach").notes == "persisted"
+
+
+def test_default_storage_mode_is_in_memory(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CPOA_STORAGE_MODE", raising=False)
+    store = manage._make_store()
+    assert isinstance(store, manage._MemoryLifecycleStore)
+    assert store.mode == "local"
+
+
+def test_firestore_unavailable_falls_back_to_memory(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A Firestore init failure must degrade to in-memory, never hard-fail."""
+    monkeypatch.setenv("CPOA_STORAGE_MODE", "firestore")
+
+    def boom(self, *a: object, **k: object) -> None:
+        raise RuntimeError("no firestore credentials in CI")
+
+    monkeypatch.setattr(manage._FirestoreLifecycleStore, "__init__", boom)
+    store = manage._make_store()
+    assert isinstance(store, manage._MemoryLifecycleStore)
+
+
+def test_durable_store_survives_cold_start(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With a durable backend, the personnel file (status + hash chain) is intact
+    after the in-process store instance is dropped — i.e. a Cloud Run cold start."""
+    backing: dict[str, str] = {}  # the durable layer (stands in for Firestore docs)
+
+    class _FakeDurableStore:
+        mode = "firestore"
+
+        def get(self, cid: str) -> dict | None:
+            raw = backing.get(cid)
+            return json.loads(raw) if raw else None
+
+        def save(self, cid: str, payload: dict) -> None:
+            backing[cid] = json.dumps(payload)
+
+        def all(self) -> list[dict]:
+            return [json.loads(v) for v in backing.values()]
+
+        def clear(self) -> None:
+            backing.clear()
+
+    monkeypatch.setattr(manage, "_make_store", lambda: _FakeDurableStore())
+    manage.reset_for_tests()  # drop cached store so the patched factory is used
+
+    manage.apply_action("cold-start", "place_on_leave", {"reason": "review"})
+    manage.advance_phase(
+        "cold-start", "govern", summary="attested", detail={"controls": 1}, actor_id="g@x"
+    )
+
+    # Cold start: drop the in-process instance. A durable backend keeps the data.
+    manage._store = None
+    state = manage.get_state("cold-start")
+    assert state.status == "on_leave"
+    assert [e["event_type"] for e in state.event_log] == [
+        "manage.placed_on_leave",
+        "govern.controls_attested",
+    ]
+    # The hash chain stays linked across the reload.
+    assert state.event_log[1]["previous_event_hash"] == state.event_log[0]["event_hash"]

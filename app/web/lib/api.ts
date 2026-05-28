@@ -7,6 +7,7 @@ import type {
   LifecycleAction,
   LifecycleActionResult,
   LifecycleAdvanceResult,
+  LifecycleDetail,
   LifecyclePhase,
   LifecycleState,
   Run,
@@ -29,6 +30,10 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fixture }),
     }),
+  // Remediate a Blocked run: quarantine the prompt-injection and re-run
+  // onboarding on the sanitized manifest. Returns the new (cleared) run.
+  remediateRun: (runId: string) =>
+    j<Run>(`/api/runs/${encodeURIComponent(runId)}/remediate`, { method: "POST" }),
   grounding: (name: string) =>
     j<{ ungrounded: any; grounded: any }>(`/api/grounding-comparison/${name}`),
   narrate: (id: string) =>
@@ -67,6 +72,25 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "{}",
+    }),
+  lifecycleDetail: (candidateId: string, runId?: string) =>
+    j<LifecycleDetail>(
+      `/api/workforce/${encodeURIComponent(candidateId)}/lifecycle-detail` +
+        (runId ? `?run_id=${encodeURIComponent(runId)}` : ""),
+    ),
+  // Resolve a flagged lifecycle item (Govern gap / Operate anomaly / Optimize
+  // growth item). Writes a real signed, hash-chained remediation event.
+  remediate: (
+    candidateId: string,
+    phase: LifecyclePhase,
+    refId: string,
+    title: string,
+    summary: string,
+  ) =>
+    j<LifecycleActionResult>(`/api/workforce/${encodeURIComponent(candidateId)}/remediate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phase, ref_id: refId, title, summary }),
     }),
   // Compass advisor + Sentinel feed
   askCompass: (message: string, context?: CompassContextPayload) =>

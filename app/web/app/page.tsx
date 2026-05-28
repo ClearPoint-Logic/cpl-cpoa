@@ -11,7 +11,7 @@ const PAIRS = [
 const LIFECYCLE = [
   { phase: "Discover", icon: "radar", href: "/workforce", note: "Real HTTPS crawl of A2A Agent Cards; surface unmanaged shadow IT" },
   { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
-  { phase: "Manage", icon: "groups", href: "/workforce", note: "HR Console: place on leave, manager handoff, role change" },
+  { phase: "Manage", icon: "groups", href: "/roster", note: "Roster + HR Console: place on leave, manager handoff, role change" },
   { phase: "Govern", icon: "policy", href: "/compliance", note: "Compliance: live control mapping to NSA / NIST / EU AI Act" },
   { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Fleet health + deterministic anomaly rules, run by the Sentinel engine" },
   { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },

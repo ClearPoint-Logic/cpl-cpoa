@@ -8,12 +8,14 @@ import { useCompass } from "@/components/Compass";
 type NavItem = { href: string; label: string; hint?: string };
 
 // Every stage of the workforce process lives under one "Workforce" menu — the
-// six-phase lifecycle, in order. Census covers Discover + Manage; the remaining
-// phases map one-to-one. Operate replaces the old "Sentinel" page label
-// (Sentinel is the monitoring engine that runs behind the scenes).
+// six-phase lifecycle, in order, mapping one-to-one to a surface: Hire
+// (Discover), Pre-Boarding (Onboard), Roster (Manage), Compliance (Govern),
+// Operate, and Talent Development (Optimize). Sentinel is the monitoring engine
+// behind Operate, not a page of its own.
 const WORKFORCE: NavItem[] = [
-  { href: "/workforce", label: "Census", hint: "Discover · Manage" },
+  { href: "/workforce", label: "Hire", hint: "Discover" },
   { href: "/agents", label: "Pre-Boarding", hint: "Onboard" },
+  { href: "/roster", label: "Roster", hint: "Manage" },
   { href: "/compliance", label: "Compliance", hint: "Govern" },
   { href: "/operate", label: "Operate", hint: "Operate" },
   { href: "/optimize", label: "Talent Development", hint: "Optimize" },
