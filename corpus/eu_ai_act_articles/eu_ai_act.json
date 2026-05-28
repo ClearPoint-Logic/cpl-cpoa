@@ -1,0 +1,39 @@
+{
+  "source_id": "eu-ai-act",
+  "source_title": "EU AI Act (Regulation (EU) 2024/1689) — selected articles",
+  "source_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+  "license": "public (EU legislation)",
+  "note": "Paraphrased summaries of selected articles relevant to agent onboarding; not verbatim legal text.",
+  "passages": [
+    {
+      "id": "eu-art9-risk",
+      "title": "Article 9 — Risk management system",
+      "tags": ["risk_management", "controls", "high_risk", "regulated"],
+      "text": "Article 9 requires a continuous risk management system for high-risk AI: identifying and analyzing known and foreseeable risks and adopting targeted measures to mitigate them. Onboarding should record the risks identified and the mitigations proposed."
+    },
+    {
+      "id": "eu-art12-logging",
+      "title": "Article 12 — Record-keeping and logging",
+      "tags": ["record_keeping", "logging", "evidence", "audit", "traceability"],
+      "text": "Article 12 requires high-risk AI systems to automatically record events (logs) over their lifecycle to ensure traceability of functioning. A tamper-evident evidence trail of the onboarding decision supports this record-keeping obligation."
+    },
+    {
+      "id": "eu-art13-transparency",
+      "title": "Article 13 — Transparency and provision of information",
+      "tags": ["transparency", "disclosure", "information", "regulated", "financial"],
+      "text": "Article 13 requires high-risk AI systems to be sufficiently transparent for deployers to interpret and use output appropriately, including clear information about capabilities and limitations. Agents handling regulated or financial matters should disclose scope and constraints."
+    },
+    {
+      "id": "eu-art14-oversight",
+      "title": "Article 14 — Human oversight",
+      "tags": ["human_oversight", "approval", "human_in_the_loop", "kill_switch"],
+      "text": "Article 14 requires that high-risk AI systems can be effectively overseen by humans, including the ability to intervene or interrupt operation. Human-approval gates and a kill-switch state for high-impact actions implement this oversight requirement."
+    },
+    {
+      "id": "eu-art10-data",
+      "title": "Article 10 — Data and data governance",
+      "tags": ["data_governance", "regulated_phi", "customer_pii", "retention", "data_boundary"],
+      "text": "Article 10 sets data governance expectations for high-risk AI, including relevance, representativeness, and appropriate handling of personal data. Explicit data-class boundaries, retention caps, and approval for external sharing of regulated data support these expectations."
+    }
+  ]
+}

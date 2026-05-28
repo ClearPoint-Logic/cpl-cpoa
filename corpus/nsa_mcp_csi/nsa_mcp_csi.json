@@ -1,0 +1,51 @@
+{
+  "source_id": "nsa-mcp-csi",
+  "source_title": "NSA CSI: Model Context Protocol — Security Design Considerations for AI-Driven Automation (May 2026)",
+  "source_url": "https://www.nsa.gov/ (Cybersecurity Information Sheet)",
+  "license": "public (U.S. Government work)",
+  "note": "Paraphrased control summaries assembled for the challenge grounding corpus; not verbatim text.",
+  "passages": [
+    {
+      "id": "nsa-auth",
+      "title": "Authenticate and authorize every MCP request",
+      "tags": ["mcp", "authentication", "authorization", "tool", "access"],
+      "text": "MCP servers should reject unauthenticated requests and enforce least-privilege authorization on a per-tool basis. Callers, sessions, and tool risk tiers should all be checked before a tool executes, so that a compromised client cannot invoke high-impact tools."
+    },
+    {
+      "id": "nsa-untrusted-input",
+      "title": "Treat tool descriptions and outputs as untrusted data",
+      "tags": ["mcp", "prompt_injection", "output_filtering", "untrusted", "tool_description"],
+      "text": "Tool metadata, tool outputs, and retrieved documents must be treated as untrusted input. Instruction-like content embedded in a tool description (for example, text directing the model to ignore prior instructions or bypass policy) is a prompt-injection vector and should be detected, quarantined, and never executed as an instruction."
+    },
+    {
+      "id": "nsa-validation",
+      "title": "Validate parameters strictly with deny-by-default",
+      "tags": ["mcp", "schema", "validation", "parameters", "input"],
+      "text": "Tool inputs and outputs should validate against strict schemas with explicit enums, size limits, and deny-by-default handling of unknown fields, reducing the attack surface for malformed or hostile payloads."
+    },
+    {
+      "id": "nsa-integrity-replay",
+      "title": "Bind messages to context and prevent replay",
+      "tags": ["mcp", "integrity", "replay", "nonce", "trace"],
+      "text": "Requests should carry trace and session identifiers, an idempotency key or nonce, an expiration, and a request hash so messages are bound to their context. Duplicate idempotency keys for state-changing tools should be rejected to prevent replay."
+    },
+    {
+      "id": "nsa-least-privilege",
+      "title": "Sandbox risky tools and restrict egress",
+      "tags": ["mcp", "least_privilege", "sandbox", "egress", "privileged_admin", "financial_action"],
+      "text": "Tools that can touch the filesystem, shell, databases, external APIs, identity, or money should run with least privilege under constrained service accounts, with outbound network access allowlisted. Privileged or financial actions warrant four-eyes human approval."
+    },
+    {
+      "id": "nsa-supply-chain",
+      "title": "Track MCP dependency health and patch history",
+      "tags": ["mcp", "dependency", "supply_chain", "vulnerability", "unmaintained", "version"],
+      "text": "Maintain an inventory of MCP server dependencies with versions and patch history. Unmaintained, archived, or unversioned MCP servers are a supply-chain risk and should be pinned to maintained releases and re-validated before use."
+    },
+    {
+      "id": "nsa-audit",
+      "title": "Log security telemetry for every tool call",
+      "tags": ["mcp", "audit", "logging", "observability", "evidence"],
+      "text": "Record the exact tool id, a hash of parameters, the caller identity, the allow/deny decision and reason, the output hash, and the trace id for every invocation, so that agent behavior can be reconstructed during an investigation."
+    }
+  ]
+}

@@ -31,6 +31,7 @@ from .artifacts import build_ai_bom, build_approval_card, build_passport
 from .decisioning import DecisionResult, decide
 from .discovery import run_discovery
 from .evidence_log import EvidenceLog, build_bundle
+from .grounding import get_grounding_for_policy
 from .policy import propose_policy
 from .scoring import compute_score
 from .validation_suite import run_validation_suite
@@ -74,7 +75,10 @@ def onboard(
         log.emit("onboarding.discovery.completed", discovery.summary, discovery,
                  actor_id="discovery_agent")
 
-        policy = propose_policy(manifest, discovery, policy_pack, grounding_refs)
+        refs = grounding_refs if grounding_refs is not None else get_grounding_for_policy(
+            manifest, discovery
+        )
+        policy = propose_policy(manifest, discovery, policy_pack, refs)
         log.emit(
             "onboarding.policy.proposed",
             f"Proposed {len(policy.approval_rules)} approval rule(s); "
