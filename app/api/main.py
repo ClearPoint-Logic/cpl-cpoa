@@ -21,7 +21,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import agent_discovery, engine
+from cpoa.services import agent_discovery, engine, manage
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -376,3 +376,38 @@ def discovery_scan(body: dict | None = None, request: Request = None) -> dict:
             "services) when pointed at a customer environment."
         ),
     }
+
+
+# --- Manage phase (the HR Console) ------------------------------------------
+# Day-to-day lifecycle actions on onboarded agents. Each action appends a real
+# hash-chained evidence event to the agent's management log.
+
+_ALLOWED_ACTIONS = {"place_on_leave", "return_from_leave", "manager_handoff", "role_change"}
+
+
+@app.get("/api/workforce/{candidate_id}/state", dependencies=[Depends(require_auth)])
+def get_workforce_state(candidate_id: str) -> dict:
+    """Return the current lifecycle state + event log for one agent."""
+    return manage.get_state(candidate_id).to_dict()
+
+
+@app.post("/api/workforce/{candidate_id}/action", dependencies=[Depends(require_auth)])
+def apply_workforce_action(candidate_id: str, body: dict) -> dict:
+    """Apply a lifecycle action (place_on_leave / return_from_leave /
+    manager_handoff / role_change) to an onboarded agent. Appends a
+    hash-chained evidence event; returns the new state and the event."""
+    action = body.get("action")
+    if action not in _ALLOWED_ACTIONS:
+        raise HTTPException(status_code=422, detail=f"action must be one of {sorted(_ALLOWED_ACTIONS)}")
+    payload = body.get("payload") or {}
+    actor_id = body.get("actor_id") or "hr.console@clearpointlogic.com"
+    try:
+        return manage.apply_action(candidate_id, action, payload, actor_id=actor_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/workforce/states", dependencies=[Depends(require_auth)])
+def list_workforce_states() -> list[dict]:
+    """Return every agent currently tracked by the HR Console."""
+    return manage.list_states()

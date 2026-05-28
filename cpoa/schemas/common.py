@@ -99,9 +99,12 @@ PromptStorage = Literal["not_included", "included_fixture", "external_reference"
 RecommendedDecision = Literal["approve", "approve_with_conditions", "deny"]
 
 # --- Evidence (§11.8) -------------------------------------------------------
-SignatureType = Literal["demo_stub", "sigstore", "none"]
+# local_hmac: HMAC-SHA256 with a per-deployment secret (CPOA_SIGNING_SECRET).
+# kms: Cloud KMS asymmetric signing over the canonical event hash.
+SignatureType = Literal["demo_stub", "sigstore", "local_hmac", "kms", "none"]
 ActorType = Literal["agent", "human", "system"]
 EventType = Literal[
+    # Onboarding (intake → decision)
     "onboarding.intake.received",
     "onboarding.input.validated",
     "onboarding.discovery.completed",
@@ -112,4 +115,9 @@ EventType = Literal[
     "onboarding.evidence.bundle.exported",
     "onboarding.decision.issued",
     "onboarding.error.fail_closed",
+    # Manage (HR Console lifecycle actions)
+    "manage.placed_on_leave",
+    "manage.returned_from_leave",
+    "manage.ownership_transferred",
+    "manage.scope_updated",
 ]

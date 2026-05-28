@@ -20,6 +20,40 @@ export interface DiscoveryScanResult {
   scope: string;
 }
 
+// Manage phase — HR Console lifecycle state
+export type LifecycleStatus = "active" | "on_leave" | "returning";
+export type LifecycleAction =
+  | "place_on_leave"
+  | "return_from_leave"
+  | "manager_handoff"
+  | "role_change";
+
+export interface LifecycleEvent {
+  event_id: string;
+  event_type: string;
+  event_hash: string;
+  previous_event_hash: string | null;
+  summary: string;
+  timestamp: string;
+  actor: { type: string; id: string };
+  signature?: { type: string; value: string };
+}
+
+export interface LifecycleState {
+  candidate_agent_id: string;
+  status: LifecycleStatus;
+  owner_email: string | null;
+  notes: string;
+  updated_at: string;
+  event_log: LifecycleEvent[];
+  last_event_hash: string | null;
+}
+
+export interface LifecycleActionResult {
+  state: LifecycleState;
+  event: LifecycleEvent;
+}
+
 export interface FixtureCard {
   name: string;
   agent_name: string;
