@@ -12,7 +12,7 @@ const LIFECYCLE = [
   { phase: "Discover", icon: "radar", href: "/workforce", note: "Real HTTPS crawl of A2A Agent Cards; surface unmanaged shadow IT" },
   { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
   { phase: "Manage", icon: "groups", href: "/workforce", note: "HR Console: place on leave, manager handoff, role change" },
-  { phase: "Govern", icon: "policy", href: "/govern", note: "Compass: live control mapping to NSA / NIST / EU AI Act" },
+  { phase: "Govern", icon: "policy", href: "/compliance", note: "Compliance: live control mapping to NSA / NIST / EU AI Act" },
   { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Sentinel: fleet health + deterministic anomaly rules" },
   { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },
 ];
@@ -115,7 +115,7 @@ export default function Home() {
             { k: "&lt; 5 ms", v: "Deterministic decision latency per onboarding run (CLI; sub-second incl. live Gemini narration)" },
             { k: "8 / 8", v: "Pre-Boarding fixtures decide correctly across 8 production-shaped risk archetypes" },
             { k: "5", v: "Fail-closed pre-employment-screening checks (OV-001..005)" },
-            { k: "29", v: "Live regulatory-citation resolutions in Compass (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
+            { k: "29", v: "Live regulatory-citation resolutions in the Compliance matrix (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
             { k: "19 / 19", v: "NSA MCP security baseline tests pass (auth, RBAC, integrity, replay, output filter, audit)" },
             { k: "186", v: "Total tests across unit, integration, evals, and security" },
             { k: "90 %", v: "Code coverage on the gate core (cpoa/services + agents + mcp_servers + app/api)" },

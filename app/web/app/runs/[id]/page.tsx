@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import type { Run } from "@/lib/types";
+import type { LifecyclePhase, LifecycleState, Run } from "@/lib/types";
 import { DecisionBadge } from "@/components/DecisionBadge";
+import { useCompass } from "@/components/Compass";
 
 // Tab labels use HR/workforce vocabulary; the canonical technical name appears in
 // the section title inside the tab so both judges and reviewers see them.
@@ -34,13 +35,18 @@ const EVENT_LABEL: Record<string, string> = {
   "onboarding.evidence.bundle.exported": "Personnel file sealed — hash-chained evidence bundle",
   "onboarding.error.fail_closed": "Fail-closed — pipeline error routed to Blocked",
   // Manage (HR Console)
+  "manage.activated": "Manage — activated into the managed roster",
   "manage.placed_on_leave": "Placed on leave",
   "manage.returned_from_leave": "Returned from leave",
   "manage.ownership_transferred": "Manager handoff",
   "manage.scope_updated": "Role change — scope updated",
+  // Govern
+  "govern.controls_attested": "Govern — controls attested against frameworks",
   // Operate (Sentinel)
   "operate.anomaly_detected": "Anomaly detected — performance issue",
-  "operate.performance_reviewed": "Performance review",
+  "operate.performance_reviewed": "Operate — performance reviewed",
+  // Optimize
+  "optimize.development_plan_accepted": "Optimize — development plan accepted",
 };
 function eventLabel(t: string): string {
   return EVENT_LABEL[t] ?? t
@@ -48,6 +54,21 @@ function eventLabel(t: string): string {
     .replace(/[._]/g, " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
 }
+
+// Post-onboarding lifecycle phases, in order. Advancing each appends a signed,
+// hash-chained event to the personnel file (same chain as the HR Console).
+const LIFECYCLE_PHASES: { phase: LifecyclePhase; label: string; blurb: string; icon: string }[] = [
+  { phase: "manage", label: "Manage", blurb: "Activate into the managed roster — HR Console controls available.", icon: "groups" },
+  { phase: "govern", label: "Govern", blurb: "Attest enforced controls against NSA / NIST / EU AI Act.", icon: "policy" },
+  { phase: "operate", label: "Operate", blurb: "Review fleet performance and Sentinel anomaly signals.", icon: "monitor_heart" },
+  { phase: "optimize", label: "Optimize", blurb: "Accept the autonomy-ladder development plan.", icon: "trending_up" },
+];
+const PHASE_EVENT_TYPE: Record<LifecyclePhase, string> = {
+  manage: "manage.activated",
+  govern: "govern.controls_attested",
+  operate: "operate.performance_reviewed",
+  optimize: "optimize.development_plan_accepted",
+};
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -70,30 +91,66 @@ function Raw({ obj }: { obj: unknown }) {
 }
 
 export default function RunPage({ params }: { params: { id: string } }) {
+  const { openCompass } = useCompass();
   const [run, setRun] = useState<Run | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("Passport");
-  const [live, setLive] = useState<string | null>(null);
-  const [narrating, setNarrating] = useState(false);
-
-  async function narrate() {
-    setNarrating(true);
-    try {
-      const r = await api.narrate(params.id);
-      setLive(r.narrative);
-    } catch (e) {
-      setLive(`(live narration unavailable on this deployment: ${String(e)})`);
-    } finally {
-      setNarrating(false);
-    }
-  }
+  const [lifecycle, setLifecycle] = useState<LifecycleState | null>(null);
+  const [lifecycleErr, setLifecycleErr] = useState<string | null>(null);
+  const [advancing, setAdvancing] = useState(false);
 
   useEffect(() => {
     api.getRun(params.id).then(setRun).catch((e) => setError(String(e)));
   }, [params.id]);
 
+  // Load the post-onboarding lifecycle state once the run (and its candidate id) is known.
+  useEffect(() => {
+    if (!run) return;
+    let cancelled = false;
+    api
+      .getLifecycleState(run.candidate_agent_id)
+      .then((s) => !cancelled && setLifecycle(s))
+      .catch((e) => !cancelled && setLifecycleErr(String(e)));
+    return () => {
+      cancelled = true;
+    };
+  }, [run]);
+
+  async function advanceOne(phase: LifecyclePhase) {
+    if (!run || advancing) return;
+    setAdvancing(true);
+    setLifecycleErr(null);
+    try {
+      const r = await api.advanceLifecycle(run.candidate_agent_id, phase);
+      setLifecycle(r.state);
+    } catch (e) {
+      setLifecycleErr(String(e));
+    } finally {
+      setAdvancing(false);
+    }
+  }
+
+  async function runAllPhases() {
+    if (!run || advancing) return;
+    setAdvancing(true);
+    setLifecycleErr(null);
+    try {
+      const r = await api.runFullLifecycle(run.candidate_agent_id);
+      setLifecycle(r.state);
+    } catch (e) {
+      setLifecycleErr(String(e));
+    } finally {
+      setAdvancing(false);
+    }
+  }
+
   if (error) return <p role="alert" className="text-decision-blocked">Could not load run: {error}</p>;
   if (!run) return <p className="text-slate-500">Loading run…</p>;
+
+  const doneTypes = new Set((lifecycle?.event_log ?? []).map((e) => e.event_type));
+  const isPhaseDone = (phase: LifecyclePhase) => doneTypes.has(PHASE_EVENT_TYPE[phase]);
+  const nextPhase = LIFECYCLE_PHASES.find((ph) => !isPhaseDone(ph.phase))?.phase ?? null;
+  const allPhasesDone = nextPhase === null;
 
   const p = run.passport;
   const pol = run.policy;
@@ -138,6 +195,89 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   </div>
                 </li>
               ))}
+            </ol>
+          </section>
+
+          {/* 2.5 Lifecycle continuation — advance past onboarding through the full lifecycle */}
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="font-heading text-lg font-semibold">Lifecycle continuation</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Onboarding is the first phase. Advance {run.agent_name} through the rest of the
+                  workforce lifecycle — each step appends a signed, hash-chained event to the personnel file.
+                </p>
+              </div>
+              {allPhasesDone ? (
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-decision-ready/10 px-3 py-2 text-xs font-semibold text-decision-ready">
+                  <span className="material-symbols-outlined text-[16px]">task_alt</span> Lifecycle complete
+                </span>
+              ) : (
+                <button
+                  onClick={runAllPhases}
+                  disabled={advancing}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-[16px]">fast_forward</span>
+                  {advancing ? "Running…" : "Run full lifecycle"}
+                </button>
+              )}
+            </div>
+
+            {lifecycleErr && (
+              <p className="mt-2 text-xs text-decision-blocked">Lifecycle service error: {lifecycleErr}</p>
+            )}
+
+            <ol className="mt-4 space-y-2">
+              {LIFECYCLE_PHASES.map((ph) => {
+                const done = isPhaseDone(ph.phase);
+                const isNext = ph.phase === nextPhase;
+                const evt = lifecycle?.event_log.find((e) => e.event_type === PHASE_EVENT_TYPE[ph.phase]);
+                return (
+                  <li
+                    key={ph.phase}
+                    className={`flex items-start gap-3 rounded-lg border p-3 ${
+                      done
+                        ? "border-decision-ready/30 bg-decision-ready/5"
+                        : isNext
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-slate-200 bg-slate-50/60"
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
+                        done
+                          ? "bg-decision-ready/15 text-decision-ready"
+                          : isNext
+                            ? "bg-primary/15 text-primary"
+                            : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">{done ? "check" : ph.icon}</span>
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-heading text-sm font-semibold text-cpl-charcoal">{ph.label}</h3>
+                        {done && <span className="text-[10px] font-semibold uppercase tracking-wider text-decision-ready">Attested</span>}
+                        {isNext && <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Next</span>}
+                      </div>
+                      <p className="text-xs text-slate-500">{evt ? evt.summary : ph.blurb}</p>
+                      {evt && (
+                        <p className="mt-0.5 font-mono text-[10px] text-slate-400">{evt.event_hash.slice(7, 21)}…</p>
+                      )}
+                    </div>
+                    {isNext && (
+                      <button
+                        onClick={() => advanceOne(ph.phase)}
+                        disabled={advancing}
+                        className="shrink-0 rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+                      >
+                        Advance
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ol>
           </section>
 
@@ -311,21 +451,22 @@ export default function RunPage({ params }: { params: { id: string } }) {
               <p className="mt-2 text-xs text-slate-500">Grounded: {run.narrative.grounded_sources.join("; ")}</p>
             ) : null}
             <button
-              onClick={narrate}
-              disabled={narrating}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+              onClick={() =>
+                openCompass(
+                  {
+                    run_id: run.run_id,
+                    candidate_id: run.candidate_agent_id,
+                    agent_name: run.agent_name,
+                    page: "run",
+                  },
+                  "Explain this onboarding decision in plain language — the score, any blockers or conditions, and what I should do next.",
+                )
+              }
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5"
             >
-              <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-              {narrating ? "Asking Gemini…" : "Explain with Gemini (live)"}
+              <span className="material-symbols-outlined text-[16px]">explore</span>
+              Ask Compass
             </button>
-            {live && (
-              <div className="mt-3 rounded-lg bg-primary/5 p-3">
-                <div className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                  <span className="material-symbols-outlined text-[12px]">spark</span> Gemini · live (Vertex AI)
-                </div>
-                <p className="text-slate-700">{live}</p>
-              </div>
-            )}
           </div>
         </aside>
       </div>
