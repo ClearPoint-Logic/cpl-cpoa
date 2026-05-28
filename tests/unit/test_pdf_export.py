@@ -18,11 +18,24 @@ def test_ascii_helper_handles_none() -> None:
     assert _ascii(None) == ""
 
 
-def test_ascii_helper_replaces_non_latin1() -> None:
-    # A character outside latin-1 (e.g., em dash) becomes "?" — that's the contract
-    result = _ascii("café — résumé")
-    assert "?" in result or "—" in result  # fpdf can't render em dash; replace is fine
-    assert "caf" in result
+def test_ascii_helper_normalizes_common_punctuation() -> None:
+    """Codex L2: Unicode punctuation we transliterate to ASCII *before* the
+    latin-1 fallback, so judges' copy-pasted content with em-dashes / smart
+    quotes / ellipses renders cleanly instead of '?' placeholders."""
+    result = _ascii("café — résumé “quoted” it’s 1…2…3")
+    assert "?" not in result, f"no '?' placeholders expected, got: {result!r}"
+    assert "café" in result and "résumé" in result  # latin-1 accents survive
+    assert "-" in result  # em-dash -> ASCII hyphen
+    assert '"quoted"' in result  # curly quotes -> straight
+    assert "it's" in result  # right single quote -> apostrophe
+    assert "1...2...3" in result  # ellipsis -> three dots
+
+
+def test_ascii_helper_still_replaces_truly_non_latin_scripts() -> None:
+    """Non-Latin scripts (CJK, Cyrillic, emoji) still fall through to '?' —
+    the punctuation map only covers Western punctuation we can transliterate."""
+    result = _ascii("привет 你好 🎉")
+    assert "?" in result  # latin-1 can't encode these, replace is fine
 
 
 @pytest.mark.parametrize("fixture_name", list_fixture_names())
