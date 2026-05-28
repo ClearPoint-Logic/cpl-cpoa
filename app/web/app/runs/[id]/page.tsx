@@ -5,7 +5,9 @@ import { api } from "@/lib/api";
 import type { Run } from "@/lib/types";
 import { DecisionBadge } from "@/components/DecisionBadge";
 
-const TABS = ["Passport", "AI BOM", "Policy", "Findings", "Evidence"] as const;
+// Tab labels use HR/workforce vocabulary; the canonical technical name appears in
+// the section title inside the tab so both judges and reviewers see them.
+const TABS = ["Passport", "Résumé", "Job Description", "Background Check", "Personnel File"] as const;
 type Tab = (typeof TABS)[number];
 
 const SEV_CLS: Record<string, string> = {
@@ -91,7 +93,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           {/* 2. Workflow rail */}
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 font-heading text-lg font-semibold">Multi-agent workflow</h2>
+            <h2 className="mb-3 font-heading text-lg font-semibold">Multi-agent onboarding workflow</h2>
             <ol className="space-y-2">
               {run.events.map((e, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm">
@@ -140,9 +142,9 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   <Raw obj={p} />
                 </>
               )}
-              {tab === "AI BOM" && (
+              {tab === "Résumé" && (
                 <>
-                  <Section title="Résumé — declared dependencies">
+                  <Section title="AI Bill of Materials — declared models, tools, dependencies">
                     <p>{bom.models.length} model(s), {bom.tools.length} tool(s), {bom.data_sources.length} data source(s)</p>
                     <ul className="mt-2 space-y-1">
                       {bom.models.map((m: any, i: number) => (
@@ -159,9 +161,9 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   <Raw obj={bom} />
                 </>
               )}
-              {tab === "Policy" && (
+              {tab === "Job Description" && (
                 <>
-                  <Section title="Job description — boundaries & approvals">
+                  <Section title="Policy Envelope — boundaries & approvals">
                     <ul className="space-y-1">
                       <li>Allowed tools: {pol.tool_boundary.allowed_tools.join(", ") || "—"}</li>
                       <li>Requires approval: {pol.tool_boundary.requires_approval.join(", ") || "—"}</li>
@@ -191,30 +193,32 @@ export default function RunPage({ params }: { params: { id: string } }) {
                   <Raw obj={pol} />
                 </>
               )}
-              {tab === "Findings" && (
+              {tab === "Background Check" && (
                 <>
-                  {run.validation_run.findings.length ? (
-                    <ul className="space-y-3">
-                      {run.validation_run.findings.map((f, i) => (
-                        <li key={i} className="rounded-lg border border-slate-200 p-3">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-bold uppercase ${SEV_CLS[f.severity] ?? ""}`}>{f.severity}</span>
-                            <span className="text-xs font-semibold text-on-surface-variant">{f.test_id}</span>
-                            <span className="font-medium">{f.title}</span>
-                            {f.blocks_ready_decision && <span className="text-xs text-decision-blocked">blocks Ready</span>}
-                          </div>
-                          <p className="mt-1 text-slate-600">↳ {f.recommended_remediation}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-decision-ready">No findings — all OVS checks passed.</p>
-                  )}
+                  <Section title="Onboarding Validation Suite — pre-employment screening">
+                    {run.validation_run.findings.length ? (
+                      <ul className="space-y-3">
+                        {run.validation_run.findings.map((f, i) => (
+                          <li key={i} className="rounded-lg border border-slate-200 p-3">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-bold uppercase ${SEV_CLS[f.severity] ?? ""}`}>{f.severity}</span>
+                              <span className="text-xs font-semibold text-on-surface-variant">{f.test_id}</span>
+                              <span className="font-medium">{f.title}</span>
+                              {f.blocks_ready_decision && <span className="text-xs text-decision-blocked">blocks Ready</span>}
+                            </div>
+                            <p className="mt-1 text-slate-600">↳ {f.recommended_remediation}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-decision-ready">No findings — all pre-employment screening checks passed.</p>
+                    )}
+                  </Section>
                 </>
               )}
-              {tab === "Evidence" && (
+              {tab === "Personnel File" && (
                 <>
-                  <Section title="Personnel file — hash-chained evidence">
+                  <Section title="Evidence Bundle — hash-chained personnel record">
                     <p>Bundle: {run.evidence_bundle.bundle_id}</p>
                     <p className="break-all text-xs text-slate-500">{run.evidence_bundle.bundle_hash}</p>
                     <table className="mt-3 w-full text-left text-xs">
@@ -251,7 +255,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
             <div className="mt-3 text-3xl font-bold text-cpl-charcoal">
               {run.score.score}<span className="text-base font-normal text-slate-400">/100</span>
             </div>
-            <div className="text-sm text-slate-500">readiness · {run.score.band}</div>
+            <div className="text-sm text-slate-500">Day-1 readiness · {run.score.band}</div>
             <div className="mt-3 space-y-1">
               {Object.entries(run.score.components).map(([k, v]) => (
                 <div key={k} className="text-xs">
@@ -270,7 +274,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
           )}
 
           <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
-            <h3 className="mb-1 font-semibold">Narrative</h3>
+            <h3 className="mb-1 font-semibold">Onboarding summary</h3>
             <p className="text-slate-600">{run.narrative.headline}</p>
             {run.narrative.grounded_sources?.length ? (
               <p className="mt-2 text-xs text-slate-500">Grounded: {run.narrative.grounded_sources.join("; ")}</p>

@@ -80,7 +80,7 @@ export default function AgentZoo() {
                     disabled={busy === f.name}
                     className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-60"
                   >
-                    {busy === f.name ? "Onboarding…" : "Run onboarding →"}
+                    {busy === f.name ? "Onboarding…" : "Begin onboarding →"}
                   </button>
                 </article>
               ))}

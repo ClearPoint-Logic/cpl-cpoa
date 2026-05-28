@@ -16,11 +16,13 @@
 2. **Home** shows the workforce frame (passport / job description / résumé / personnel file) and
    the Google platform stack.
 3. **Pre-Boarding** → run **`safe_research_agent`** → **Ready** (score 100; clean evidence bundle).
-4. Run **`prompt_injected_mcp_agent`** → **Blocked** — see the OV-004 prompt-injection finding, the
-   quarantined tool in the Policy tab, and the grounded NSA MCP source citation; fail-closed.
+4. Run **`prompt_injected_mcp_agent`** → **Blocked** — see the OV-004 prompt-injection finding in
+   the **Background Check** tab, the quarantined tool in the **Job Description** tab, and the
+   grounded NSA MCP source citation; fail-closed.
 5. Run **`healthcare_phi_support_agent`** → **Ready with Conditions** (regulated-data controls).
-6. On any run: open the **artifact tabs** (Passport / AI BOM / Policy / Findings / Evidence) and
-   **download** the evidence bundle (JSON / Markdown / PDF).
+6. On any run: open the **artifact tabs** — **Passport** (ID badge), **Résumé** (AI BOM),
+   **Job Description** (Policy Envelope), **Background Check** (Validation findings),
+   **Personnel File** (Evidence Bundle) — and **download** the bundle (JSON / Markdown / PDF).
 7. **Architecture** and **Judge Access** pages summarize the Google platform mapping and the
    honest-scope limitations.
 
