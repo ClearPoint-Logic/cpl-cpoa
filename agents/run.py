@@ -72,3 +72,66 @@ def run_adk_onboarding(manifest_dict: dict, model: str | None = None) -> str:  #
         + json.dumps(manifest_dict)
     )
     return asyncio.run(_run_agent_async(build_root_agent(model or fast_model()), message))
+
+
+async def _run_sequential_async(agent, message: str) -> dict:  # pragma: no cover
+    """Walk the SequentialAgent end-to-end; return the ordered sub-agent transcript + final state."""
+    from google.adk.runners import InMemoryRunner
+    from google.genai import types
+
+    runner = InMemoryRunner(agent=agent, app_name="cpoa")
+    session = await runner.session_service.create_session(app_name="cpoa", user_id="judge")
+    content = types.Content(role="user", parts=[types.Part(text=message)])
+    transcript: list[dict] = []
+    async for event in runner.run_async(user_id="judge", session_id=session.id,
+                                         new_message=content):
+        author = getattr(event, "author", None) or "unknown"
+        text_parts: list[str] = []
+        tool_calls: list[str] = []
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if getattr(part, "text", None):
+                    text_parts.append(part.text)
+                if getattr(part, "function_call", None):
+                    tool_calls.append(part.function_call.name)
+                if getattr(part, "function_response", None):
+                    tool_calls.append(f"{part.function_response.name}:result")
+        if text_parts or tool_calls:
+            transcript.append({
+                "subagent": author,
+                "text": " ".join(text_parts).strip() if text_parts else "",
+                "tool_calls": tool_calls,
+            })
+    final_session = await runner.session_service.get_session(
+        app_name="cpoa", user_id="judge", session_id=session.id
+    )
+    final_state = dict(final_session.state) if final_session and final_session.state else {}
+    # Pull just the keyed sub-agent outputs (not internal scratch keys)
+    keyed = {
+        k: v for k, v in final_state.items()
+        if k in {"discovery_report", "policy_envelope", "validation_run",
+                 "artifacts", "evidence_bundle"}
+    }
+    return {"transcript": transcript, "final_state": keyed}
+
+
+def run_sequential_adk_onboarding(manifest_dict: dict, model: str | None = None) -> dict:  # pragma: no cover
+    """Run the explicit six-subagent SequentialAgent over the manifest; return the
+    ordered subagent transcript + accumulated state.
+
+    This exercises the real ADK multi-agent path — each sub-agent makes its own
+    Gemini call and emits its keyed output. The decision remains deterministic
+    (each sub-agent's tool calls into the deterministic engine functions); ADK
+    is the orchestrator, not the decider.
+    """
+    if not llm_available():
+        raise RuntimeError("Gemini/Vertex not configured (GOOGLE_GENAI_USE_VERTEXAI + project).")
+    from agents.onboarding_orchestrator.agent import build_sequential_orchestrator
+
+    agent = build_sequential_orchestrator(model or fast_model())
+    message = (
+        "Onboard this candidate agent step-by-step through the six-subagent pipeline. "
+        "Each subagent must call its tool with the prior subagent's output from session "
+        "state. Candidate manifest:\n" + json.dumps(manifest_dict)
+    )
+    return asyncio.run(_run_sequential_async(agent, message))

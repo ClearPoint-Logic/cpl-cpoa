@@ -23,14 +23,31 @@ _AUTH_TOKEN = os.environ.get("CPOA_MCP_AUTH_TOKEN")
 # no token configured runs open for convenience (documented in JUDGE_RUNBOOK).
 _REQUIRE_AUTH = bool(_AUTH_TOKEN) and os.environ.get("CPOA_MCP_REQUIRE_AUTH", "true").lower() == "true"
 
+# Codex audit C3: bind caller_role to the auth_token at the server side rather
+# than trusting the caller-supplied claim. The deployed deployment configures
+# one token + one role; a future multi-tenant deployment would replace this
+# with a JWT/IAM-derived role.
+_AUTH_ROLE = os.environ.get("CPOA_MCP_AUTH_ROLE", "service")
+
 gateway = SecureGateway(auth_token=_AUTH_TOKEN, require_auth=_REQUIRE_AUTH)
 
 
 def _context(payload: dict, auth_token: str | None, caller_role: str,
              nonce: str | None, trace_id: str | None, session_id: str | None) -> SecurityContext:
+    """Build the SecurityContext for a tool invocation.
+
+    Role binding (NSA-baseline RBAC, Codex C3):
+    - When the server has an auth token configured (deployed mode), the role
+      is **server-side derived** from CPOA_MCP_AUTH_ROLE and the caller's
+      ``caller_role`` argument is ignored — preventing a caller from
+      claiming a role tied to a token that doesn't grant it.
+    - When no token is configured (local stdio dev), the caller's role is
+      accepted for back-compat with the per-control unit tests.
+    """
+    effective_role = _AUTH_ROLE if _AUTH_TOKEN else (caller_role or "service")
     return SecurityContext(
         auth_token=auth_token,
-        caller_role=caller_role or "service",
+        caller_role=effective_role,
         trace_id=trace_id or f"trace-{uuid.uuid4().hex[:12]}",
         session_id=session_id or f"session-{uuid.uuid4().hex[:12]}",
         nonce=nonce or uuid.uuid4().hex,

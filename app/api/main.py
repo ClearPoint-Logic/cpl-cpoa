@@ -148,6 +148,61 @@ def get_fixture(name: str) -> dict:
         raise HTTPException(status_code=404, detail=f"fixture not found: {name}") from exc
 
 
+@app.post("/api/runs/adk", dependencies=[Depends(require_auth)])
+def create_run_via_adk(body: dict) -> dict:
+    """Run onboarding via the explicit six-subagent ADK SequentialAgent.
+
+    This is the multi-agent path the README + DEVPOST claim. Each sub-agent
+    (discovery → policy → validation → artifacts → evidence → explanation)
+    makes its own Gemini call and reports its keyed output. The decision
+    remains deterministic — each sub-agent's tool calls into the engine
+    functions; ADK is the conductor, not the decider.
+
+    Slow (~10-30s incl. Gemini latency per sub-agent). The default `/api/runs`
+    endpoint is the fast deterministic path; this one proves the ADK live
+    multi-agent execution exists end-to-end.
+    """
+    if "fixture" in body:
+        try:
+            manifest = load_manifest_by_name(body["fixture"])
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail="fixture not found") from exc
+    elif "candidate_manifest" in body:
+        try:
+            manifest = CandidateAgentManifest(**body["candidate_manifest"])
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=422, detail=f"invalid manifest: {exc}") from exc
+    else:
+        raise HTTPException(status_code=422, detail="provide 'fixture' or 'candidate_manifest'")
+
+    if not llm_available():
+        raise HTTPException(
+            status_code=503,
+            detail="ADK live path requires Vertex AI; set GOOGLE_GENAI_USE_VERTEXAI=TRUE.",
+        )
+
+    with span("onboarding_adk", candidate=manifest.candidate_agent_id) as s:
+        from agents.run import run_sequential_adk_onboarding
+
+        try:
+            adk_result = run_sequential_adk_onboarding(manifest.model_dump())
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=502, detail=f"ADK execution failed: {exc}") from exc
+        if s is not None:
+            s.set_attribute("subagent_turns", len(adk_result.get("transcript", [])))
+    return {
+        "candidate_agent_id": manifest.candidate_agent_id,
+        "agent_name": manifest.name,
+        "orchestrator": "adk_sequential",
+        "subagents": [
+            "discovery_agent", "policy_agent", "validation_agent",
+            "artifact_agent", "evidence_agent", "explanation_agent",
+        ],
+        "transcript": adk_result["transcript"],
+        "final_state": adk_result["final_state"],
+    }
+
+
 @app.post("/api/runs", dependencies=[Depends(require_auth)])
 def create_run(body: dict) -> dict:
     """Run onboarding for a fixture name or an inline candidate manifest."""
