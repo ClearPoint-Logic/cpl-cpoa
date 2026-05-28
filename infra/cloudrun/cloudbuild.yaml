@@ -1,0 +1,19 @@
+# Generic Cloud Build: build one image from a chosen Dockerfile (amd64) and push.
+# Substitutions: _IMAGE, _DOCKERFILE, _API_BASE (only used by the web image).
+substitutions:
+  _IMAGE: ""
+  _DOCKERFILE: ""
+  _API_BASE: ""
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        ARGS=""
+        if [ -n "$_API_BASE" ]; then ARGS="--build-arg CPOA_API_BASE=$_API_BASE"; fi
+        docker build -f "$_DOCKERFILE" $ARGS -t "$_IMAGE" .
+images:
+  - "${_IMAGE}"
+options:
+  logging: CLOUD_LOGGING_ONLY
