@@ -13,7 +13,7 @@ and challenge judges through an approved access path (private-repo allowlist or 
 - The **Passport Readiness Score** (demo-only; flagged `not_production_cas_or_ecs: true`).
 - `demo_stub` evidence signatures (clearly labeled non-production).
 - A grounded corpus assembled **only** from public sources (NSA MCP CSI, NIST AI RMF subset, EU AI
-  Act selected articles) plus CPOA's own demo content, with per-excerpt attribution.
+  Act selected articles) plus CWA's own demo content, with per-excerpt attribution.
 - ADK agent code, the secure MCP server, Stitch design exports, eval harness, deployment config.
 
 ## What this repo MUST NOT contain (protected)

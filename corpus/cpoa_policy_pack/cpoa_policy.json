@@ -1,6 +1,6 @@
 {
   "source_id": "cpoa-policy-pack",
-  "source_title": "ClearPoint Onboarding Agent — Demo Policy Pack & Workforce Frame",
+  "source_title": "ClearPoint Workforce Agent — Demo Policy Pack & Workforce Frame",
   "source_url": "internal challenge artifact (demo-safe)",
   "license": "ClearPoint Logic — challenge demo content",
   "note": "CPOA's own demo policy guidance; demo-safe, not production CAS/ECS or Anchor policy.",

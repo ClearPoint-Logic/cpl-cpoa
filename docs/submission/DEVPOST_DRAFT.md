@@ -1,4 +1,4 @@
-# Devpost Submission — ClearPoint Onboarding Agent
+# Devpost Submission — ClearPoint Workforce Agent
 
 **Track:** Track 1 — Build (Net-New Agents)
 **Tagline:** AI Workforce Management — the first six phases of the lifecycle shipped end-to-end on Google's agent platform (ADK, Gemini on Vertex AI, MCP, Vertex AI Search, A2A, Firestore, Cloud Trace, Cloud Run). Discover, Onboard, Manage, Govern, Operate, Optimize — every layer running on real signals from one hash-chained personnel file.
@@ -21,17 +21,17 @@ ladder.
 
 Google's Gemini Enterprise Agent Platform (April 2026) ships **Agent Registry**, **Agent
 Identity**, **Agent Gateway**, dynamic **AI Bill of Materials**, and **Agent Anomaly Detection**
-as platform primitives. CPOA is **not** a competing platform — it is the workforce/HR
-**application layer** that consumes those primitives. The platform gives you the registry; **CPOA
+as platform primitives. CWA is **not** a competing platform — it is the workforce/HR
+**application layer** that consumes those primitives. The platform gives you the registry; **CWA
 is the HR department that decides who gets hired into it** — and the management surface that
 operates the workforce afterwards. The terms *Agent Passport*, *AIBOM*, and *Evidence Bundle* are
 now widely used (Cubitrek v0.1, ERC-8004, the open `agent-passport-system` library); what makes
-CPOA distinct is the **workforce framing applied to the whole lifecycle**, with deterministic
+CWA distinct is the **workforce framing applied to the whole lifecycle**, with deterministic
 ceremony and a single continuous personnel file.
 
 ## What it does
 
-CPOA inspects candidate AI agents (ADK / Gemini Enterprise / MCP / registry-style manifests),
+CWA inspects candidate AI agents (ADK / Gemini Enterprise / MCP / registry-style manifests),
 shepherds them through onboarding, then manages, governs, monitors, and grows them:
 
 **Onboard — the gate that produces the personnel file**
@@ -52,7 +52,7 @@ deterministic reasoning and Gemini-authored narrative.
   Pre-Boarding."
 - **Manage (HR Console)** — Place on Leave, Return, Manager Handoff, Role Change. Every action
   writes a real hash-chained evidence event into the agent's personnel file.
-- **Govern (Compass)** — Live control matrix: every CPOA control mapped to specific NSA MCP CSI /
+- **Govern (Compass)** — Live control matrix: every CWA control mapped to specific NSA MCP CSI /
   NIST AI RMF / EU AI Act passages, resolved live against the grounding corpus.
 - **Operate (Sentinel)** — Fleet health with deterministic anomaly rules
   (BLOCKER-AT-INTAKE, STALE-LEAVE, HIGH-AUTONOMY-HIGH-RISK, MULTI-CONDITION-AGENT). Anomalies
@@ -168,7 +168,7 @@ Tailwind (Material 3) · FastAPI · Pydantic v2.
 
 ## Honest scope
 
-CPOA is newly created during the contest period and meets the contest's net-new requirement.
+CWA is newly created during the contest period and meets the contest's net-new requirement.
 What stays caveat-worthy in any production:
 
 - **Synthetic candidate fixtures.** We don't have customer agents on the Pre-Boarding roster yet.

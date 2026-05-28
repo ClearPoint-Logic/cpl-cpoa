@@ -1,6 +1,6 @@
-# ClearPoint Onboarding Agent
+# ClearPoint Workforce Agent
 
-**AI Workforce Management — the first six phases shipped end-to-end on Google's agent platform.** ClearPoint Onboarding Agent (CPOA) hires AI agents the way enterprises hire humans, then keeps managing them: discover the unmanaged ones running in your environment, onboard them through a deterministic gate, manage their day-to-day lifecycle, govern them against the public regulatory frameworks, monitor them in production, and grow them along an explicit autonomy ladder.
+**AI Workforce Management — the first six phases shipped end-to-end on Google's agent platform.** ClearPoint Workforce Agent (CWA) hires AI agents the way enterprises hire humans, then keeps managing them: discover the unmanaged ones running in your environment, onboard them through a deterministic gate, manage their day-to-day lifecycle, govern them against the public regulatory frameworks, monitor them in production, and grow them along an explicit autonomy ladder.
 
 > **Google for Startups AI Agents Challenge — Track 1: Build (Net-New Agents)**
 
@@ -17,7 +17,7 @@ Every enterprise has a hiring process for humans: an identity check, a job descr
 qualifications, a hiring manager, and a personnel file. AI agents are joining the workforce — and
 most organizations have **no equivalent process** for them.
 
-CPOA gives every new agent the same structured intake **before it does any work**, and then keeps
+CWA gives every new agent the same structured intake **before it does any work**, and then keeps
 managing them across the rest of the lifecycle:
 
 | Human onboarding | AI-agent equivalent | Artifact issued |
@@ -90,8 +90,8 @@ For a 200-agent fleet through the gate over a typical month:
 
 Google's Gemini Enterprise Agent Platform (April 2026) ships **Agent Registry**, **Agent
 Identity**, **Agent Gateway**, dynamic **AI Bill of Materials**, and **Agent Anomaly Detection**
-as platform primitives. CPOA is the workforce/HR **application layer** that consumes those
-primitives. The platform gives you the registry; **CPOA is the HR department that decides who
+as platform primitives. CWA is the workforce/HR **application layer** that consumes those
+primitives. The platform gives you the registry; **CWA is the HR department that decides who
 gets hired into it** — and the management surface that operates the workforce afterwards.
 
 ## What ships in this repository
@@ -110,7 +110,7 @@ gets hired into it** — and the management surface that operates the workforce 
   `/api/demo-fleet/<name>/.well-known/agent.json` so the scan exercises real network paths
 - An **HR Console** with real lifecycle actions (place on leave / return / manager handoff /
   role change) — every action lands an evidence event
-- A live **control-mapping matrix** (Compass) — every CPOA control mapped to specific NSA /
+- A live **control-mapping matrix** (Compass) — every CWA control mapped to specific NSA /
   NIST / EU AI Act passages, resolved live against the grounding corpus
 - A **fleet-health Sentinel** with deterministic anomaly rules — derives live signals from
   onboarding outcomes and the HR Console event log
@@ -123,7 +123,7 @@ gets hired into it** — and the management surface that operates the workforce 
 
 ## Honest scope
 
-CPOA is **newly created during the contest period** and meets the contest's net-new requirement.
+CWA is **newly created during the contest period** and meets the contest's net-new requirement.
 What stays caveat-worthy in any production:
 
 - **Synthetic candidate fixtures.** We don't have customer agents on the Pre-Boarding roster yet.

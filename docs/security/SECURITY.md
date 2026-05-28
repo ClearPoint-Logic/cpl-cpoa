@@ -1,8 +1,8 @@
-# Security Policy — ClearPoint Onboarding Agent
+# Security Policy — ClearPoint Workforce Agent
 
 ## Reporting a vulnerability
 
-If you have discovered a security issue in CPOA, please **do not file a public
+If you have discovered a security issue in CWA, please **do not file a public
 issue.** Email **security@clearpointlogic.com** with:
 
 - A description of the issue and its impact.
@@ -29,7 +29,7 @@ The full threat model lives at [`THREAT_MODEL.md`](THREAT_MODEL.md).
 
 ## Defense in depth — what's enforced today
 
-CPOA layers controls so a single failure does not compromise the system.
+CWA layers controls so a single failure does not compromise the system.
 
 ### Network + transport
 

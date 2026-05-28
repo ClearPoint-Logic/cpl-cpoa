@@ -3,7 +3,7 @@ import { Nav } from "@/components/Nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ClearPoint Onboarding Agent — AI Workforce Management",
+  title: "ClearPoint Workforce Agent — AI Workforce Management",
   description:
     "The AI Workforce Management onboarding gate. Built on Google's agent platform — ADK, Gemini on Vertex AI, MCP, Vertex AI Search, Cloud Run, A2A — to hire AI agents the way enterprises hire humans.",
 };

@@ -1,4 +1,4 @@
-# Architecture — ClearPoint Onboarding Agent
+# Architecture — ClearPoint Workforce Agent
 
 AI Workforce Management — the first six phases of the lifecycle shipped end-to-end on Google's
 agent platform. The onboarding decision is **deterministic** (score, caps, blockers, final
@@ -70,7 +70,7 @@ A single ungrounded model call gives a generic answer. The grounded multi-agent 
 specific public guidance (NSA MCP CSI, NIST AI RMF, EU AI Act) and attaches `grounding_refs` to
 the policy envelope and findings — demonstrated side-by-side via `/api/grounding-comparison`
 and the `grounding_required_policy_agent` fixture. The Compass page (`/govern`) renders the
-**reverse mapping** — every CPOA control to specific corpus passages — resolved live so a
+**reverse mapping** — every CWA control to specific corpus passages — resolved live so a
 corpus update flows into the matrix on next request.
 
 ## Integrity claim — defensible by construction

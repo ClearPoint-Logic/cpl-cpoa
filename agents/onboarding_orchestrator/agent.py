@@ -30,7 +30,7 @@ def build_root_agent(model: str | None = None) -> LlmAgent:
     return LlmAgent(
         name="onboarding_orchestrator",
         model=model or fast_model(),
-        description="ClearPoint Onboarding Agent — safely onboards AI agents into the workforce.",
+        description="ClearPoint Workforce Agent — safely onboards AI agents into the workforce.",
         instruction=prompts.ROOT_INSTRUCTION,
         tools=[adk_tools.onboard_candidate_agent, adk_tools.lookup_grounding],
     )

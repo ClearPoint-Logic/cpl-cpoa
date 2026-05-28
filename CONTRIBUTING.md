@@ -1,4 +1,4 @@
-# Contributing to ClearPoint Onboarding Agent
+# Contributing to ClearPoint Workforce Agent
 
 Thanks for considering a contribution. This document captures the conventions
 the repo follows so changes land cleanly.
