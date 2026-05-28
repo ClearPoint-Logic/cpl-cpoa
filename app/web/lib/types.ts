@@ -54,6 +54,76 @@ export interface LifecycleActionResult {
   event: LifecycleEvent;
 }
 
+// Lifecycle continuation — advancing through the post-onboarding phases.
+export type LifecyclePhase = "manage" | "govern" | "operate" | "optimize";
+
+export interface LifecycleAdvanceResult {
+  state: LifecycleState;
+  event: LifecycleEvent;
+  phase: LifecyclePhase;
+}
+
+export interface RunLifecycleResult {
+  state: LifecycleState;
+  events: (LifecycleEvent & { phase: LifecyclePhase })[];
+}
+
+// Compass — in-platform advisor (advise + act on confirm).
+export interface CompassCitation {
+  source_id: string;
+  title: string;
+  snippet?: string;
+}
+
+export interface CompassAction {
+  id: string;
+  kind: "navigate" | "advance_lifecycle" | "ask";
+  label: string;
+  description?: string;
+  href?: string; // navigate
+  candidate_id?: string; // advance_lifecycle
+  prompt?: string; // ask
+  confirm?: boolean; // requires an explicit confirm step
+}
+
+export interface CompassAnswer {
+  answer: string;
+  source: "gemini" | "deterministic";
+  citations: CompassCitation[];
+  suggested_actions: CompassAction[];
+}
+
+export interface CompassContextPayload {
+  run_id?: string;
+  candidate_id?: string;
+  page?: string;
+  agent_name?: string;
+}
+
+// Operate (Sentinel) fleet snapshot — surfaced to Compass's Agent View.
+export interface FleetMember {
+  candidate_agent_id: string;
+  name: string;
+  status: string;
+  risk_tier: string;
+  readiness_score: number;
+  onboarding_decision: string;
+  open_findings: number;
+  anomalies: Array<{ rule_id: string; severity: string; summary: string }>;
+}
+
+export interface FleetSnapshot {
+  summary: {
+    agents: number;
+    active: number;
+    on_leave: number;
+    agents_with_anomalies: number;
+    total_anomalies: number;
+    by_risk_tier: Record<string, number>;
+  };
+  members: FleetMember[];
+}
+
 export interface FixtureCard {
   name: string;
   agent_name: string;

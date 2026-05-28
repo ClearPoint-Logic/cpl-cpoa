@@ -1,10 +1,16 @@
 import type {
+  CompassAnswer,
+  CompassContextPayload,
   DiscoveryScanResult,
   FixtureCard,
+  FleetSnapshot,
   LifecycleAction,
   LifecycleActionResult,
+  LifecycleAdvanceResult,
+  LifecyclePhase,
   LifecycleState,
   Run,
+  RunLifecycleResult,
 } from "./types";
 
 // Relative paths; next.config rewrites /api/* to the FastAPI backend (dev + deploy).
@@ -49,4 +55,25 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, payload, actor_id: actorId }),
     }),
+  // Lifecycle continuation
+  advanceLifecycle: (candidateId: string, phase: LifecyclePhase) =>
+    j<LifecycleAdvanceResult>(`/api/workforce/${encodeURIComponent(candidateId)}/advance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phase }),
+    }),
+  runFullLifecycle: (candidateId: string) =>
+    j<RunLifecycleResult>(`/api/workforce/${encodeURIComponent(candidateId)}/run-lifecycle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    }),
+  // Compass advisor + Sentinel feed
+  askCompass: (message: string, context?: CompassContextPayload) =>
+    j<CompassAnswer>("/api/compass/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, context: context ?? {} }),
+    }),
+  operateFleet: () => j<FleetSnapshot>("/api/operate/fleet"),
 };
