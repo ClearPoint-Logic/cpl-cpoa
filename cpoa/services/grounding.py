@@ -123,13 +123,19 @@ def get_grounding_for_policy(
 
     Uses the env-configured retriever (Vertex AI Search when
     ``CPOA_GROUNDING_MODE=vertex_ai_search``); falls back to the local
-    corpus retriever otherwise.
+    corpus retriever if a single retrieve() call raises so a transient
+    Discovery Engine outage cannot 500 the onboarding API.
     """
     retriever = retriever or get_retriever()
+    fallback = _default_retriever()
     refs: dict[str, GroundingRef] = {}
 
     def add(query: str, tags: list[str], k: int = 1) -> None:
-        for r in retriever.retrieve(query, k=k, tags=tags):
+        try:
+            results = retriever.retrieve(query, k=k, tags=tags)
+        except Exception:  # noqa: BLE001 — degrade to local, don't 500 the gate
+            results = fallback.retrieve(query, k=k, tags=tags)
+        for r in results:
             refs.setdefault(r.source_id, r)
 
     add("accountable owner roles and governance", ["owner", "accountability", "governance"])
