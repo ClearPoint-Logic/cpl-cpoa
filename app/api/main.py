@@ -21,7 +21,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import agent_discovery, engine, govern, manage
+from cpoa.services import agent_discovery, engine, govern, manage, operate, optimize
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -421,3 +421,40 @@ def govern_controls() -> dict:
     """Live control matrix: each enforced control mapped to NSA MCP CSI /
     NIST AI RMF / EU AI Act passages from the grounding corpus."""
     return govern.control_matrix()
+
+
+# --- Operate phase (Sentinel runtime monitoring) ----------------------------
+
+
+@app.get("/api/operate/fleet", dependencies=[Depends(require_auth)])
+def operate_fleet() -> dict:
+    """Fleet health snapshot: real signals from onboarding + Manage events,
+    deterministic anomaly detection across the active roster."""
+    snapshot = operate.assess_fleet()
+    # assess_fleet returns a list with a single envelope today; flatten.
+    return snapshot[0] if snapshot else {"summary": {}, "members": []}
+
+
+@app.post("/api/operate/{candidate_id}/anomaly", dependencies=[Depends(require_auth)])
+def operate_record_anomaly(candidate_id: str, body: dict) -> dict:
+    """Record an anomaly into the agent's hash-chained personnel file.
+
+    Body: ``{ rule_id, severity, summary }``.
+    """
+    rule_id = body.get("rule_id")
+    severity = body.get("severity", "medium")
+    summary = body.get("summary")
+    if not rule_id or not summary:
+        raise HTTPException(status_code=422, detail="rule_id and summary are required")
+    return operate.record_anomaly(candidate_id, rule_id, severity, summary,
+                                  actor_id=body.get("actor_id", "sentinel@clearpointlogic.com"))
+
+
+# --- Optimize phase (Talent Development) ------------------------------------
+
+
+@app.get("/api/optimize/plans", dependencies=[Depends(require_auth)])
+def optimize_plans() -> dict:
+    """Per-agent development plans: open conditions become development items,
+    autonomy ladder rungs become promotion targets."""
+    return optimize.development_plans()
