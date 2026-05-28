@@ -5,6 +5,8 @@ substitutions:
   _IMAGE: ""
   _DOCKERFILE: ""
   _API_BASE: ""
+  _JUDGE_USER: ""
+  _JUDGE_PASS: ""
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
@@ -13,6 +15,10 @@ steps:
       - ${_DOCKERFILE}
       - --build-arg
       - CPOA_API_BASE=${_API_BASE}
+      - --build-arg
+      - CPOA_JUDGE_BASIC_AUTH_USER=${_JUDGE_USER}
+      - --build-arg
+      - CPOA_JUDGE_BASIC_AUTH_PASS=${_JUDGE_PASS}
       - -t
       - ${_IMAGE}
       - .

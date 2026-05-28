@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ClearPoint | Enterprise Workforce</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime&amp;family=Inter:wght@400;600&amp;family=Lexend:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-primary": "#b3c5ff",
+                      "on-secondary-fixed": "#151c21",
+                      "surface-charcoal": "#1F262B",
+                      "on-secondary-fixed-variant": "#41484d",
+                      "on-error-container": "#93000a",
+                      "status-blocked": "#EF4444",
+                      "on-secondary-container": "#5e656b",
+                      "surface": "#f7fafb",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#007d88",
+                      "primary-fixed": "#dbe1ff",
+                      "on-surface-variant": "#424655",
+                      "outline": "#737687",
+                      "on-primary-container": "#f6f5ff",
+                      "surface-container": "#ebeeef",
+                      "error": "#ba1a1a",
+                      "status-warning": "#F59E0B",
+                      "secondary-container": "#dce3ea",
+                      "tertiary-fixed": "#8ef2ff",
+                      "on-primary-fixed": "#00184a",
+                      "on-background": "#181c1d",
+                      "surface-dim": "#d7dadb",
+                      "aqua-accent": "#43CFDF",
+                      "primary-fixed-dim": "#b3c5ff",
+                      "inverse-surface": "#2d3132",
+                      "primary": "#004ecb",
+                      "on-surface": "#181c1d",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-high": "#e6e9ea",
+                      "secondary-fixed": "#dce3ea",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed-dim": "#c0c7ce",
+                      "on-primary-fixed-variant": "#003fa5",
+                      "secondary": "#585f65",
+                      "surface-container-low": "#f1f4f5",
+                      "on-tertiary-container": "#e2fbff",
+                      "surface-container-highest": "#e0e3e4",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "outline-variant": "#c2c6d8",
+                      "surface-tint": "#0054d7",
+                      "background": "#f7fafb",
+                      "status-ready": "#10B981",
+                      "on-tertiary-fixed": "#001f23",
+                      "tertiary": "#00626b",
+                      "tertiary-fixed-dim": "#4fd8e8",
+                      "surface-bright": "#f7fafb",
+                      "surface-variant": "#e0e3e4",
+                      "inverse-on-surface": "#eef1f2",
+                      "primary-container": "#0b65fc",
+                      "on-tertiary-fixed-variant": "#004f56"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "workflow-rail-height": "80px",
+                      "sidebar-width": "320px",
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "margin-desktop": "32px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "code-sm": [
+                              "Courier Prime"
+                      ],
+                      "headline-md": [
+                              "Lexend"
+                      ],
+                      "headline-xl": [
+                              "Lexend"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Lexend"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface shadow-sm docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center h-workflow-rail-height px-margin-desktop w-full max-w-full">
+<div class="flex items-center gap-6">
+<!-- Brand Logo -->
+<div class="font-headline-md text-headline-md font-semibold text-primary tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+                    ClearPoint
+                </div>
+<!-- Navigation Links (Desktop) -->
+<nav class="hidden md:flex gap-8 ml-8 h-full">
+<a class="text-primary border-b-2 border-primary font-semibold flex items-center h-full" href="#">
+<span class="font-label-md text-label-md">Landing</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors flex items-center h-full hover:bg-secondary-container/50 px-3" href="#">
+<span class="font-label-md text-label-md">Agent Zoo</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors flex items-center h-full hover:bg-secondary-container/50 px-3" href="#">
+<span class="font-label-md text-label-md">My Runs</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors flex items-center h-full hover:bg-secondary-container/50 px-3" href="#">
+<span class="font-label-md text-label-md">Architecture</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors flex items-center h-full hover:bg-secondary-container/50 px-3" href="#">
+<span class="font-label-md text-label-md">Judge Access</span>
+</a>
+</nav>
+</div>
+<!-- Right Side Actions -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-full transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container overflow-hidden">
+<img alt="User Profile Avatar" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr_lt6PAShtHxOmz85KPIBy8vp7UiCkIESahiq9M_LJMCYUmvxhp_GhiQ7jgwXK6mAa_6nkk4tmHOw-8pxA9360kjOpvqqGZ7Q6wecBAlO0h3HB2xyaEYpBSVfSGJq98gU7Dtg04pmaYiYbNdXYQj8OyM4D20gGDqARZNd3Hm-ukJYfCT6mw47wRE4Oii4bD8HS5KHonEnXuYoG7tmEuBHQ-YGDU2Hk50RaskEymGtdOpoJPw6cpdZ6RU6vsldhGvXCJb_aCVY-CI"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex flex-col">
+<!-- Hero Section: The Workforce Parallel -->
+<section class="w-full px-margin-mobile md:px-margin-desktop py-12 md:py-24 bg-surface-container-low border-b border-outline-variant/30 relative overflow-hidden">
+<!-- Decorative Background Grid -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, black 1px, transparent 0); background-size: 32px 32px;"></div>
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-gutter items-center relative z-10">
+<!-- Left: Typography & Intent -->
+<div class="flex flex-col gap-6 max-w-2xl">
+<div class="inline-flex items-center gap-2 bg-primary-container/20 text-primary px-3 py-1 rounded-full w-fit">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="font-label-md text-label-md tracking-wider">ENTERPRISE READINESS</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-background">
+                        Hire Agents. <br/>
+<span class="text-primary">Don't Just Deploy Code.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                        Move beyond ephemeral scripts. ClearPoint introduces a high-trust, regulatory-ready platform where AI assets are onboarded, audited, and managed like your most critical human workforce.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-4">
+<button class="bg-primary text-on-primary hover:bg-on-primary-fixed-variant transition-colors px-6 py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                            Start Onboarding
+                        </button>
+<button class="bg-transparent border border-outline hover:bg-surface-container transition-colors text-on-surface px-6 py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+                            View Compliance Framework
+                        </button>
+</div>
+</div>
+<!-- Right: Bento Grid Parallelism -->
+<div class="grid grid-cols-2 gap-4 mt-8 lg:mt-0">
+<!-- Human Parallel -->
+<div class="col-span-1 flex flex-col gap-4">
+<div class="text-center font-label-md text-label-md text-secondary tracking-widest uppercase mb-2">Human Parallel</div>
+<!-- ID Card -->
+<div class="bg-surface rounded-lg shadow-sm p-4 border border-outline-variant/30 flex items-center gap-4 opacity-70 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+<div class="h-12 w-12 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">badge</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Employee ID</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Identity Verified</div>
+</div>
+</div>
+<!-- Job Description -->
+<div class="bg-surface rounded-lg shadow-sm p-4 border border-outline-variant/30 flex items-center gap-4 opacity-70 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+<div class="h-12 w-12 rounded bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">assignment</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Job Description</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Scope Defined</div>
+</div>
+</div>
+</div>
+<!-- AI Agent Parallel -->
+<div class="col-span-1 flex flex-col gap-4">
+<div class="text-center font-label-md text-label-md text-primary tracking-widest uppercase mb-2">Agent Equivalent</div>
+<!-- AI Passport -->
+<div class="bg-surface rounded-lg shadow-md p-4 border-l-4 border-l-primary border-t border-r border-b border-outline-variant/30 flex items-center gap-4 relative overflow-hidden group hover:shadow-lg transition-all cursor-pointer">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="h-12 w-12 rounded-full bg-primary-container flex items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-primary">smart_toy</span>
+</div>
+<div class="relative z-10">
+<div class="font-label-md text-label-md text-on-surface">Agent Passport</div>
+<div class="font-body-sm text-body-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Ready
+                                </div>
+</div>
+</div>
+<!-- Policy Envelope -->
+<div class="bg-surface rounded-lg shadow-md p-4 border border-outline-variant/30 flex items-center gap-4 relative overflow-hidden group hover:shadow-lg transition-all cursor-pointer">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="h-12 w-12 rounded bg-tertiary-container/20 flex items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-tertiary">gavel</span>
+</div>
+<div class="relative z-10">
+<div class="font-label-md text-label-md text-on-surface">Policy Envelope</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Boundaries Set</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-dim w-full py-4 mt-auto border-t border-outline-variant/30">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-4 max-w-7xl mx-auto w-full">
+<div class="font-body-sm text-body-sm text-secondary">
+                © 2024 ClearPoint Gemini Enterprise. All Rights Reserved. Audit-Ready Clearance Level 4.
+            </div>
+<div class="flex gap-6">
+<a class="font-body-sm text-body-sm text-secondary-fixed-variant hover:text-primary hover:underline transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-secondary-fixed-variant hover:text-primary hover:underline transition-colors" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-secondary-fixed-variant hover:text-primary hover:underline transition-colors" href="#">Compliance Artifacts</a>
+</div>
+</div>
+</footer>
+</body></html>

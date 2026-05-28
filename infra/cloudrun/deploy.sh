@@ -21,9 +21,10 @@ echo "== Artifact Registry =="
 gcloud artifacts repositories create "${REPO}" --repository-format=docker \
   --location="${REGION}" -q 2>/dev/null || true
 
-submit() { # image dockerfile [api_base]
-  gcloud builds submit --config "${CB}" \
-    --substitutions=_IMAGE="$1",_DOCKERFILE="$2",_API_BASE="${3:-}" -q .
+submit() { # image dockerfile [api_base]  (judge creds baked only for the web build)
+  local subs="_IMAGE=$1,_DOCKERFILE=$2,_API_BASE=${3:-}"
+  if [ -n "${3:-}" ]; then subs="$subs,_JUDGE_USER=${JUDGE_USER},_JUDGE_PASS=${JUDGE_PASS}"; fi
+  gcloud builds submit --config "${CB}" --substitutions="$subs" -q .
 }
 
 echo "== Build + deploy MCP (private) =="
