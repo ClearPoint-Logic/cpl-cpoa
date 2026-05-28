@@ -61,6 +61,12 @@ class EvidenceLog:
         return event
 
 
+def new_bundle_id(candidate_agent_id: str) -> str:
+    """Predictable bundle id factory — callers that need to stamp the id into the
+    approval_card before hashing the bundle must use this so the hash recomputes."""
+    return f"bundle-{candidate_agent_id}-{uuid.uuid4().hex[:8]}"
+
+
 def build_bundle(
     decision: Decision,
     passport: AgentPassport,
@@ -70,9 +76,19 @@ def build_bundle(
     validation_run: ValidationRun,
     approval_card: ApprovalCard,
     events: list[EvidenceEvent],
+    *,
+    bundle_id: str | None = None,
 ) -> EvidenceBundle:
+    """Assemble + hash the personnel-file bundle.
+
+    Pass ``bundle_id`` when the caller has already stamped that id onto a
+    field that is *inside* the bundle (e.g. ``approval_card.evidence_bundle_id``);
+    otherwise a fresh id is minted here. The computed ``bundle_hash`` is
+    over the canonical-JSON serialization of the final bundle — verifiable
+    by any consumer that runs ``compute_bundle_hash`` against the same payload.
+    """
     bundle = EvidenceBundle(
-        bundle_id=f"bundle-{passport.candidate_agent_id}-{uuid.uuid4().hex[:8]}",
+        bundle_id=bundle_id or new_bundle_id(passport.candidate_agent_id),
         candidate_agent_id=passport.candidate_agent_id,
         decision=decision,
         passport=passport,

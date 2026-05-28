@@ -116,11 +116,18 @@ def onboard(
              "conditions": decision_result.conditions},
         )
 
+        # Stamp the bundle_id onto the approval_card BEFORE hashing the bundle.
+        # The approval_card is a field inside the bundle, so any post-hash mutation
+        # would invalidate compute_bundle_hash(bundle).
+        from cpoa.services.evidence_log import new_bundle_id
+        bundle_id = new_bundle_id(passport.candidate_agent_id)
+        approval_card.evidence_bundle_id = bundle_id
+
         bundle = build_bundle(
             decision_result.decision, passport, ai_bom, policy, score, validation_run,
             approval_card, list(log.events),
+            bundle_id=bundle_id,
         )
-        approval_card.evidence_bundle_id = bundle.bundle_id
         log.emit("onboarding.evidence.bundle.exported",
                  f"Exported evidence bundle {bundle.bundle_id}.",
                  {"bundle_id": bundle.bundle_id, "bundle_hash": bundle.bundle_hash})

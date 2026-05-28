@@ -21,8 +21,8 @@ export default function Judge() {
       <div>
         <h1 className="font-heading text-2xl font-semibold">Judge access &amp; testing</h1>
         <p className="text-on-surface-variant">
-          Everything needed to evaluate the AI Workforce Management onboarding gate in under four
-          minutes.
+          Everything needed to evaluate the AI Workforce Management onboarding gate in three
+          minutes. The accompanying demo video runs to a hard 2-minute cap.
         </p>
       </div>
 

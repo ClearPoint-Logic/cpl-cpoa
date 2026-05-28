@@ -6,9 +6,10 @@
 
 ## Hosted access
 - **Judge UI:** [https://cpoa.clearpointlogic.com](https://cpoa.clearpointlogic.com)
-- **Login (HTTP basic auth):** `judge` / `MLcdaYGa9XcHihAu`
-- **API (direct):** behind the same hostname; identical basic-auth credentials
-- **A2A Agent Card:** `/.well-known/agent.json` (open for discovery)
+- **Login (HTTP basic auth):** credentials provided privately in the Devpost
+  submission's testing-instructions field (not committed to this public repo).
+- **API (direct):** behind the same hostname; identical basic-auth credentials.
+- **A2A Agent Card:** `/.well-known/agent.json` (open for discovery — no auth required).
 - No CLI required — every fixture runs from the **Pre-Boarding** roster.
 
 ## 3-minute evaluation path
