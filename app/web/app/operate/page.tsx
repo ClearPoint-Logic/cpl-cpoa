@@ -64,7 +64,7 @@ export default function Operate() {
         <div>
           <h1 className="font-heading text-2xl font-semibold">Operate</h1>
           <p className="text-on-surface-variant">
-            The Operate phase of the AI Workforce Management lifecycle — continuous
+            The Operate phase of the AI Workforce Management lifecycle: continuous
             performance management across the active roster, powered by the{" "}
             <strong className="text-on-surface">Sentinel</strong> monitoring engine
             running behind the scenes. Real signals from each agent&apos;s onboarding

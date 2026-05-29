@@ -53,16 +53,16 @@ function greeting(ctx: CompassContextPayload): Msg {
       role: "compass",
       source: "deterministic",
       text:
-        `Hi — I'm **Compass**. I'm looking at ${ctx.agent_name ? `**${ctx.agent_name}**` : "this onboarding run"}. ` +
-        "Ask me to explain the decision, a finding, or what to do next — and I can advance this agent through its lifecycle for you.",
+        `Hi, I'm **Compass**. I'm looking at ${ctx.agent_name ? `**${ctx.agent_name}**` : "this onboarding run"}. ` +
+        "Ask me to explain the decision, a finding, or what to do next, and I can advance this agent through its lifecycle for you.",
     };
   }
   return {
     role: "compass",
     source: "deterministic",
     text:
-      "Hi — I'm **Compass**, your in-platform advisor. Ask me about an agent, a decision, or the " +
-      "six-phase lifecycle. I can also take actions for you — always with a confirmation step.",
+      "Hi, I'm **Compass**, your in-platform advisor. Ask me about an agent, a decision, or the " +
+      "six-phase lifecycle. I can also take actions for you, always with a confirmation step.",
     actions: [
       { id: "preboard", kind: "navigate", label: "Go to Pre-Boarding", href: "/agents" },
       { id: "capabilities", kind: "ask", label: "What can Compass do?", prompt: "What can you help me do on this platform?" },
@@ -169,7 +169,7 @@ function CompassPanel({
       try {
         const r = await api.runFullLifecycle(a.candidate_id);
         const body = r.events.length
-          ? r.events.map((e) => `- **${PHASE_LABEL[e.phase]}** — ${e.summary}`).join("\n")
+          ? r.events.map((e) => `- **${PHASE_LABEL[e.phase]}**: ${e.summary}`).join("\n")
           : "All lifecycle phases were already attested on this agent.";
         setMessages((m) => [
           ...m,
@@ -434,7 +434,7 @@ function AgentView({
         agents have open signals.
       </div>
       {flagged.length === 0 ? (
-        <p className="text-sm text-decision-ready">No anomalies across the roster — all agents within policy.</p>
+        <p className="text-sm text-decision-ready">No anomalies across the roster. All agents within policy.</p>
       ) : (
         flagged.map((m) => (
           <div

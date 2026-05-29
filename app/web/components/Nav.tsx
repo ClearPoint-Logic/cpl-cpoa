@@ -171,7 +171,7 @@ function resetLabel(phase: ResetPhase): { icon: string; text: string; tone: stri
     case "done":
       return { icon: "check_circle", text: "Demo reset", tone: "text-status-ready" };
     case "error":
-      return { icon: "error", text: "Reset failed — try again", tone: "text-status-blocked" };
+      return { icon: "error", text: "Reset failed. Try again", tone: "text-status-blocked" };
     default:
       return {
         icon: "restart_alt",

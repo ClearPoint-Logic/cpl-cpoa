@@ -24,7 +24,7 @@ export default function Grounding() {
         <p className="text-on-surface-variant">
           The same candidate, explained two ways. A single ungrounded model call gives a generic
           answer; the grounded multi-agent path cites specific public sources (NSA MCP CSI, NIST AI
-          RMF, EU AI Act) — the multi-agent value made visible (FR-084).
+          RMF, EU AI Act), the multi-agent value made visible (FR-084).
         </p>
       </div>
 
@@ -35,7 +35,7 @@ export default function Grounding() {
         <div className="grid gap-6 md:grid-cols-2">
           <section className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-5">
             <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
-              Ungrounded — single model call
+              Ungrounded: single model call
             </h2>
             <p className="text-sm text-on-surface-variant">{data.ungrounded.explanation}</p>
             <p className="mt-4 text-xs italic text-on-surface-variant">No sources cited.</p>
@@ -43,14 +43,14 @@ export default function Grounding() {
 
           <section className="rounded-xl border-2 border-primary/30 bg-surface-container-lowest p-5">
             <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-hover">
-              Grounded — multi-agent
+              Grounded: multi-agent
             </h2>
             <p className="text-sm text-on-surface">{data.grounded.explanation}</p>
             <ul className="mt-4 space-y-1 border-t border-outline-variant/30 pt-3 text-xs text-on-surface-variant">
               {data.grounded.grounding_refs.map((g) => (
                 <li key={g.source_id} title={g.snippet}>
                   <span className="font-semibold text-on-surface">{g.source_id}</span>
-                  {g.source_title ? <> — {g.source_title}</> : null}
+                  {g.source_title ? <> · {g.source_title}</> : null}
                 </li>
               ))}
             </ul>

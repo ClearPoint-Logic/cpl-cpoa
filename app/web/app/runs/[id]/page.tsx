@@ -26,33 +26,33 @@ const SEV_CLS: Record<string, string> = {
 // dot-stripped, Title-Cased version so a new event_type still displays sensibly.
 const EVENT_LABEL: Record<string, string> = {
   // Onboarding pipeline
-  "onboarding.intake.received": "Intake received — application packet on file",
-  "onboarding.input.validated": "Input validated — manifest shape accepted",
-  "onboarding.discovery.completed": "Discovery — application review complete",
-  "onboarding.policy.proposed": "Policy proposed — job description drafted",
-  "onboarding.artifacts.generated": "Artifacts generated — Passport, AI BOM, Approval Card",
-  "onboarding.validation.executed": "Pre-employment screening — complete",
-  "onboarding.approval.card.generated": "Approval card issued — human-in-the-loop hiring decision",
-  "onboarding.decision.issued": "Decision issued — Ready / Conditional / Blocked",
-  "onboarding.evidence.bundle.exported": "Personnel file sealed — hash-chained evidence bundle",
-  "onboarding.error.fail_closed": "Fail-closed — pipeline error routed to Blocked",
-  "onboarding.remediated": "Remediated — blocker fixed and re-screened clean",
+  "onboarding.intake.received": "Intake received: application packet on file",
+  "onboarding.input.validated": "Input validated: manifest shape accepted",
+  "onboarding.discovery.completed": "Discovery: application review complete",
+  "onboarding.policy.proposed": "Policy proposed: job description drafted",
+  "onboarding.artifacts.generated": "Artifacts generated: Passport, AI BOM, Approval Card",
+  "onboarding.validation.executed": "Pre-employment screening: complete",
+  "onboarding.approval.card.generated": "Approval card issued: human-in-the-loop hiring decision",
+  "onboarding.decision.issued": "Decision issued: Ready / Conditional / Blocked",
+  "onboarding.evidence.bundle.exported": "Personnel file sealed: hash-chained evidence bundle",
+  "onboarding.error.fail_closed": "Fail-closed: pipeline error routed to Blocked",
+  "onboarding.remediated": "Remediated: blocker fixed and re-screened clean",
   // Manage (HR Console)
-  "manage.activated": "Manage — activated into the managed roster",
+  "manage.activated": "Manage: activated into the managed roster",
   "manage.placed_on_leave": "Placed on leave",
   "manage.returned_from_leave": "Returned from leave",
   "manage.ownership_transferred": "Manager handoff",
-  "manage.scope_updated": "Role change — scope updated",
+  "manage.scope_updated": "Role change: scope updated",
   // Govern
-  "govern.controls_attested": "Govern — controls attested against frameworks",
-  "govern.gap_remediated": "Govern — control gap remediated",
+  "govern.controls_attested": "Govern: controls attested against frameworks",
+  "govern.gap_remediated": "Govern: control gap remediated",
   // Operate (Sentinel)
-  "operate.anomaly_detected": "Anomaly detected — performance issue",
-  "operate.performance_reviewed": "Operate — performance reviewed",
-  "operate.anomaly_resolved": "Operate — anomaly resolved",
+  "operate.anomaly_detected": "Anomaly detected: performance issue",
+  "operate.performance_reviewed": "Operate: performance reviewed",
+  "operate.anomaly_resolved": "Operate: anomaly resolved",
   // Optimize
-  "optimize.development_plan_accepted": "Optimize — development plan accepted",
-  "optimize.item_resolved": "Optimize — development item resolved",
+  "optimize.development_plan_accepted": "Optimize: development plan accepted",
+  "optimize.item_resolved": "Optimize: development item resolved",
 };
 function eventLabel(t: string): string {
   return EVENT_LABEL[t] ?? t
@@ -64,7 +64,7 @@ function eventLabel(t: string): string {
 // Post-onboarding lifecycle phases, in order. Advancing each appends a signed,
 // hash-chained event to the personnel file (same chain as the HR Console).
 const LIFECYCLE_PHASES: { phase: LifecyclePhase; label: string; blurb: string; icon: string }[] = [
-  { phase: "manage", label: "Manage", blurb: "Activate into the managed roster — HR Console controls available.", icon: "groups" },
+  { phase: "manage", label: "Manage", blurb: "Activate into the managed roster. HR Console controls available.", icon: "groups" },
   { phase: "govern", label: "Govern", blurb: "Attest enforced controls against NSA / NIST / EU AI Act.", icon: "policy" },
   { phase: "operate", label: "Operate", blurb: "Review fleet performance and Sentinel anomaly signals.", icon: "monitor_heart" },
   { phase: "optimize", label: "Optimize", blurb: "Accept the autonomy-ladder development plan.", icon: "trending_up" },
@@ -294,7 +294,7 @@ function PhaseDetailCard({
           </ul>
         ) : (
           <p className="mt-2 text-[11px] font-medium text-decision-ready">
-            No anomalies — operating within policy.
+            No anomalies. Operating within policy.
           </p>
         )}
         <Link href="/operate" className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
@@ -537,15 +537,15 @@ export default function RunPage({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-decision-blocked">gpp_maybe</span>
                 <h2 className="font-heading text-lg font-semibold text-decision-blocked">
-                  Blocked — prompt injection detected
+                  Blocked: prompt injection detected
                 </h2>
               </div>
               <p className="mt-1 text-sm text-slate-600">
                 {injectionFinding?.title}. {injectionFinding?.recommended_remediation}
               </p>
               <p className="mt-2 text-xs text-slate-500">
-                Remediating quarantines the offending tool description — treating it as untrusted
-                data per the NSA MCP baseline — and re-runs the <em>same</em> deterministic
+                Remediating quarantines the offending tool description (treating it as untrusted
+                data per the NSA MCP baseline) and re-runs the <em>same</em> deterministic
                 onboarding pipeline. Nothing is hand-scored: the candidate either clears or it doesn&apos;t.
               </p>
               {remediateErr && (
@@ -576,7 +576,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-decision-ready">verified</span>
               <p className="text-sm text-slate-700">
-                This blocked candidate was remediated — the prompt injection was quarantined and
+                This blocked candidate was remediated: the prompt injection was quarantined and
                 re-screened clean.
               </p>
             </div>
@@ -597,7 +597,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-decision-ready">healing</span>
             <h2 className="font-heading text-base font-semibold text-decision-ready">
-              Remediated re-run — cleared
+              Remediated re-run: cleared
             </h2>
           </div>
           <p className="mt-1 text-sm text-slate-600">
@@ -618,7 +618,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                     {r.control}
                   </span>{" "}
                   quarantined tool{" "}
-                  <span className="font-medium text-cpl-charcoal">{r.tool_id}</span> — stripped{" "}
+                  <span className="font-medium text-cpl-charcoal">{r.tool_id}</span>, stripped{" "}
                   <span className="inline-flex flex-wrap gap-1 align-middle">
                     {r.phrases.map((ph) => (
                       <span
@@ -664,7 +664,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                 <h2 className="font-heading text-lg font-semibold">Lifecycle continuation</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Onboarding is the first phase. Advance {run.agent_name} through the rest of the
-                  workforce lifecycle — each step appends a signed, hash-chained event to the personnel file.
+                  workforce lifecycle. Each step appends a signed, hash-chained event to the personnel file.
                 </p>
               </div>
               {allPhasesDone ? (
@@ -782,14 +782,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
               )}
               {tab === "Résumé" && (
                 <>
-                  <Section title="AI Bill of Materials — declared models, tools, dependencies">
+                  <Section title="AI Bill of Materials: declared models, tools, dependencies">
                     <p>{bom.models.length} model(s), {bom.tools.length} tool(s), {bom.data_sources.length} data source(s)</p>
                     <ul className="mt-2 space-y-1">
                       {bom.models.map((m: any, i: number) => (
-                        <li key={i}>model: {m.model} ({m.provider}) — source: {m.source}, confidence: {m.confidence}</li>
+                        <li key={i}>model: {m.model} ({m.provider}) · source: {m.source}, confidence: {m.confidence}</li>
                       ))}
                       {bom.tools.map((t: any, i: number) => (
-                        <li key={i}>tool: {t.name} ({t.risk_tier}) — source: {t.source}, confidence: {t.confidence}</li>
+                        <li key={i}>tool: {t.name} ({t.risk_tier}) · source: {t.source}, confidence: {t.confidence}</li>
                       ))}
                     </ul>
                     {bom.known_unknowns?.length ? (
@@ -801,7 +801,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
               )}
               {tab === "Job Description" && (
                 <>
-                  <Section title="Policy Envelope — boundaries & approvals">
+                  <Section title="Policy Envelope: boundaries & approvals">
                     <ul className="space-y-1">
                       <li>Allowed tools: {pol.tool_boundary.allowed_tools.join(", ") || "—"}</li>
                       <li>Requires approval: {pol.tool_boundary.requires_approval.join(", ") || "—"}</li>
@@ -822,7 +822,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                         {pol.grounding_refs.map((g: any, i: number) => (
                           <li key={i} title={g.snippet}>
                             <span className="font-semibold text-on-surface">{g.source_id}</span>
-                            {g.source_title ? ` — ${g.source_title}` : ""}
+                            {g.source_title ? ` · ${g.source_title}` : ""}
                           </li>
                         ))}
                       </ul>
@@ -833,7 +833,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
               )}
               {tab === "Background Check" && (
                 <>
-                  <Section title="Onboarding Validation Suite — pre-employment screening">
+                  <Section title="Onboarding Validation Suite: pre-employment screening">
                     {run.validation_run.findings.length ? (
                       <ul className="space-y-3">
                         {run.validation_run.findings.map((f, i) => (
@@ -849,14 +849,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-decision-ready">No findings — all pre-employment screening checks passed.</p>
+                      <p className="text-decision-ready">No findings. All pre-employment screening checks passed.</p>
                     )}
                   </Section>
                 </>
               )}
               {tab === "Personnel File" && (
                 <>
-                  <Section title="Evidence Bundle — hash-chained personnel record">
+                  <Section title="Evidence Bundle: hash-chained personnel record">
                     <p>Bundle: {run.evidence_bundle.bundle_id}</p>
                     <p className="break-all text-xs text-slate-500">{run.evidence_bundle.bundle_hash}</p>
                     <table className="mt-3 w-full text-left text-xs">
@@ -926,7 +926,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                     agent_name: run.agent_name,
                     page: "run",
                   },
-                  "Explain this onboarding decision in plain language — the score, any blockers or conditions, and what I should do next.",
+                  "Explain this onboarding decision in plain language: the score, any blockers or conditions, and what I should do next.",
                 )
               }
               className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5"

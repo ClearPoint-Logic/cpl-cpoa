@@ -67,8 +67,8 @@ export default function Compliance() {
         <h1 className="font-heading text-2xl font-semibold">Compliance</h1>
         <p className="text-on-surface-variant">
           The Govern phase of the AI Workforce Management lifecycle. Every control the
-          platform enforces — Onboarding Validation Suite checks, Policy Envelope
-          primitives, the secure-MCP baseline, the hash-chained personnel file — is mapped
+          platform enforces (Onboarding Validation Suite checks, Policy Envelope
+          primitives, the secure-MCP baseline, the hash-chained personnel file) is mapped
           here to the public regulatory and security frameworks the deployment is grounded
           in. Citations resolve live against the corpus that ships with this repo.
         </p>
@@ -145,7 +145,7 @@ export default function Compliance() {
                           <li key={cite.id} className="text-xs">
                             <div className="flex flex-wrap items-baseline gap-2">
                               <span className="font-semibold text-on-surface">{cite.title}</span>
-                              <span className="text-[10px] text-on-surface-variant">— {cite.source_title}</span>
+                              <span className="text-[10px] text-on-surface-variant">· {cite.source_title}</span>
                             </div>
                             <p className="mt-0.5 text-on-surface-variant">{cite.snippet}</p>
                           </li>

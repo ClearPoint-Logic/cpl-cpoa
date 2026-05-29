@@ -36,7 +36,7 @@ export default function Home() {
               personnel file. AI agents are joining the workforce with no equivalent process.
               <strong className="font-semibold text-on-surface"> ClearPoint Workforce Agent</strong>{" "}
               ships the first <strong className="font-semibold text-on-surface">six phases of AI
-              Workforce Management</strong> end-to-end — discover the unmanaged agents already
+              Workforce Management</strong> end-to-end: discover the unmanaged agents already
               running, onboard new ones through a deterministic gate, then manage, govern,
               operate, and grow them along an explicit autonomy ladder.
             </p>
@@ -107,7 +107,7 @@ export default function Home() {
         <div>
           <h2 className="font-heading text-xl font-semibold">By the numbers</h2>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Every figure below is measurable from the deployed build — not aspiration.
+            Every figure below is measurable from the deployed build, not aspiration.
           </p>
         </div>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -146,7 +146,7 @@ export default function Home() {
           <strong className="text-on-surface"> Agent-to-Agent (A2A)</strong> protocol.
         </p>
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          The onboarding decision — score, caps, blockers — is computed deterministically; Gemini
+          The onboarding decision (score, caps, blockers) is computed deterministically; Gemini
           contributes summaries, rationale, and explanations. Six lifecycle phases are shipped
           here; the seventh, continuous attestation across every running interaction, is the
           roadmap.

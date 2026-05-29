@@ -34,7 +34,7 @@ export default function AgentZoo() {
         <h1 className="font-heading text-2xl font-semibold text-cpl-charcoal">Pre-Boarding</h1>
         <p className="text-on-surface-variant">
           The roster of candidate AI agents awaiting their first day. Pick one and run it through
-          the onboarding gate end-to-end. Each candidate exercises a distinct production scenario —
+          the onboarding gate end-to-end. Each candidate exercises a distinct production scenario:
           clean intake, governance gaps, regulated data, budget exposure, prompt injection, and
           supply-chain risk.
         </p>
@@ -49,17 +49,17 @@ export default function AgentZoo() {
           <LegendItem
             label="Ready"
             cls="text-status-ready"
-            text="Clears the onboarding gate on day one — no blocking findings. Safe to deploy within its declared scope."
+            text="Clears the onboarding gate on day one: no blocking findings. Safe to deploy within its declared scope."
           />
           <LegendItem
             label="Conditional"
             cls="text-status-conditional"
-            text="Hireable with conditions — scope caps, human approvals, or remediations attached before activation."
+            text="Hireable with conditions: scope caps, human approvals, or remediations attached before activation."
           />
           <LegendItem
             label="Blocked"
             cls="text-status-blocked"
-            text="Cannot be onboarded as submitted — one or more fail-closed findings must be remediated first."
+            text="Cannot be onboarded as submitted: one or more fail-closed findings must be remediated first."
           />
         </dl>
       </section>

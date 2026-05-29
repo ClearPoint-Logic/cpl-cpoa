@@ -46,7 +46,7 @@ export default function Roster() {
           The <strong className="text-on-surface">Manage</strong> phase. Governed agents on the
           active roster, each carrying a current Passport, Policy Envelope, AI Bill of Materials,
           and a hash-chained Personnel File. Use the HR Console to place an agent on leave, hand
-          off to a new manager, or update its role — every action appends a real evidence event to
+          off to a new manager, or update its role. Every action appends a real evidence event to
           the agent&apos;s personnel file. New hires arrive from{" "}
           <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>.
         </p>

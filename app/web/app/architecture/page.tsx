@@ -1,10 +1,10 @@
 const MAPPING: [string, string][] = [
-  ["Multi-agent orchestration", "Agent Development Kit (ADK) — root LlmAgent + six subagents"],
+  ["Multi-agent orchestration", "Agent Development Kit (ADK): root LlmAgent + six subagents"],
   ["Reasoning", "Gemini 3.5 Flash on Vertex AI (region: global)"],
-  ["Tool surface", "Model Context Protocol — secure HTTP MCP server, NSA MCP security baseline"],
+  ["Tool surface", "Model Context Protocol: secure HTTP MCP server, NSA MCP security baseline"],
   ["Grounding / RAG", "Vertex AI Search (Discovery Engine) with local-corpus fallback"],
-  ["Interoperability", "Agent-to-Agent (A2A) protocol — Agent Card at /.well-known/agent.json"],
-  ["Persistence", "Firestore — durable runs across scale-to-zero"],
+  ["Interoperability", "Agent-to-Agent (A2A) protocol: Agent Card at /.well-known/agent.json"],
+  ["Persistence", "Firestore: durable runs across scale-to-zero"],
   ["Runtime", "Cloud Run (web, API, MCP) deployed via Cloud Build"],
   ["Observability", "Cloud Trace spans + SHA-256 hash-chained evidence log"],
   ["Design system", "Google Stitch → Next.js + Tailwind with Material 3 tokens"],
@@ -84,7 +84,7 @@ export default function Architecture() {
         <h1 className="font-heading text-2xl font-semibold">Architecture</h1>
         <p className="text-on-surface-variant">
           How the AI Workforce Management onboarding gate is composed on Google&apos;s agent platform.
-          Top-to-bottom is the request path — and every box is a Google Cloud product or open protocol.
+          Top-to-bottom is the request path, and every box is a Google Cloud product or open protocol.
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function Architecture() {
           <div className="mt-5 rounded-xl border border-dashed border-primary/40 bg-primary/[0.04] p-4">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-primary">visibility</span>
-              <h3 className="font-heading text-sm font-semibold text-on-surface">Platform agents — cross-cutting</h3>
+              <h3 className="font-heading text-sm font-semibold text-on-surface">Platform agents (cross-cutting)</h3>
             </div>
             <p className="mt-1 text-xs text-on-surface-variant">
               <strong className="text-on-surface">Compass</strong> reads across every layer to advise in natural
@@ -123,7 +123,7 @@ export default function Architecture() {
         <p className="text-sm text-on-surface-variant">
           The onboarding decision (score, caps, blockers, final disposition) is computed
           deterministically from §11 schemas. Gemini contributes summaries, rationale, and
-          explanations only — so the gate is reliable, reproducible, and audit-defensible.
+          explanations only, so the gate is reliable, reproducible, and audit-defensible.
         </p>
       </section>
 

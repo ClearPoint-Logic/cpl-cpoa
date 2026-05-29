@@ -53,7 +53,7 @@ export default function Hire() {
         <p className="max-w-3xl text-on-surface-variant">
           The <strong className="text-on-surface">Discover</strong> phase. A real
           Agent-to-Agent (A2A) directory crawl finds agents operating in the environment
-          without a Passport — <strong className="text-on-surface">shadow IT</strong>.
+          without a Passport: <strong className="text-on-surface">shadow IT</strong>.
           Route a candidate into the onboarding gate from here. Onboard them on{" "}
           <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>;
           manage the governed roster on the{" "}
@@ -118,7 +118,7 @@ function DiscoveredSection({
         <p className="max-w-3xl text-sm text-on-surface-variant">
           Agents found via real HTTP crawl of <code className="rounded bg-surface-container px-1 text-on-surface">/.well-known/agent.json</code>{" "}
           endpoints across the A2A directory. Any agent not in the governed registry surfaces
-          here as <strong className="text-on-surface">shadow IT</strong> — no Passport, no Policy
+          here as <strong className="text-on-surface">shadow IT</strong>: no Passport, no Policy
           Envelope, no Evidence Bundle, operating outside the gate.
         </p>
         <button
@@ -209,7 +209,7 @@ function DiscoveredSection({
           <ul className="mt-2 space-y-1">
             {unreachable.map((u) => (
               <li key={u.endpoint}>
-                <code>{u.endpoint}</code> — {u.error}
+                <code>{u.endpoint}</code>: {u.error}
               </li>
             ))}
           </ul>
