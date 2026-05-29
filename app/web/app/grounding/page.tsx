@@ -22,14 +22,15 @@ export default function Grounding() {
       <div>
         <h1 className="font-heading text-2xl font-semibold">Grounded vs. ungrounded</h1>
         <p className="text-on-surface-variant">
-          The same candidate, explained two ways. A single ungrounded model call gives a generic
-          answer; the grounded multi-agent path cites specific public sources (NSA MCP CSI, NIST AI
-          RMF, EU AI Act), the multi-agent value made visible (FR-084).
+          Same candidate, two explanations, side by side. Ask one model on its own and you get a
+          confident-sounding generality. Run the grounded multi-agent path and it points to real,
+          public sources by name (NSA MCP CSI, NIST AI RMF, EU AI Act). That gap is exactly the value
+          of going multi-agent, made visible (FR-084).
         </p>
       </div>
 
       {error && <p role="alert" className="text-status-blocked">Could not load comparison: {error}</p>}
-      {!data && !error && <p className="text-on-surface-variant">Loading comparison…</p>}
+      {!data && !error && <p className="text-on-surface-variant">Running both sides…</p>}
 
       {data && (
         <div className="grid gap-6 md:grid-cols-2">

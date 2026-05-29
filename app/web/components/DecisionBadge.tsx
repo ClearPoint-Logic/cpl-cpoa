@@ -1,4 +1,4 @@
-// Decision indicator — bold colored uppercase label, no pill background.
+// Decision indicator: bold colored uppercase label, no pill background.
 // AI Workforce Management design language: authoritative, sober, enterprise-grade.
 const MAP: Record<string, { label: string; cls: string }> = {
   Ready: { label: "Ready", cls: "text-status-ready" },

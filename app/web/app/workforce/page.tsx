@@ -51,20 +51,21 @@ export default function Hire() {
       <header>
         <h1 className="font-heading text-2xl font-semibold">Hire</h1>
         <p className="max-w-3xl text-on-surface-variant">
-          The <strong className="text-on-surface">Discover</strong> phase. A real
-          Agent-to-Agent (A2A) directory crawl finds agents operating in the environment
-          without a Passport: <strong className="text-on-surface">shadow IT</strong>.
-          Route a candidate into the onboarding gate from here. Onboard them on{" "}
-          <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>;
-          manage the governed roster on the{" "}
+          This is the <strong className="text-on-surface">Discover</strong> phase. We crawl your
+          Agent-to-Agent (A2A) directory for real and turn up agents that are already working
+          without a Passport: your{" "}
+          <strong className="text-on-surface">shadow IT</strong>. Found one you want? Send it
+          straight to the hiring gate. Put it through onboarding on{" "}
+          <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>, then manage
+          your governed team on the{" "}
           <Link href="/roster" className="text-primary underline">Roster</Link>.
         </p>
       </header>
 
       {/* Top-line metrics */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <MetricCard label="Discovered (unmanaged)" value={unmanaged.length} tone="warn" />
-        <MetricCard label="Already governed" value={governed.length} tone="ok" />
+        <MetricCard label="Found, unmanaged" value={unmanaged.length} tone="warn" />
+        <MetricCard label="Already on the books" value={governed.length} tone="ok" />
         <MetricCard label="Endpoints scanned" value={scan?.summary.scanned ?? 0} tone="info" />
       </section>
 
@@ -116,22 +117,23 @@ function DiscoveredSection({
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          Agents found via real HTTP crawl of <code className="rounded bg-surface-container px-1 text-on-surface">/.well-known/agent.json</code>{" "}
-          endpoints across the A2A directory. Any agent not in the governed registry surfaces
-          here as <strong className="text-on-surface">shadow IT</strong>: no Passport, no Policy
-          Envelope, no Evidence Bundle, operating outside the gate.
+          These are real agents, picked up by crawling the{" "}
+          <code className="rounded bg-surface-container px-1 text-on-surface">/.well-known/agent.json</code>{" "}
+          endpoints across your A2A directory. Anything that isn&apos;t already in the governed
+          registry shows up here as <strong className="text-on-surface">shadow IT</strong>: no
+          Passport, no Policy Envelope, no Evidence Bundle, working outside the gate.
         </p>
         <button
           onClick={onRescan}
           disabled={scanning}
           className="rounded-lg border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
         >
-          {scanning ? "Scanning…" : "Re-scan directory"}
+          {scanning ? "Scanning…" : "Scan again"}
         </button>
       </div>
 
       {agents.length === 0 && !scanning ? (
-        <p className="text-decision-ready">No unmanaged agents detected.</p>
+        <p className="text-decision-ready">All clear. Every agent out there is already accounted for.</p>
       ) : (
         <ul className="space-y-3">
           {agents.map((a) => (
@@ -155,7 +157,7 @@ function DiscoveredSection({
               </div>
 
               <p className="mt-2 text-sm text-on-surface-variant">
-                {a.agent_card?.description ?? "No description provided."}
+                {a.agent_card?.description ?? "No description on file."}
               </p>
 
               <dl className="mt-3 grid gap-x-6 gap-y-1 text-xs text-on-surface-variant sm:grid-cols-2">
@@ -193,7 +195,7 @@ function DiscoveredSection({
                   Send to Pre-Boarding →
                 </Link>
                 <span className="text-[11px] text-on-surface-variant">
-                  Routes this agent into the onboarding gate (Passport + Policy + Evidence)
+                  Walks this agent through the hiring gate (Passport, Policy, and Evidence)
                 </span>
               </div>
             </li>
@@ -218,7 +220,7 @@ function DiscoveredSection({
 
       {scope && (
         <p className="rounded-lg border border-outline-variant/30 bg-surface-container-lowest p-3 text-xs italic text-on-surface-variant">
-          <span className="font-semibold not-italic">Honest scope:</span> {scope}
+          <span className="font-semibold not-italic">Straight talk on scope:</span> {scope}
         </p>
       )}
     </section>

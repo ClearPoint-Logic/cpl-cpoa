@@ -45,10 +45,11 @@ export default function NewRun() {
   return (
     <div className="max-w-2xl space-y-8">
       <h1 className="text-2xl font-bold text-cpl-charcoal">Start an onboarding run</h1>
+      <p className="text-on-surface-variant">Put a candidate through the hiring gate. Pick one off the bench, or paste your own.</p>
       {error && <p role="alert" className="rounded border border-decision-blocked/30 bg-decision-blocked/5 p-3 text-sm text-decision-blocked">{error}</p>}
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="font-semibold">Pick a fixture</h2>
+        <h2 className="font-semibold">Pick a candidate</h2>
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
@@ -59,12 +60,12 @@ export default function NewRun() {
           ))}
         </select>
         <button onClick={runFixture} disabled={busy || !selected} className="rounded-lg bg-cpl-blue px-4 py-2 text-sm font-semibold text-white hover:bg-cpl-blue/90 disabled:opacity-60">
-          {busy ? "Onboarding…" : "Run onboarding →"}
+          {busy ? "Interviewing…" : "Run onboarding →"}
         </button>
       </section>
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="font-semibold">…or paste a candidate manifest (JSON)</h2>
+        <h2 className="font-semibold">…or bring your own (paste a candidate manifest as JSON)</h2>
         <textarea
           value={manifest}
           onChange={(e) => setManifest(e.target.value)}

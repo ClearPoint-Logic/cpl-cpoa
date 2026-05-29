@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import type { DiscoveredAgent, DiscoveryScanResult, LifecycleAction, LifecycleState } from "@/lib/types";
 
 // Roster = the Manage phase of the AI Workforce lifecycle. Governed agents on
-// the active roster — each carries a current Passport, Policy Envelope, AI Bill
+// the active roster: each carries a current Passport, Policy Envelope, AI Bill
 // of Materials, and a hash-chained Personnel File. The HR Console appends a real
 // evidence event for every action (leave, return, manager handoff, role change).
 
@@ -43,11 +43,11 @@ export default function Roster() {
       <header>
         <h1 className="font-heading text-2xl font-semibold">Roster</h1>
         <p className="max-w-3xl text-on-surface-variant">
-          The <strong className="text-on-surface">Manage</strong> phase. Governed agents on the
-          active roster, each carrying a current Passport, Policy Envelope, AI Bill of Materials,
-          and a hash-chained Personnel File. Use the HR Console to place an agent on leave, hand
-          off to a new manager, or update its role. Every action appends a real evidence event to
-          the agent&apos;s personnel file. New hires arrive from{" "}
+          This is the <strong className="text-on-surface">Manage</strong> phase: your team of
+          working agents, each one carrying a current Passport, Policy Envelope, AI Bill of
+          Materials, and a hash-chained Personnel File. The HR Console lets you place an agent on
+          leave, hand it to a new manager, or change its role. Every move you make is written to
+          that agent&apos;s file as real evidence. New hires show up here from{" "}
           <Link href="/agents" className="text-primary underline">Pre-Boarding</Link>.
         </p>
       </header>
@@ -61,7 +61,7 @@ export default function Roster() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-on-surface-variant">
-            {onboarded.length} governed {onboarded.length === 1 ? "agent" : "agents"} on the active roster.
+            {onboarded.length} {onboarded.length === 1 ? "agent" : "agents"} on your team right now.
           </p>
           <button
             onClick={load}
@@ -72,7 +72,7 @@ export default function Roster() {
           </button>
         </div>
         {onboarded.length === 0 && !loading ? (
-          <p className="text-on-surface-variant">No governed agents detected on the roster.</p>
+          <p className="text-on-surface-variant">Nobody on the roster yet. Hire your first agent to get started.</p>
         ) : (
           <ul className="grid gap-4">
             {onboarded.map((a) => (
@@ -116,12 +116,12 @@ function OnboardedAgentCard({ agent }: { agent: DiscoveredAgent }) {
   }
 
   function promptAndPlaceOnLeave() {
-    const v = window.prompt("Reason for placing on leave (will be recorded):", "");
+    const v = window.prompt("Why are you placing this agent on leave? (we'll record it)", "");
     act("place_on_leave", { reason: v ?? "" });
   }
 
   function promptAndReturn() {
-    const v = window.prompt("Return note (will be recorded):", "");
+    const v = window.prompt("Add a note for the return (we'll record it):", "");
     act("return_from_leave", { reason: v ?? "" });
   }
 

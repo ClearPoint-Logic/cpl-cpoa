@@ -33,33 +33,32 @@ export default function AgentZoo() {
       <div>
         <h1 className="font-heading text-2xl font-semibold text-cpl-charcoal">Pre-Boarding</h1>
         <p className="text-on-surface-variant">
-          The roster of candidate AI agents awaiting their first day. Pick one and run it through
-          the onboarding gate end-to-end. Each candidate exercises a distinct production scenario:
-          clean intake, governance gaps, regulated data, budget exposure, prompt injection, and
-          supply-chain risk.
+          Meet the candidates waiting for their first day. Pick one and put it through the full
+          hiring gate. Each one is a different real-world test: a clean applicant, governance gaps,
+          regulated data, runaway budget, a prompt-injection attempt, and supply-chain risk.
         </p>
       </div>
 
-      {/* Decision legend — what the badge on each candidate means */}
+      {/* Decision legend: what the badge on each candidate means */}
       <section className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
-          What the decision on each candidate means
+          What each verdict means
         </h2>
         <dl className="mt-3 grid gap-3 sm:grid-cols-3">
           <LegendItem
             label="Ready"
             cls="text-status-ready"
-            text="Clears the onboarding gate on day one: no blocking findings. Safe to deploy within its declared scope."
+            text="Hired on day one. Nothing blocking, cleared to work within the scope it declared."
           />
           <LegendItem
             label="Conditional"
             cls="text-status-conditional"
-            text="Hireable with conditions: scope caps, human approvals, or remediations attached before activation."
+            text="Hired, with strings attached: tighter scope, a human sign-off, or fixes to make before it starts."
           />
           <LegendItem
             label="Blocked"
             cls="text-status-blocked"
-            text="Cannot be onboarded as submitted: one or more fail-closed findings must be remediated first."
+            text="Not as it stands. One or more fail-closed findings have to be fixed before it can join."
           />
         </dl>
       </section>
@@ -69,7 +68,7 @@ export default function AgentZoo() {
           {error}
         </div>
       )}
-      {!fixtures.length && !error && <p className="text-slate-500">Loading fixtures…</p>}
+      {!fixtures.length && !error && <p className="text-slate-500">Lining up the candidates…</p>}
 
       {fixtures.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
@@ -96,7 +95,7 @@ export default function AgentZoo() {
                 disabled={busy === f.name}
                 className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-60"
               >
-                {busy === f.name ? "Onboarding…" : "Begin onboarding →"}
+                {busy === f.name ? "Interviewing…" : "Begin onboarding →"}
               </button>
             </article>
           ))}

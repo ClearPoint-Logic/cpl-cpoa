@@ -2,19 +2,19 @@ import { Fragment } from "react";
 import Link from "next/link";
 
 const PAIRS = [
-  { human: "ID badge", hIcon: "badge", ai: "Agent Passport", aIcon: "smart_toy", note: "identity, owner, trust tier" },
-  { human: "Job description", hIcon: "assignment", ai: "Policy Envelope", aIcon: "gavel", note: "authorized scope of action" },
-  { human: "Résumé", hIcon: "description", ai: "AI Bill of Materials", aIcon: "inventory_2", note: "declared models, tools, deps" },
-  { human: "Personnel file", hIcon: "folder_shared", ai: "Evidence Bundle", aIcon: "verified_user", note: "the record that follows it forward" },
+  { human: "ID badge", hIcon: "badge", ai: "Agent Passport", aIcon: "smart_toy", note: "who it is, who owns it, how far it's trusted" },
+  { human: "Job description", hIcon: "assignment", ai: "Policy Envelope", aIcon: "gavel", note: "exactly what it's allowed to do" },
+  { human: "Résumé", hIcon: "description", ai: "AI Bill of Materials", aIcon: "inventory_2", note: "the models, tools, and dependencies it brings" },
+  { human: "Personnel file", hIcon: "folder_shared", ai: "Evidence Bundle", aIcon: "verified_user", note: "the record that follows it everywhere" },
 ];
 
 const LIFECYCLE = [
-  { phase: "Discover", icon: "radar", href: "/workforce", note: "Real HTTPS crawl of A2A Agent Cards; surface unmanaged shadow IT" },
-  { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
-  { phase: "Manage", icon: "groups", href: "/roster", note: "Roster + HR Console: place on leave, manager handoff, role change" },
-  { phase: "Govern", icon: "policy", href: "/compliance", note: "Compliance: live control mapping to NSA / NIST / EU AI Act" },
-  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Fleet health + deterministic anomaly rules, run by the Sentinel engine" },
-  { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },
+  { phase: "Discover", icon: "radar", href: "/workforce", note: "Crawl your A2A Agent Cards for real and catch the agents already running off the books" },
+  { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "A six-stage interview with one clear verdict: Ready, Conditional, or Blocked" },
+  { phase: "Manage", icon: "groups", href: "/roster", note: "Your roster and HR Console: place on leave, hand off to a new manager, change a role" },
+  { phase: "Govern", icon: "policy", href: "/compliance", note: "Every control mapped live to NSA, NIST, and the EU AI Act" },
+  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Always-on performance reviews, watched by the Sentinel engine" },
+  { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "A growth plan for every agent, one rung up the autonomy ladder at a time" },
 ];
 
 export default function Home() {
@@ -28,31 +28,32 @@ export default function Home() {
         <div className="relative grid items-center gap-gutter lg:grid-cols-2">
           <div className="flex max-w-2xl flex-col gap-6">
             <h1 className="font-heading text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Hire AI agents. <br />
-              <span className="text-primary">Don&apos;t just deploy code.</span>
+              Hire your AI agents. <br />
+              <span className="text-primary">Don&apos;t just deploy them.</span>
             </h1>
             <p className="text-lg text-on-surface-variant">
-              Enterprises hire humans with an ID badge, a job description, a résumé, and a
-              personnel file. AI agents are joining the workforce with no equivalent process.
+              You&apos;d never let a new hire start without an ID badge, a job description, a
+              résumé, and a file in HR. Yet AI agents keep showing up to work with none of it.
               <strong className="font-semibold text-on-surface"> ClearPoint Workforce Agent</strong>{" "}
-              ships the first <strong className="font-semibold text-on-surface">six phases of AI
-              Workforce Management</strong> end-to-end: discover the unmanaged agents already
-              running, onboard new ones through a deterministic gate, then manage, govern,
-              operate, and grow them along an explicit autonomy ladder.
+              gives them the same treatment, across the first{" "}
+              <strong className="font-semibold text-on-surface">six phases of AI Workforce
+              Management</strong>: find the agents already running unsupervised, put new ones
+              through a hiring gate that decides the same way every time, then manage, govern,
+              operate, and help them grow up the autonomy ladder.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/agents" className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-hover">
-                <span className="material-symbols-outlined text-[18px]">how_to_reg</span> Start Onboarding
+                <span className="material-symbols-outlined text-[18px]">how_to_reg</span> Start onboarding
               </Link>
               <Link href="/architecture" className="inline-flex items-center gap-2 rounded-lg border border-outline px-6 py-3 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container">
-                <span className="material-symbols-outlined text-[18px]">account_tree</span> See the architecture
+                <span className="material-symbols-outlined text-[18px]">account_tree</span> See how it&apos;s built
               </Link>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="text-center text-xs font-semibold uppercase tracking-widest text-on-surface-variant">Human onboarding</div>
-            <div className="text-center text-xs font-semibold uppercase tracking-widest text-primary">Agent equivalent</div>
+            <div className="text-center text-xs font-semibold uppercase tracking-widest text-on-surface-variant">When you hire a person</div>
+            <div className="text-center text-xs font-semibold uppercase tracking-widest text-primary">When you hire an agent</div>
             {PAIRS.map((p) => (
               <Fragment key={p.ai}>
                 <div className="flex items-center gap-3 rounded-lg border border-outline-variant/30 bg-surface p-3 opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0">
@@ -76,8 +77,8 @@ export default function Home() {
         <div>
           <h2 className="font-heading text-xl font-semibold">The AI Workforce Management lifecycle</h2>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Six phases shipped end-to-end. Every phase writes into one continuous,
-            hash-chained personnel file per agent.
+            Six phases, start to finish. Every one of them adds to a single personnel file per
+            agent, hash-chained so nothing can be quietly rewritten later.
           </p>
         </div>
         <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -107,19 +108,19 @@ export default function Home() {
         <div>
           <h2 className="font-heading text-xl font-semibold">By the numbers</h2>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Every figure below is measurable from the deployed build, not aspiration.
+            Real numbers, not promises. Every figure here is measured from the build you&apos;re looking at.
           </p>
         </div>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { k: "&lt; 5 ms", v: "Deterministic decision latency per onboarding run (CLI; sub-second incl. live Gemini narration)" },
-            { k: "8 / 8", v: "Pre-Boarding fixtures decide correctly across 8 production-shaped risk archetypes" },
-            { k: "5", v: "Fail-closed pre-employment-screening checks (OV-001..005)" },
-            { k: "29", v: "Live regulatory-citation resolutions in the Compliance matrix (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
-            { k: "19 / 19", v: "NSA MCP security baseline tests pass (auth, RBAC, integrity, replay, output filter, audit)" },
-            { k: "186", v: "Total tests across unit, integration, evals, and security" },
-            { k: "90 %", v: "Code coverage on the gate core (cpoa/services + agents + mcp_servers + app/api)" },
-            { k: "6 / 7", v: "AI Workforce Management lifecycle phases shipped; the seventh is continuous attestation" },
+            { k: "&lt; 5 ms", v: "to reach a decision per onboarding run (CLI; still sub-second with live Gemini narration on top)" },
+            { k: "8 / 8", v: "Pre-Boarding candidates land on the right call across 8 production-shaped risk archetypes" },
+            { k: "5", v: "fail-closed pre-employment screening checks, every candidate, every time (OV-001..005)" },
+            { k: "29", v: "regulatory citations resolved live in the Compliance matrix (NSA MCP CSI, NIST AI RMF, EU AI Act)" },
+            { k: "19 / 19", v: "NSA MCP security baseline tests passing (auth, RBAC, integrity, replay, output filter, audit)" },
+            { k: "186", v: "tests in all, spanning unit, integration, evals, and security" },
+            { k: "90 %", v: "code coverage on the decision core (cpoa/services + agents + mcp_servers + app/api)" },
+            { k: "6 / 7", v: "lifecycle phases live today; the seventh, continuous attestation, is next" },
           ].map(({ k, v }) => (
             <div key={k} className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4">
               <dt
@@ -135,21 +136,22 @@ export default function Home() {
       <section className="space-y-3">
         <h2 className="font-heading text-xl font-semibold">Built on Google&apos;s agent platform</h2>
         <p className="max-w-3xl text-on-surface-variant">
-          Orchestrated with the <strong className="text-on-surface">Agent Development Kit</strong>,
-          reasoning with <strong className="text-on-surface">Gemini 3.5 Flash on Vertex AI</strong>,
-          tools served over the <strong className="text-on-surface">Model Context Protocol</strong>,
-          grounded with <strong className="text-on-surface">Vertex AI Search</strong>, designed in
-          <strong className="text-on-surface"> Google Stitch</strong>, observed with
-          <strong className="text-on-surface"> Cloud Trace</strong>, persisted in
-          <strong className="text-on-surface"> Firestore</strong>, deployed on
-          <strong className="text-on-surface"> Cloud Run</strong>, and discoverable via the
+          It all runs on Google. The crew is orchestrated with the{" "}
+          <strong className="text-on-surface">Agent Development Kit</strong>, thinks with{" "}
+          <strong className="text-on-surface">Gemini 3.5 Flash on Vertex AI</strong>, reaches its
+          tools over the <strong className="text-on-surface">Model Context Protocol</strong>, stays
+          grounded with <strong className="text-on-surface">Vertex AI Search</strong>, is designed in
+          <strong className="text-on-surface"> Google Stitch</strong>, watched with
+          <strong className="text-on-surface"> Cloud Trace</strong>, remembered in
+          <strong className="text-on-surface"> Firestore</strong>, shipped on
+          <strong className="text-on-surface"> Cloud Run</strong>, and found by other agents over the
           <strong className="text-on-surface"> Agent-to-Agent (A2A)</strong> protocol.
         </p>
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          The onboarding decision (score, caps, blockers) is computed deterministically; Gemini
-          contributes summaries, rationale, and explanations. Six lifecycle phases are shipped
-          here; the seventh, continuous attestation across every running interaction, is the
-          roadmap.
+          The verdict itself (the score, the caps, the blockers) is computed deterministically, so it
+          lands the same way every time. Gemini handles the parts that benefit from language: the
+          summaries, the reasoning, the plain-English explanations. Six phases are live here; the
+          seventh, continuous attestation across every running interaction, is what&apos;s next.
         </p>
       </section>
     </div>

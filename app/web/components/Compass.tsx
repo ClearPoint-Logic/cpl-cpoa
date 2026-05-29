@@ -12,7 +12,7 @@ import type {
   LifecyclePhase,
 } from "@/lib/types";
 
-// Compass — the in-platform advisor, delivered as a global slide-over.
+// Compass: the in-platform advisor, delivered as a global slide-over.
 // Two surfaces: "Ask Compass" (NL Q&A grounded on the live run + corpus, with
 // act-on-confirm actions) and "Agent View" (Sentinel's surfaced issues feed).
 
@@ -53,16 +53,16 @@ function greeting(ctx: CompassContextPayload): Msg {
       role: "compass",
       source: "deterministic",
       text:
-        `Hi, I'm **Compass**. I'm looking at ${ctx.agent_name ? `**${ctx.agent_name}**` : "this onboarding run"}. ` +
-        "Ask me to explain the decision, a finding, or what to do next, and I can advance this agent through its lifecycle for you.",
+        `Hey, I'm **Compass**. I've got ${ctx.agent_name ? `**${ctx.agent_name}**` : "this onboarding run"} open in front of me. ` +
+        "Ask me to break down the decision, dig into a finding, or tell you what's next, and if you'd like, I'll walk this agent through the rest of its lifecycle for you.",
     };
   }
   return {
     role: "compass",
     source: "deterministic",
     text:
-      "Hi, I'm **Compass**, your in-platform advisor. Ask me about an agent, a decision, or the " +
-      "six-phase lifecycle. I can also take actions for you, always with a confirmation step.",
+      "Hey, I'm **Compass**, your guide around here. Ask me anything about an agent, a decision, or " +
+      "the six-phase lifecycle. I can also do things for you, and I'll always check with you before I act.",
     actions: [
       { id: "preboard", kind: "navigate", label: "Go to Pre-Boarding", href: "/agents" },
       { id: "capabilities", kind: "ask", label: "What can Compass do?", prompt: "What can you help me do on this platform?" },
@@ -141,7 +141,7 @@ function CompassPanel({
         { role: "compass", text: r.answer, source: r.source, citations: r.citations, actions: r.suggested_actions },
       ]);
     } catch (e) {
-      setMessages((m) => [...m, { role: "compass", text: `I couldn't reach the advisor service. ${String(e)}` }]);
+      setMessages((m) => [...m, { role: "compass", text: `I couldn't reach my brain just then. ${String(e)}` }]);
     } finally {
       setBusy(false);
     }
@@ -170,17 +170,17 @@ function CompassPanel({
         const r = await api.runFullLifecycle(a.candidate_id);
         const body = r.events.length
           ? r.events.map((e) => `- **${PHASE_LABEL[e.phase]}**: ${e.summary}`).join("\n")
-          : "All lifecycle phases were already attested on this agent.";
+          : "Looks like every lifecycle phase was already attested on this agent.";
         setMessages((m) => [
           ...m,
           {
             role: "compass",
             source: "deterministic",
-            text: `Done. New signed, hash-chained events on the personnel file:\n\n${body}`,
+            text: `All set. Here's what just landed on the personnel file, each one signed and hash-chained:\n\n${body}`,
           },
         ]);
       } catch (e) {
-        setMessages((m) => [...m, { role: "compass", text: `Couldn't advance the lifecycle: ${String(e)}` }]);
+        setMessages((m) => [...m, { role: "compass", text: `I couldn't advance the lifecycle: ${String(e)}` }]);
       } finally {
         setBusy(false);
       }
@@ -281,7 +281,7 @@ function CompassPanel({
                   onCancelConfirm={() => setConfirm(null)}
                 />
               ))}
-              {busy && <div className="pl-1 text-xs text-on-surface-variant">Compass is thinking…</div>}
+              {busy && <div className="pl-1 text-xs text-on-surface-variant">Compass is thinking it over…</div>}
             </div>
             <form
               onSubmit={(e) => {
@@ -423,18 +423,18 @@ function AgentView({
   err: string | null;
   onAsk: (prompt: string) => void;
 }) {
-  if (err) return <div className="p-4 text-sm text-decision-blocked">Couldn&apos;t load the Sentinel feed: {err}</div>;
-  if (!fleet) return <div className="p-4 text-sm text-on-surface-variant">Loading Sentinel feed…</div>;
+  if (err) return <div className="p-4 text-sm text-decision-blocked">I couldn&apos;t load the Sentinel feed: {err}</div>;
+  if (!fleet) return <div className="p-4 text-sm text-on-surface-variant">Pulling up the Sentinel feed…</div>;
   const flagged = fleet.members.filter((m) => m.anomalies.length > 0);
   return (
     <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
       <div className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-3 text-xs text-on-surface-variant">
-        <span className="font-semibold text-on-surface">Sentinel</span> watches the active roster in the
-        background and surfaces issues here. {fleet.summary.agents_with_anomalies} of {fleet.summary.agents}{" "}
-        agents have open signals.
+        <span className="font-semibold text-on-surface">Sentinel</span> keeps watch over the active roster in
+        the background and flags anything worth a look here. {fleet.summary.agents_with_anomalies} of{" "}
+        {fleet.summary.agents} agents have open signals.
       </div>
       {flagged.length === 0 ? (
-        <p className="text-sm text-decision-ready">No anomalies across the roster. All agents within policy.</p>
+        <p className="text-sm text-decision-ready">Nothing flagged across the roster. Everyone&apos;s within policy.</p>
       ) : (
         flagged.map((m) => (
           <div

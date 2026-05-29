@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Compliance (the Govern phase) — live control matrix mapping every enforced
+// Compliance (the Govern phase): live control matrix mapping every enforced
 // control to public regulatory + security framework passages from the grounding
 // corpus. Citations resolve live against the corpus that ships with this repo.
 
@@ -66,11 +66,11 @@ export default function Compliance() {
       <header>
         <h1 className="font-heading text-2xl font-semibold">Compliance</h1>
         <p className="text-on-surface-variant">
-          The Govern phase of the AI Workforce Management lifecycle. Every control the
-          platform enforces (Onboarding Validation Suite checks, Policy Envelope
-          primitives, the secure-MCP baseline, the hash-chained personnel file) is mapped
-          here to the public regulatory and security frameworks the deployment is grounded
-          in. Citations resolve live against the corpus that ships with this repo.
+          This is the Govern phase, where you can show your work. Every control the platform
+          enforces (Onboarding Validation Suite checks, Policy Envelope primitives, the secure-MCP
+          baseline, the hash-chained personnel file) is tied right here to the public regulatory and
+          security frameworks behind it. The citations aren&apos;t static screenshots: they resolve
+          live against the corpus shipped in this repo.
         </p>
       </header>
 
@@ -79,7 +79,7 @@ export default function Compliance() {
           Could not load control matrix: {error}
         </div>
       )}
-      {!matrix && !error && <p className="text-on-surface-variant">Loading control matrix…</p>}
+      {!matrix && !error && <p className="text-on-surface-variant">Pulling the control matrix together…</p>}
 
       {matrix && (
         <>
