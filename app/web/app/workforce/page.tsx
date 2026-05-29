@@ -14,6 +14,7 @@ export default function Hire() {
   const [scan, setScan] = useState<DiscoveryScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [lastScanned, setLastScanned] = useState<string | null>(null);
 
   async function runScan() {
     setScanning(true);
@@ -21,6 +22,7 @@ export default function Hire() {
     try {
       const r = await api.discoveryScan();
       setScan(r);
+      setLastScanned(new Date().toLocaleTimeString());
     } catch (e) {
       setError(String(e));
     } finally {
@@ -80,6 +82,7 @@ export default function Hire() {
         unreachable={unreachable}
         scope={scan?.scope}
         scanning={scanning}
+        lastScanned={lastScanned}
         onRescan={runScan}
       />
     </div>
@@ -105,12 +108,14 @@ function DiscoveredSection({
   unreachable,
   scope,
   scanning,
+  lastScanned,
   onRescan,
 }: {
   agents: DiscoveredAgent[];
   unreachable: DiscoveredAgent[];
   scope: string | undefined;
   scanning: boolean;
+  lastScanned: string | null;
   onRescan: () => void;
 }) {
   return (
@@ -123,13 +128,22 @@ function DiscoveredSection({
           registry shows up here as <strong className="text-on-surface">shadow IT</strong>: no
           Passport, no Policy Envelope, no Evidence Bundle, working outside the gate.
         </p>
-        <button
-          onClick={onRescan}
-          disabled={scanning}
-          className="rounded-lg border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
-        >
-          {scanning ? "Scanning…" : "Scan again"}
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={onRescan}
+            disabled={scanning}
+            className="rounded-lg border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface hover:bg-surface-container disabled:opacity-60"
+          >
+            {scanning ? "Scanning…" : "Re-scan directory"}
+          </button>
+          <span className="text-[11px] text-on-surface-variant" aria-live="polite">
+            {scanning
+              ? "Crawling /.well-known/agent.json endpoints…"
+              : lastScanned
+              ? `Last crawl ${lastScanned}`
+              : ""}
+          </span>
+        </div>
       </div>
 
       {agents.length === 0 && !scanning ? (
@@ -189,13 +203,13 @@ function DiscoveredSection({
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <Link
-                  href="/agents"
+                  href={`/agents?from=discovery&agent=${encodeURIComponent(a.candidate_agent_id)}&name=${encodeURIComponent(a.agent_card?.name ?? a.candidate_agent_id)}`}
                   className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary hover:bg-primary-hover"
                 >
                   Send to Pre-Boarding →
                 </Link>
                 <span className="text-[11px] text-on-surface-variant">
-                  Walks this agent through the hiring gate (Passport, Policy, and Evidence)
+                  Routes it to the onboarding gate — Passport, Policy, and Evidence
                 </span>
               </div>
             </li>

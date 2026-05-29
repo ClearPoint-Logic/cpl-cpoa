@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { FixtureCard } from "@/lib/types";
 import { DecisionBadge } from "@/components/DecisionBadge";
@@ -38,6 +38,10 @@ export default function AgentZoo() {
           regulated data, runaway budget, a prompt-injection attempt, and supply-chain risk.
         </p>
       </div>
+
+      <Suspense fallback={null}>
+        <DiscoveryBanner />
+      </Suspense>
 
       {/* Decision legend: what the badge on each candidate means */}
       <section className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4">
@@ -101,6 +105,25 @@ export default function AgentZoo() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// Shown when an agent is routed here from the Discover (Hire) phase. Discovery
+// turns up shadow-IT agents over A2A; this sets the expectation for what
+// Pre-Boarding does with them so the hand-off doesn't read as a dead end.
+function DiscoveryBanner() {
+  const params = useSearchParams();
+  if (params.get("from") !== "discovery") return null;
+  const name = params.get("name")?.trim() || "The discovered agent";
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-on-surface">
+      <p>
+        <span className="font-semibold">{name}</span> came in from your Discovery scan. In
+        production, Pre-Boarding onboards the discovered agent directly over A2A; in this demo, run
+        the hiring gate on any candidate below to see the deterministic verdict and its hash-chained
+        evidence bundle.
+      </p>
     </div>
   );
 }
