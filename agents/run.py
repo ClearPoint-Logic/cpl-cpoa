@@ -7,9 +7,31 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 
 from agents.config import fast_model, llm_available
 from cpoa.services.engine import OnboardingResult
+
+# Em/en dashes are stripped from all model-generated prose so live Gemini
+# output matches the site's house style (no em-dashes). Source copy is already
+# clean; this guards the one surface we cannot edit at the source: the model's
+# free-form text.
+_DASH_CLAUSE_TRAILING = re.compile(r"\s*[—–]\s+")
+_DASH_CLAUSE_LEADING = re.compile(r"\s+[—–]")
+_DASH_BARE = re.compile(r"[—–]")
+
+
+def _sanitize_dashes(text: str) -> str:
+    """Rewrite em/en dashes to match the site's no-em-dash style.
+
+    A dash used as a clause break (whitespace on at least one side) becomes a
+    comma; a bare dash (ranges like ``4-6``, compounds) becomes a hyphen.
+    """
+    if not text:
+        return text
+    text = _DASH_CLAUSE_TRAILING.sub(", ", text)
+    text = _DASH_CLAUSE_LEADING.sub(", ", text)
+    return _DASH_BARE.sub("-", text)
 
 
 async def _run_agent_async(agent, message: str) -> str:  # pragma: no cover
@@ -26,7 +48,7 @@ async def _run_agent_async(agent, message: str) -> str:  # pragma: no cover
             for part in event.content.parts:
                 if getattr(part, "text", None):
                     final_text = part.text
-    return final_text
+    return _sanitize_dashes(final_text)
 
 
 def _explanation_agent(model: str | None = None):  # pragma: no cover
@@ -150,7 +172,7 @@ async def _run_sequential_async(agent, message: str) -> dict:  # pragma: no cove
         if text_parts or tool_calls:
             transcript.append({
                 "subagent": author,
-                "text": " ".join(text_parts).strip() if text_parts else "",
+                "text": _sanitize_dashes(" ".join(text_parts).strip()) if text_parts else "",
                 "tool_calls": tool_calls,
             })
     final_session = await runner.session_service.get_session(
