@@ -115,12 +115,22 @@ EventType = Literal[
     "onboarding.evidence.bundle.exported",
     "onboarding.decision.issued",
     "onboarding.error.fail_closed",
+    # Onboarding remediation (a blocked candidate is fixed and re-run)
+    "onboarding.remediated",
     # Manage (HR Console lifecycle actions)
+    "manage.activated",
     "manage.placed_on_leave",
     "manage.returned_from_leave",
     "manage.ownership_transferred",
     "manage.scope_updated",
+    # Govern (control attestation)
+    "govern.controls_attested",
+    "govern.gap_remediated",
     # Operate (Sentinel runtime monitoring)
     "operate.anomaly_detected",
     "operate.performance_reviewed",
+    "operate.anomaly_resolved",
+    # Optimize (Talent Development)
+    "optimize.development_plan_accepted",
+    "optimize.item_resolved",
 ]

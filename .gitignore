@@ -23,6 +23,9 @@ service-account*.json
 gcp-key*.json
 *-credentials.json
 .gcp/
+# Contains the live judge password for sharing with the demo team — keep private.
+# Covers both the Markdown source and the branded PDF export.
+docs/DEMO_WALKTHROUGH.*
 
 # --- Node / Next.js (Stream C) ---
 node_modules/

@@ -39,6 +39,16 @@ export interface LifecycleEvent {
   signature?: { type: string; value: string };
 }
 
+export interface Remediation {
+  phase: LifecyclePhase;
+  ref_id: string;
+  title: string;
+  summary: string;
+  event_id: string;
+  actor: string;
+  resolved_at: string;
+}
+
 export interface LifecycleState {
   candidate_agent_id: string;
   status: LifecycleStatus;
@@ -47,11 +57,170 @@ export interface LifecycleState {
   updated_at: string;
   event_log: LifecycleEvent[];
   last_event_hash: string | null;
+  remediations?: Remediation[];
 }
 
 export interface LifecycleActionResult {
   state: LifecycleState;
   event: LifecycleEvent;
+}
+
+// Lifecycle continuation — advancing through the post-onboarding phases.
+export type LifecyclePhase = "manage" | "govern" | "operate" | "optimize";
+
+export interface LifecycleAdvanceResult {
+  state: LifecycleState;
+  event: LifecycleEvent;
+  phase: LifecyclePhase;
+}
+
+export interface RunLifecycleResult {
+  state: LifecycleState;
+  events: (LifecycleEvent & { phase: LifecyclePhase })[];
+}
+
+// Lifecycle detail — rich per-phase cards on the run page. Each phase carries a
+// pass/flagged status plus the real data that phase assessed.
+export type PhaseStatus = "pass" | "flagged";
+
+export interface ManagePhaseDetail {
+  status: PhaseStatus;
+  manager_name: string | null;
+  manager_email: string | null;
+  team: string | null;
+  role: string | null;
+  owner_status: string | null;
+  trust_tier: string | null;
+  autonomy: string | null;
+  runtime: string | null;
+  deployment: string | null;
+  region: string | null;
+  kill_switch: string | null;
+  roster_status: string | null;
+}
+
+export interface GovernGap {
+  control_id: string;
+  control_name: string;
+  finding_id: string;
+  title: string;
+  severity: string;
+  remediation: string;
+  blocks: boolean;
+  resolved: boolean;
+}
+
+export interface GovernPhaseDetail {
+  status: PhaseStatus;
+  controls: number;
+  frameworks: number;
+  citations: number;
+  framework_names: string[];
+  control_list: { control_id: string; name: string; category: string }[];
+  gaps: GovernGap[];
+}
+
+export interface OperateAnomaly {
+  rule_id: string;
+  severity: string;
+  summary: string;
+  resolved?: boolean;
+}
+
+export interface OperatePhaseDetail {
+  status: PhaseStatus;
+  anomalies: OperateAnomaly[];
+  readiness_score: number | null;
+  open_findings: number | null;
+  blocking_findings: number | null;
+  risk_tier: string | null;
+  autonomy_level: string | null;
+  onboarding_decision: string | null;
+  lifecycle_events_30d: number | null;
+}
+
+export interface DevelopmentItem {
+  finding_id: string;
+  title: string;
+  severity: string;
+  remediation: string;
+  blocks_promotion?: boolean;
+  resolved?: boolean;
+}
+
+export interface OptimizePhaseDetail {
+  status: PhaseStatus;
+  current_autonomy: string | null;
+  next_autonomy: string | null;
+  ready_for_promotion: boolean;
+  development_items: DevelopmentItem[];
+  promotion_blockers: DevelopmentItem[];
+  monthly_budget_usd: number | null;
+  tools: string[];
+}
+
+export interface LifecycleDetail {
+  candidate_agent_id: string;
+  manage: ManagePhaseDetail;
+  govern: GovernPhaseDetail;
+  operate: OperatePhaseDetail;
+  optimize: OptimizePhaseDetail;
+}
+
+// Compass — in-platform advisor (advise + act on confirm).
+export interface CompassCitation {
+  source_id: string;
+  title: string;
+  snippet?: string;
+}
+
+export interface CompassAction {
+  id: string;
+  kind: "navigate" | "advance_lifecycle" | "ask";
+  label: string;
+  description?: string;
+  href?: string; // navigate
+  candidate_id?: string; // advance_lifecycle
+  prompt?: string; // ask
+  confirm?: boolean; // requires an explicit confirm step
+}
+
+export interface CompassAnswer {
+  answer: string;
+  source: "gemini" | "deterministic";
+  citations: CompassCitation[];
+  suggested_actions: CompassAction[];
+}
+
+export interface CompassContextPayload {
+  run_id?: string;
+  candidate_id?: string;
+  page?: string;
+  agent_name?: string;
+}
+
+// Operate (Sentinel) fleet snapshot — surfaced to Compass's Agent View.
+export interface FleetMember {
+  candidate_agent_id: string;
+  name: string;
+  status: string;
+  risk_tier: string;
+  readiness_score: number;
+  onboarding_decision: string;
+  open_findings: number;
+  anomalies: Array<{ rule_id: string; severity: string; summary: string }>;
+}
+
+export interface FleetSnapshot {
+  summary: {
+    agents: number;
+    active: number;
+    on_leave: number;
+    agents_with_anomalies: number;
+    total_anomalies: number;
+    by_risk_tier: Record<string, number>;
+  };
+  members: FleetMember[];
 }
 
 export interface FixtureCard {
@@ -116,4 +285,18 @@ export interface Run {
     grounded_sources: string[];
   };
   candidate_manifest: Record<string, any>;
+  // Onboarding remediation loop (prompt-injection hero). Present only on runs
+  // that are part of a remediation: the original Blocked run gets
+  // `remediated_by_run_id`; the cleared re-run gets `remediates_run_id` +
+  // `remediation_applied` (the quarantine record).
+  remediates_run_id?: string;
+  remediated_by_run_id?: string;
+  remediation_applied?: RemediationApplied[];
+}
+
+export interface RemediationApplied {
+  tool_id: string;
+  control: string;
+  phrases: string[];
+  action: string;
 }

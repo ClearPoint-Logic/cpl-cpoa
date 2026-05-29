@@ -221,6 +221,9 @@ def record_anomaly(
     state.event_log.append(event.model_dump(mode="json"))
     state.last_event_hash = event.event_hash
     state.updated_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    # Persist the appended event — the lifecycle store hands out detached copies,
+    # so mutations must be written back explicitly (no shared in-memory ref).
+    manage.save_state(state)
     return {
         "state": state.to_dict(),
         "event": event.model_dump(mode="json"),

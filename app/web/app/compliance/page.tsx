@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-// Govern (Compass) — live control matrix mapping every enforced control to
-// NSA MCP CSI / NIST AI RMF / EU AI Act passages from the grounding corpus.
+// Compliance (the Govern phase) — live control matrix mapping every enforced
+// control to public regulatory + security framework passages from the grounding
+// corpus. Citations resolve live against the corpus that ships with this repo.
 
 interface Citation {
   id: string;
@@ -45,7 +46,11 @@ interface ControlMatrix {
   };
 }
 
-export default function Govern() {
+function allCitations(c: Control): Citation[] {
+  return [...c.citations.nsa_mcp_csi, ...c.citations.nist_ai_rmf, ...c.citations.eu_ai_act];
+}
+
+export default function Compliance() {
   const [matrix, setMatrix] = useState<ControlMatrix | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,13 +64,13 @@ export default function Govern() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-heading text-2xl font-semibold">Compass</h1>
+        <h1 className="font-heading text-2xl font-semibold">Compliance</h1>
         <p className="text-on-surface-variant">
-          The Govern layer of the AI Workforce Management lifecycle. Every control
-          CPOA enforces — Onboarding Validation Suite checks, Policy Envelope primitives,
-          the secure-MCP baseline, the hash-chained personnel file — is mapped here to
-          the public regulatory and security frameworks the deployment is grounded in.
-          Citations resolve live against the corpus that ships with this repo.
+          The Govern phase of the AI Workforce Management lifecycle. Every control the
+          platform enforces (Onboarding Validation Suite checks, Policy Envelope
+          primitives, the secure-MCP baseline, the hash-chained personnel file) is mapped
+          here to the public regulatory and security frameworks the deployment is grounded
+          in. Citations resolve live against the corpus that ships with this repo.
         </p>
       </header>
 
@@ -97,9 +102,8 @@ export default function Govern() {
                   className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 text-sm"
                 >
                   <h3 className="font-heading text-base font-semibold text-on-surface">
-                    {f.source_id}
+                    {f.source_title}
                   </h3>
-                  <p className="mt-1 text-xs text-on-surface-variant">{f.source_title}</p>
                   <p className="mt-2 text-[11px] text-on-surface-variant">
                     {f.passage_count} passages · {f.controls_citing} controls citing
                   </p>
@@ -114,35 +118,43 @@ export default function Govern() {
               Control matrix
             </h2>
             <div className="space-y-3">
-              {matrix.controls.map((c) => (
-                <article
-                  key={c.control_id}
-                  className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-5"
-                >
-                  <header className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h3 className="font-heading text-base font-semibold text-on-surface">
-                      <span className="font-mono text-xs text-on-surface-variant">
-                        {c.control_id}
-                      </span>{" "}
-                      · {c.name}
-                    </h3>
-                    <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                      {c.category}
-                    </span>
-                  </header>
-                  <p className="mt-2 text-sm text-on-surface-variant">{c.summary}</p>
-                  <p className="mt-1 text-xs text-on-surface-variant">
-                    <span className="font-semibold text-on-surface">Enforces: </span>
-                    {c.enforces.join("; ")}
-                  </p>
+              {matrix.controls.map((c) => {
+                const cites = allCitations(c);
+                return (
+                  <article
+                    key={c.control_id}
+                    className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-5"
+                  >
+                    <header className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="font-heading text-base font-semibold text-on-surface">
+                        <span className="font-mono text-xs text-on-surface-variant">{c.control_id}</span> · {c.name}
+                      </h3>
+                      <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                        {c.category}
+                      </span>
+                    </header>
+                    <p className="mt-2 text-sm text-on-surface-variant">{c.summary}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">
+                      <span className="font-semibold text-on-surface">Enforces: </span>
+                      {c.enforces.join("; ")}
+                    </p>
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-3">
-                    <CitationColumn label="NSA MCP CSI" citations={c.citations.nsa_mcp_csi} />
-                    <CitationColumn label="NIST AI RMF" citations={c.citations.nist_ai_rmf} />
-                    <CitationColumn label="EU AI Act" citations={c.citations.eu_ai_act} />
-                  </div>
-                </article>
-              ))}
+                    {cites.length > 0 && (
+                      <ul className="mt-4 space-y-2 border-t border-outline-variant/30 pt-3">
+                        {cites.map((cite) => (
+                          <li key={cite.id} className="text-xs">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                              <span className="font-semibold text-on-surface">{cite.title}</span>
+                              <span className="text-[10px] text-on-surface-variant">· {cite.source_title}</span>
+                            </div>
+                            <p className="mt-0.5 text-on-surface-variant">{cite.snippet}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           </section>
         </>
@@ -158,28 +170,6 @@ function Metric({ label, value }: { label: string; value: number }) {
         {label}
       </div>
       <div className="mt-1 font-heading text-3xl font-semibold text-on-surface">{value}</div>
-    </div>
-  );
-}
-
-function CitationColumn({ label, citations }: { label: string; citations: Citation[] }) {
-  return (
-    <div className="rounded-lg border border-outline-variant/30 bg-surface p-3 text-xs">
-      <h4 className="mb-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-        {label}
-      </h4>
-      {citations.length === 0 ? (
-        <p className="text-on-surface-variant">—</p>
-      ) : (
-        <ul className="space-y-2">
-          {citations.map((cite) => (
-            <li key={cite.id}>
-              <p className="font-semibold text-on-surface">{cite.title}</p>
-              <p className="text-on-surface-variant">{cite.snippet}</p>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

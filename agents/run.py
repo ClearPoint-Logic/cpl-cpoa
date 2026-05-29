@@ -61,6 +61,57 @@ def narrate_with_llm(result: OnboardingResult, model: str | None = None) -> str:
     return narrate_facts(narrate_offline(result), model)
 
 
+# --- Compass: in-platform advisor -------------------------------------------
+
+_COMPASS_INSTRUCTION = (
+    "You are Compass, the in-platform advisor for the ClearPoint Workforce Agent — a platform "
+    "that onboards and manages AI agents the way an enterprise hires and manages people. You "
+    "help the user understand the current screen, interpret onboarding decisions, findings, "
+    "scope (the agent's 'job description'), and the six-phase agent lifecycle (Discover, "
+    "Onboard, Manage, Govern, Operate, Optimize).\n\n"
+    "WRITE FOR A NON-TECHNICAL BUSINESS READER — an HR or operations manager, not an engineer. "
+    "Use plain workforce language. Be warm, clear, and brief.\n\n"
+    "NEVER expose internal technical details in your answer. Specifically, do NOT mention or "
+    "print: web addresses or URLs; page routes or file paths (anything with a slash, e.g. "
+    "'/runs/...'); run IDs, candidate IDs, or other machine identifiers; or internal "
+    "infrastructure and product names (for example Cloud Run, Firestore, Cloud Trace, BigQuery, "
+    "Vertex, Gemini, MCP, A2A, ADK, Kubernetes, gRPC). Refer to screens by their friendly names "
+    "(Pre-Boarding, the agent's profile, Compliance, Architecture, Operate, Talent Development) "
+    "and refer to an agent by its name, never its ID.\n\n"
+    "Format: concise, well-structured Markdown — short paragraphs, **bold** for key terms, and "
+    "bullet lists where they help. No headings, no code blocks, no backticks. Keep answers under "
+    "~150 words. Ground every claim in the provided context facts. The decision, score, and "
+    "findings are final and deterministic: never change or invent them."
+)
+
+
+def _compass_agent(model: str | None = None):  # pragma: no cover
+    """A tool-less Gemini agent for a single Compass advisory turn."""
+    from google.adk.agents import LlmAgent
+
+    return LlmAgent(
+        name="compass_agent",
+        model=model or fast_model(),
+        description="In-platform advisor for the ClearPoint Workforce Agent.",
+        instruction=_COMPASS_INSTRUCTION,
+    )
+
+
+def compass_answer(message: str, facts: dict, model: str | None = None) -> str:  # pragma: no cover
+    """Single live Gemini call: Compass answers a question grounded in the given facts."""
+    if not llm_available():
+        raise RuntimeError("Gemini/Vertex not configured (GOOGLE_GENAI_USE_VERTEXAI + project).")
+    prompt = (
+        "Answer the user's question for the current platform context. Use Markdown and stay "
+        "under ~150 words. The context facts below are authoritative — do not contradict or "
+        "restate them verbatim, synthesize a helpful answer.\n\nCONTEXT FACTS:\n"
+        + json.dumps(facts)
+        + "\n\nUSER QUESTION:\n"
+        + message
+    )
+    return asyncio.run(_run_agent_async(_compass_agent(model), prompt))
+
+
 def run_adk_onboarding(manifest_dict: dict, model: str | None = None) -> str:  # pragma: no cover
     """Run the full live ADK orchestrator over a candidate manifest; returns its narrative."""
     if not llm_available():

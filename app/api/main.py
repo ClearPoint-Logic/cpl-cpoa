@@ -24,7 +24,7 @@ from agents.explanation import narrate_offline
 from cpoa.evals import load_expected
 from cpoa.loader import REPO_ROOT, list_fixture_names, load_manifest_by_name
 from cpoa.schemas import CandidateAgentManifest
-from cpoa.services import agent_discovery, engine, govern, manage, operate, optimize
+from cpoa.services import agent_discovery, engine, govern, manage, operate, optimize, remediation
 from cpoa.services.discovery import run_discovery
 from cpoa.services.exports import bundle_to_json, bundle_to_markdown
 from cpoa.services.grounding import build_grounding_comparison
@@ -251,6 +251,72 @@ def create_run(request: Request, body: dict) -> dict:
     run_id = f"run-{uuid.uuid4().hex[:12]}"
     payload = _serialize_run(run_id, result, narrate_offline(result))
     store.save(run_id, payload)
+    return payload
+
+
+@app.post("/api/runs/{run_id}/remediate", dependencies=[Depends(require_auth)])
+@limiter.limit("60/minute")
+def remediate_run(run_id: str, request: Request) -> dict:
+    """Remediate a Blocked run and re-run onboarding on the sanitized manifest.
+
+    The honest fix for the prompt-injection hero: the same OV-004 detector that
+    blocked the candidate is used to quarantine the offending tool description,
+    then the *same* deterministic pipeline re-runs and the candidate clears. A
+    new run is created and linked back to the original via ``remediates_run_id``;
+    a signed, hash-chained ``onboarding.remediated`` event is appended to the
+    original run's personnel file pointing forward to the cleared re-run.
+    """
+    original = store.get(run_id)
+    if not original:
+        raise HTTPException(status_code=404, detail="run not found")
+    manifest_data = original.get("candidate_manifest")
+    if not manifest_data:
+        raise HTTPException(status_code=422, detail="run has no manifest to remediate")
+
+    manifest = CandidateAgentManifest(**manifest_data)
+    sanitized, applied = remediation.sanitize_manifest(manifest)
+    if not applied:
+        raise HTTPException(
+            status_code=422,
+            detail="nothing to remediate — no prompt-injection content found in this manifest",
+        )
+
+    with span("remediation", candidate=manifest.candidate_agent_id) as s:
+        result = engine.onboard(sanitized)
+        if s is not None:
+            s.set_attribute("decision", result.decision)
+            s.set_attribute("readiness_score", result.score.score)
+
+    new_run_id = f"run-{uuid.uuid4().hex[:12]}"
+    payload = _serialize_run(new_run_id, result, narrate_offline(result))
+    payload["remediates_run_id"] = run_id
+    payload["remediation_applied"] = applied
+    store.save(new_run_id, payload)
+
+    # Close the loop on the ORIGINAL run's personnel file: append a real signed,
+    # hash-chained event that bridges the Blocked attempt to the cleared re-run.
+    quarantined = ", ".join(a["tool_id"] for a in applied if a.get("tool_id"))
+    events = list(original.get("events") or [])
+    prev_hash = events[-1].get("event_hash") if events else None
+    event = remediation.build_remediation_event(
+        manifest.candidate_agent_id,
+        previous_event_hash=prev_hash,
+        summary=(
+            f"Remediated prompt-injection in tool(s) [{quarantined}]; re-screened "
+            f"clean as {result.decision} (re-run {new_run_id})."
+        ),
+        payload={
+            "remediated_run_id": run_id,
+            "re_run_id": new_run_id,
+            "new_decision": result.decision,
+            "applied": applied,
+        },
+    )
+    events.append(event.model_dump(mode="json"))
+    original["events"] = events
+    original["remediated_by_run_id"] = new_run_id
+    store.save(run_id, original)
+
     return payload
 
 
@@ -511,6 +577,295 @@ def list_workforce_states() -> list[dict]:
     return manage.list_states()
 
 
+# --- Demo controls ----------------------------------------------------------
+# A single Reset that returns the lifecycle demo to its pristine state, so a
+# judge (or the next demo run) starts clean without a manual Firestore edit.
+
+
+@app.post("/api/demo/reset", dependencies=[Depends(require_auth)])
+def reset_demo() -> dict:
+    """Reset the lifecycle demo to its pristine state.
+
+    Clears every agent's management/lifecycle personnel file — the advance and
+    remediation events plus the remediation ledger — so flagged cards re-derive
+    as flagged (e.g. the budget-runaway agent's Govern gap reappears) and the HR
+    Console roster empties until agents are advanced again. Onboarding runs are a
+    separate store and are intentionally left intact. Returns the number of agent
+    states cleared.
+    """
+    return {"status": "reset", "cleared": manage.clear_all()}
+
+
+# --- Lifecycle continuation (Manage → Govern → Operate → Optimize) ----------
+#
+# After onboarding seals the Personnel File, the agent advances through the
+# remaining lifecycle phases. Each advance appends a real signed, hash-chained
+# event; the human-readable summary + detail come from live Govern/Operate/
+# Optimize data so the continuation is genuine, not scripted.
+
+
+def _phase_summary_detail(candidate_id: str, phase: str) -> tuple[str, dict]:
+    """Compute the (summary, detail) for one lifecycle advance from live data."""
+    if phase == "manage":
+        return (
+            "Activated on the roster — manager assigned, lifecycle tracking started",
+            {"status": "active"},
+        )
+    if phase == "govern":
+        m = govern.control_matrix()
+        s = m["summary"]
+        return (
+            f"Governance attested — {s['controls_total']} controls mapped to "
+            f"{s['frameworks_total']} frameworks ({s['citations_total']} live citations)",
+            {
+                "controls": s["controls_total"],
+                "frameworks": s["frameworks_total"],
+                "citations": s["citations_total"],
+            },
+        )
+    if phase == "operate":
+        fleet = operate.assess_fleet()
+        snap = fleet[0] if fleet else {"members": []}
+        me = next(
+            (x for x in snap.get("members", []) if x.get("candidate_agent_id") == candidate_id),
+            None,
+        )
+        anomalies = (me or {}).get("anomalies", [])
+        if anomalies:
+            return (
+                f"Performance reviewed — {len(anomalies)} anomaly signal(s) under watch",
+                {"anomalies": len(anomalies)},
+            )
+        return ("Performance reviewed — no anomalies; operating within policy", {"anomalies": 0})
+    if phase == "optimize":
+        plans = optimize.development_plans()
+        me = next(
+            (p for p in plans["plans"] if p["candidate_agent_id"] == candidate_id),
+            None,
+        )
+        items = (me or {}).get("development_items", [])
+        nxt = (me or {}).get("next_autonomy")
+        return (
+            f"Development plan accepted — {len(items)} growth item(s); "
+            f"next rung: {nxt or 'top of ladder'}",
+            {"development_items": len(items), "next_autonomy": nxt},
+        )
+    raise HTTPException(status_code=422, detail=f"unknown phase: {phase}")
+
+
+@app.post("/api/workforce/{candidate_id}/advance", dependencies=[Depends(require_auth)])
+def advance_lifecycle(candidate_id: str, body: dict) -> dict:
+    """Advance one agent into the next lifecycle phase (manage/govern/operate/
+    optimize). Appends a real hash-chained event; returns the new state + event."""
+    phase = body.get("phase")
+    if phase not in manage.PHASE_ORDER:
+        raise HTTPException(status_code=422, detail=f"phase must be one of {manage.PHASE_ORDER}")
+    summary, detail = _phase_summary_detail(candidate_id, phase)
+    actor_id = body.get("actor_id") or f"{phase}@clearpointlogic.com"
+    return manage.advance_phase(candidate_id, phase, summary=summary, detail=detail, actor_id=actor_id)
+
+
+@app.post("/api/workforce/{candidate_id}/run-lifecycle", dependencies=[Depends(require_auth)])
+def run_full_lifecycle(candidate_id: str, body: dict | None = None) -> dict:
+    """One-click: advance an agent through every remaining lifecycle phase.
+
+    Skips phases already attested on the personnel file so re-running is safe.
+    Each new phase appends its own signed, hash-chained event.
+    """
+    already = set(manage.completed_phases(manage.get_state(candidate_id)))
+    new_events: list[dict] = []
+    for phase in manage.PHASE_ORDER:
+        if phase in already:
+            continue
+        summary, detail = _phase_summary_detail(candidate_id, phase)
+        result = manage.advance_phase(
+            candidate_id, phase, summary=summary, detail=detail,
+            actor_id=f"{phase}@clearpointlogic.com",
+        )
+        new_events.append({"phase": phase, **result["event"]})
+    return {"state": manage.get_state(candidate_id).to_dict(), "events": new_events}
+
+
+def _phase_detail_full(candidate_id: str, run: dict | None) -> dict:
+    """Rich, per-phase detail for the lifecycle cards on the run page.
+
+    This is the *displayable* expansion of what each advance event is hashed
+    over: the Manage placement (manager, team, passport posture), the Govern
+    controls attested, the Operate performance review, and the Optimize
+    development plan. Every value is derived live from the run's passport +
+    the Govern/Operate/Optimize services — nothing is scripted. Each phase also
+    carries a ``status`` ("pass"/"flagged") that the per-phase gating (Phase 3)
+    builds on.
+    """
+    passport = (run or {}).get("passport") or {}
+    p_owner = passport.get("owner") or {}
+    runtime = passport.get("runtime") or {}
+    manifest = (run or {}).get("candidate_manifest") or {}
+    m_owner = manifest.get("owner") or {}
+    autonomy = manifest.get("autonomy") or {}
+    state = manage.get_state(candidate_id)
+
+    manage_detail = {
+        "status": "pass",
+        "manager_name": m_owner.get("name") or p_owner.get("name"),
+        "manager_email": state.owner_email or m_owner.get("email") or p_owner.get("email"),
+        "team": m_owner.get("team"),
+        "role": m_owner.get("role"),
+        "owner_status": p_owner.get("status"),
+        "trust_tier": passport.get("trust_tier"),
+        "autonomy": autonomy.get("level"),
+        "runtime": runtime.get("framework"),
+        "deployment": runtime.get("deployment_target"),
+        "region": runtime.get("region"),
+        "kill_switch": passport.get("kill_switch_state"),
+        "roster_status": state.status,
+    }
+
+    # GOVERN — controls the agent must attest. Findings from the gate map to a
+    # control (test_id == control_id); each unresolved mapped finding is a gap.
+    m = govern.control_matrix()
+    s = m["summary"]
+    control_names = {c["control_id"]: c["name"] for c in m["controls"]}
+    findings = (((run or {}).get("validation_run") or {}).get("findings")) or []
+    govern_resolved = manage.resolved_refs(state, "govern")
+    gaps = []
+    for f in findings:
+        cid = f.get("test_id")
+        if cid not in control_names:
+            continue
+        gaps.append({
+            "control_id": cid,
+            "control_name": control_names[cid],
+            "finding_id": f.get("finding_id"),
+            "title": f.get("title"),
+            "severity": f.get("severity"),
+            "remediation": f.get("recommended_remediation"),
+            "blocks": bool(f.get("blocks_ready_decision")),
+            "resolved": cid in govern_resolved,
+        })
+    govern_detail = {
+        "status": "flagged" if any(not g["resolved"] for g in gaps) else "pass",
+        "controls": s["controls_total"],
+        "frameworks": s["frameworks_total"],
+        "citations": s["citations_total"],
+        "framework_names": [f["source_title"] for f in m["frameworks"]],
+        "control_list": [
+            {"control_id": c["control_id"], "name": c["name"], "category": c["category"]}
+            for c in m["controls"]
+        ],
+        "gaps": gaps,
+    }
+
+    # OPERATE — Sentinel anomalies, annotated with whether they've been resolved.
+    fleet = operate.assess_fleet()
+    snap = fleet[0] if fleet else {"members": []}
+    me = next(
+        (x for x in snap.get("members", []) if x.get("candidate_agent_id") == candidate_id),
+        None,
+    )
+    operate_resolved = manage.resolved_refs(state, "operate")
+    anomalies = [
+        {**a, "resolved": a.get("rule_id") in operate_resolved}
+        for a in (me or {}).get("anomalies", [])
+    ]
+    operate_detail = {
+        "status": "flagged" if any(not a["resolved"] for a in anomalies) else "pass",
+        "anomalies": anomalies,
+        "readiness_score": (me or {}).get("readiness_score"),
+        "open_findings": (me or {}).get("open_findings"),
+        "blocking_findings": (me or {}).get("blocking_findings"),
+        "risk_tier": (me or {}).get("risk_tier"),
+        "autonomy_level": (me or {}).get("autonomy_level"),
+        "onboarding_decision": (me or {}).get("onboarding_decision"),
+        "lifecycle_events_30d": (me or {}).get("lifecycle_events_30d"),
+    }
+
+    # OPTIMIZE — development items + promotion blockers, annotated as resolved.
+    plans = optimize.development_plans()
+    plan = next(
+        (p for p in plans["plans"] if p["candidate_agent_id"] == candidate_id),
+        None,
+    )
+    optimize_resolved = manage.resolved_refs(state, "optimize")
+    dev_items = [
+        {**it, "resolved": it.get("finding_id") in optimize_resolved}
+        for it in (plan or {}).get("development_items", [])
+    ]
+    prom_blockers = [
+        {**b, "resolved": b.get("finding_id") in optimize_resolved}
+        for b in (plan or {}).get("promotion_blockers", [])
+    ]
+    next_autonomy = (plan or {}).get("next_autonomy")
+    unresolved_growth = [x for x in dev_items + prom_blockers if not x["resolved"]]
+    optimize_detail = {
+        "status": "flagged" if unresolved_growth else "pass",
+        "current_autonomy": (plan or {}).get("current_autonomy"),
+        "next_autonomy": next_autonomy,
+        # Derived from the ledger: once every item is cleared, the agent is
+        # eligible for the next rung (the raw plan can't see the remediations).
+        "ready_for_promotion": next_autonomy is not None and not unresolved_growth,
+        "development_items": dev_items,
+        "promotion_blockers": prom_blockers,
+        "monthly_budget_usd": (plan or {}).get("monthly_budget_usd"),
+        "tools": (plan or {}).get("tools", []),
+    }
+
+    return {
+        "candidate_agent_id": candidate_id,
+        "manage": manage_detail,
+        "govern": govern_detail,
+        "operate": operate_detail,
+        "optimize": optimize_detail,
+    }
+
+
+@app.get("/api/workforce/{candidate_id}/lifecycle-detail", dependencies=[Depends(require_auth)])
+def lifecycle_detail(candidate_id: str, run_id: str | None = None) -> dict:
+    """Rich per-phase detail powering the lifecycle cards on the run page.
+
+    Pass the originating ``run_id`` so the Manage card can show the agent's
+    verified passport posture. Govern/Operate/Optimize are derived live from
+    their services and keyed to this ``candidate_id``.
+    """
+    run = store.get(run_id) if run_id else None
+    return _phase_detail_full(candidate_id, run)
+
+
+_REMEDIABLE_PHASES = {"govern", "operate", "optimize"}
+
+
+@app.post("/api/workforce/{candidate_id}/remediate", dependencies=[Depends(require_auth)])
+def remediate(candidate_id: str, body: dict) -> dict:
+    """Resolve a flagged lifecycle item (Govern gap, Operate anomaly, Optimize
+    growth item).
+
+    Appends a *real* signed, hash-chained remediation event to the agent's
+    personnel file and writes a ledger entry so the per-phase gating recomputes
+    the item as resolved. Body: ``{phase, ref_id, title?, summary?, actor_id?}``.
+    Returns ``{state, event}``. 422 for an unknown phase or a missing ref_id.
+    """
+    phase = body.get("phase")
+    ref_id = body.get("ref_id")
+    if phase not in _REMEDIABLE_PHASES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"phase must be one of {sorted(_REMEDIABLE_PHASES)}",
+        )
+    if not ref_id:
+        raise HTTPException(status_code=422, detail="ref_id is required")
+    try:
+        return manage.record_remediation(
+            candidate_id,
+            phase,
+            ref_id,
+            title=body.get("title") or ref_id,
+            summary=body.get("summary") or f"Remediated {ref_id}",
+            actor_id=body.get("actor_id") or "workforce.manager@clearpointlogic.com",
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 # --- Govern phase (Compass control mapping) ---------------------------------
 
 
@@ -556,3 +911,184 @@ def optimize_plans() -> dict:
     """Per-agent development plans: open conditions become development items,
     autonomy ladder rungs become promotion targets."""
     return optimize.development_plans()
+
+
+# --- Compass (in-platform advisor) ------------------------------------------
+#
+# Compass is the platform copilot: it answers natural-language questions grounded
+# in the live run + corpus, and proposes concrete platform actions (advance the
+# lifecycle, explain a finding, deep-link to a page) that the user confirms. The
+# advisory prose is a live Gemini call when Vertex is configured; otherwise it
+# falls back to a deterministic grounded answer so the advisor is always useful.
+
+
+# Map a raw route/path (from the calling page) to a friendly, non-technical screen
+# name. Compass must never echo a raw path or run ID back to a business user.
+_FRIENDLY_PAGE: dict[str, str] = {
+    "/": "the home overview",
+    "run": "the agent's onboarding profile",
+    "/agents": "Pre-Boarding",
+    "/workforce": "the Workforce roster",
+    "/architecture": "Architecture",
+    "/compliance": "Compliance",
+    "/operate": "Operate",
+    "/optimize": "Talent Development",
+    "/grounding": "Grounding",
+}
+
+
+def _friendly_page(page: str | None) -> str:
+    """Resolve a raw page key/path to a human screen name (never leak a path)."""
+    if not page:
+        return "the platform"
+    if page in _FRIENDLY_PAGE:
+        return _FRIENDLY_PAGE[page]
+    if page.startswith("/runs"):
+        return "the agent's onboarding profile"
+    return "the platform"
+
+
+def _compass_facts(context: dict) -> tuple[dict, dict | None]:
+    """Build the grounding facts for a Compass turn; also return the loaded run.
+
+    Facts are deliberately free of machine identifiers, paths, and infrastructure
+    names so the advisor speaks in plain business language (see _COMPASS_INSTRUCTION).
+    """
+    facts: dict = {
+        "platform": "ClearPoint Workforce Agent — onboards and manages AI agents the "
+                    "way an enterprise hires and manages people",
+        "lifecycle_phases": ["Discover", "Onboard", "Manage", "Govern", "Operate", "Optimize"],
+        "current_screen": _friendly_page(context.get("page")),
+    }
+    run = store.get(context["run_id"]) if context.get("run_id") else None
+    if run:
+        state = manage.get_state(run.get("candidate_agent_id", ""))
+        facts["agent"] = {
+            "agent_name": run["agent_name"],
+            "decision": run["decision"],
+            "readiness_score": run["score"]["score"],
+            "band": run["score"]["band"],
+            "blockers": run["blockers"],
+            "conditions": run["conditions"],
+            "findings": [
+                {"severity": f["severity"], "title": f["title"]}
+                for f in run["validation_run"]["findings"]
+            ],
+            "grounded_sources": run["narrative"]["grounded_sources"],
+            "lifecycle_completed_phases": manage.completed_phases(state),
+        }
+    return facts, run
+
+
+def _compass_actions(run: dict | None) -> list[dict]:
+    """Deterministic, reliable suggested actions for the current context."""
+    if not run:
+        return [
+            {"id": "preboard", "kind": "navigate", "label": "Go to Pre-Boarding", "href": "/agents"},
+            {"id": "compliance", "kind": "navigate",
+             "label": "Open the Compliance matrix", "href": "/compliance"},
+            {"id": "capabilities", "kind": "ask", "label": "What can Compass do?",
+             "prompt": "What can you help me do on this platform?"},
+        ]
+    cid = run["candidate_agent_id"]
+    completed = set(manage.completed_phases(manage.get_state(cid)))
+    actions: list[dict] = []
+    if len(completed) < len(manage.PHASE_ORDER):
+        actions.append({
+            "id": "advance", "kind": "advance_lifecycle", "candidate_id": cid,
+            "label": "Run the full lifecycle",
+            "description": "Advance Manage → Govern → Operate → Optimize; appends signed events.",
+            "confirm": True,
+        })
+    findings = run["validation_run"]["findings"]
+    if findings:
+        top = findings[0]
+        actions.append({
+            "id": "explain_finding", "kind": "ask",
+            "label": f"Explain: {top['title']}",
+            "prompt": f'Explain the finding "{top["title"]}" in plain language and how to resolve it.',
+        })
+    actions.append({
+        "id": "open_compliance", "kind": "navigate",
+        "label": "Open the Compliance matrix", "href": "/compliance",
+    })
+    return actions
+
+
+def _compass_deterministic_answer(message: str, run: dict | None) -> str:
+    """A grounded Markdown answer used when live Gemini is unavailable.
+
+    Plain business language — no machine codes, paths, or infrastructure names.
+    """
+    if run:
+        msg = message.lower()
+        # If the question names a specific finding (by code or title), surface its remediation.
+        for f in run["validation_run"]["findings"]:
+            if f["test_id"].lower() in msg or (f["title"] and f["title"].lower() in msg):
+                return (
+                    f"**{f['title']}** _({f['severity']})_\n\n"
+                    f"{f.get('description') or ''}\n\n"
+                    f"**How to resolve it:** {f['recommended_remediation']}"
+                )
+        lines = [
+            f"**{run['agent_name']}** was evaluated by the onboarding gate.",
+            "",
+            f"- **Decision:** {run['decision']}",
+            f"- **Readiness:** {run['score']['score']}/100 ({run['score']['band']})",
+        ]
+        if run["blockers"]:
+            lines.append("- **Blockers:** " + "; ".join(run["blockers"]))
+        if run["conditions"]:
+            lines.append("- **Conditions:** " + "; ".join(run["conditions"]))
+        findings = run["validation_run"]["findings"]
+        if findings:
+            lines += [
+                "",
+                f"The pre-employment screening raised **{len(findings)} finding(s)**; the "
+                f"most important is **{findings[0]['title']}**.",
+            ]
+        lines += [
+            "",
+            "Use the **lifecycle stepper** to advance this agent through Manage, Govern, "
+            "Operate, and Optimize — each step writes a signed event to the personnel file.",
+        ]
+        return "\n".join(lines)
+    return (
+        "I'm **Compass**, your in-platform advisor. I can:\n\n"
+        "- Explain onboarding **decisions**, **findings**, and **policy**\n"
+        "- Walk you through the six-phase lifecycle — Discover, Onboard, Manage, Govern, "
+        "Operate, Optimize\n"
+        "- Take actions for you (like advancing an agent's lifecycle) **with your confirmation**\n\n"
+        "Open a candidate from **Pre-Boarding**, then ask me to explain the result."
+    )
+
+
+@app.post("/api/compass/ask", dependencies=[Depends(require_auth)])
+@limiter.limit("30/minute")  # Gemini cost guard
+def compass_ask(request: Request, body: dict) -> dict:
+    """Compass advisory turn: grounded Markdown answer + suggested actions."""
+    message = (body.get("message") or "").strip()
+    if not message:
+        raise HTTPException(status_code=422, detail="message is required")
+    context = body.get("context") or {}
+    facts, run = _compass_facts(context)
+    citations = (
+        [{"source_id": s, "title": s} for s in run["narrative"]["grounded_sources"][:4]]
+        if run else []
+    )
+    answer = _compass_deterministic_answer(message, run)
+    source = "deterministic"
+    if llm_available():
+        try:
+            from agents.run import compass_answer
+
+            answer = compass_answer(message, facts)
+            source = "gemini"
+        except Exception:  # noqa: BLE001 — never hard-fail the advisor; fall back to deterministic
+            pass
+    return {
+        "answer": answer,
+        "source": source,
+        "citations": citations,
+        "suggested_actions": _compass_actions(run),
+    }

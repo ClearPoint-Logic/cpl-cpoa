@@ -11,9 +11,9 @@ const PAIRS = [
 const LIFECYCLE = [
   { phase: "Discover", icon: "radar", href: "/workforce", note: "Real HTTPS crawl of A2A Agent Cards; surface unmanaged shadow IT" },
   { phase: "Onboard", icon: "how_to_reg", href: "/agents", note: "Six-stage gate; deterministic Ready / Conditional / Blocked" },
-  { phase: "Manage", icon: "groups", href: "/workforce", note: "HR Console: place on leave, manager handoff, role change" },
-  { phase: "Govern", icon: "policy", href: "/govern", note: "Compass: live control mapping to NSA / NIST / EU AI Act" },
-  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Sentinel: fleet health + deterministic anomaly rules" },
+  { phase: "Manage", icon: "groups", href: "/roster", note: "Roster + HR Console: place on leave, manager handoff, role change" },
+  { phase: "Govern", icon: "policy", href: "/compliance", note: "Compliance: live control mapping to NSA / NIST / EU AI Act" },
+  { phase: "Operate", icon: "monitor_heart", href: "/operate", note: "Fleet health + deterministic anomaly rules, run by the Sentinel engine" },
   { phase: "Optimize", icon: "trending_up", href: "/optimize", note: "Talent Development: per-agent autonomy-ladder plans" },
 ];
 
@@ -36,7 +36,7 @@ export default function Home() {
               personnel file. AI agents are joining the workforce with no equivalent process.
               <strong className="font-semibold text-on-surface"> ClearPoint Workforce Agent</strong>{" "}
               ships the first <strong className="font-semibold text-on-surface">six phases of AI
-              Workforce Management</strong> end-to-end — discover the unmanaged agents already
+              Workforce Management</strong> end-to-end: discover the unmanaged agents already
               running, onboard new ones through a deterministic gate, then manage, govern,
               operate, and grow them along an explicit autonomy ladder.
             </p>
@@ -107,7 +107,7 @@ export default function Home() {
         <div>
           <h2 className="font-heading text-xl font-semibold">By the numbers</h2>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Every figure below is measurable from the deployed build — not aspiration.
+            Every figure below is measurable from the deployed build, not aspiration.
           </p>
         </div>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -115,7 +115,7 @@ export default function Home() {
             { k: "&lt; 5 ms", v: "Deterministic decision latency per onboarding run (CLI; sub-second incl. live Gemini narration)" },
             { k: "8 / 8", v: "Pre-Boarding fixtures decide correctly across 8 production-shaped risk archetypes" },
             { k: "5", v: "Fail-closed pre-employment-screening checks (OV-001..005)" },
-            { k: "29", v: "Live regulatory-citation resolutions in Compass (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
+            { k: "29", v: "Live regulatory-citation resolutions in the Compliance matrix (NSA MCP CSI + NIST AI RMF + EU AI Act)" },
             { k: "19 / 19", v: "NSA MCP security baseline tests pass (auth, RBAC, integrity, replay, output filter, audit)" },
             { k: "186", v: "Total tests across unit, integration, evals, and security" },
             { k: "90 %", v: "Code coverage on the gate core (cpoa/services + agents + mcp_servers + app/api)" },
@@ -146,7 +146,7 @@ export default function Home() {
           <strong className="text-on-surface"> Agent-to-Agent (A2A)</strong> protocol.
         </p>
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          The onboarding decision — score, caps, blockers — is computed deterministically; Gemini
+          The onboarding decision (score, caps, blockers) is computed deterministically; Gemini
           contributes summaries, rationale, and explanations. Six lifecycle phases are shipped
           here; the seventh, continuous attestation across every running interaction, is the
           roadmap.

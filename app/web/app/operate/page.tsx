@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-// Operate (Sentinel) — fleet health + anomaly detection across the active
-// roster. Signals are real: derived from each agent's onboarding outcome
-// (Onboarding Validation Suite findings, readiness score, decision) and
-// the live lifecycle state from the HR Console.
+// Operate — fleet health + anomaly detection across the active roster, powered
+// by the Sentinel monitoring engine (which runs behind the scenes). Signals are
+// real: derived from each agent's onboarding outcome (Onboarding Validation Suite
+// findings, readiness score, decision) and the live lifecycle state from the HR
+// Console.
 
 interface FleetMember {
   candidate_agent_id: string;
@@ -61,12 +62,14 @@ export default function Operate() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">Sentinel</h1>
+          <h1 className="font-heading text-2xl font-semibold">Operate</h1>
           <p className="text-on-surface-variant">
-            The Operate layer of the AI Workforce Management lifecycle. Continuous
-            performance management across the active roster — real signals from each
-            agent&apos;s onboarding outcome and lifecycle history, with deterministic
-            anomaly detection that lands findings on the hash-chained personnel file.
+            The Operate phase of the AI Workforce Management lifecycle: continuous
+            performance management across the active roster, powered by the{" "}
+            <strong className="text-on-surface">Sentinel</strong> monitoring engine
+            running behind the scenes. Real signals from each agent&apos;s onboarding
+            outcome and lifecycle history, with deterministic anomaly detection that
+            lands findings on the hash-chained personnel file.
           </p>
         </div>
         <button
