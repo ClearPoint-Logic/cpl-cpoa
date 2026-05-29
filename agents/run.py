@@ -71,7 +71,7 @@ def narrate_facts(facts: dict, model: str | None = None) -> str:  # pragma: no c
         raise RuntimeError("Gemini/Vertex not configured (GOOGLE_GENAI_USE_VERTEXAI + project).")
     message = (
         "Explain this completed onboarding result in workforce language for a reviewer in 4-6 "
-        "sentences. Do NOT change the decision, score, or findings — they are final.\n"
+        "sentences. Do NOT change the decision, score, or findings. They are final.\n"
         + json.dumps(facts)
     )
     return asyncio.run(_run_agent_async(_explanation_agent(model), message))
@@ -86,12 +86,12 @@ def narrate_with_llm(result: OnboardingResult, model: str | None = None) -> str:
 # --- Compass: in-platform advisor -------------------------------------------
 
 _COMPASS_INSTRUCTION = (
-    "You are Compass, the in-platform advisor for the ClearPoint Workforce Agent — a platform "
+    "You are Compass, the in-platform advisor for the ClearPoint Workforce Agent, a platform "
     "that onboards and manages AI agents the way an enterprise hires and manages people. You "
     "help the user understand the current screen, interpret onboarding decisions, findings, "
     "scope (the agent's 'job description'), and the six-phase agent lifecycle (Discover, "
     "Onboard, Manage, Govern, Operate, Optimize).\n\n"
-    "WRITE FOR A NON-TECHNICAL BUSINESS READER — an HR or operations manager, not an engineer. "
+    "WRITE FOR A NON-TECHNICAL BUSINESS READER, an HR or operations manager, not an engineer. "
     "Use plain workforce language. Be warm, clear, and brief.\n\n"
     "NEVER expose internal technical details in your answer. Specifically, do NOT mention or "
     "print: web addresses or URLs; page routes or file paths (anything with a slash, e.g. "
@@ -100,7 +100,7 @@ _COMPASS_INSTRUCTION = (
     "Vertex, Gemini, MCP, A2A, ADK, Kubernetes, gRPC). Refer to screens by their friendly names "
     "(Pre-Boarding, the agent's profile, Compliance, Architecture, Operate, Talent Development) "
     "and refer to an agent by its name, never its ID.\n\n"
-    "Format: concise, well-structured Markdown — short paragraphs, **bold** for key terms, and "
+    "Format: concise, well-structured Markdown, short paragraphs, **bold** for key terms, and "
     "bullet lists where they help. No headings, no code blocks, no backticks. Keep answers under "
     "~150 words. Ground every claim in the provided context facts. The decision, score, and "
     "findings are final and deterministic: never change or invent them."
@@ -125,7 +125,7 @@ def compass_answer(message: str, facts: dict, model: str | None = None) -> str: 
         raise RuntimeError("Gemini/Vertex not configured (GOOGLE_GENAI_USE_VERTEXAI + project).")
     prompt = (
         "Answer the user's question for the current platform context. Use Markdown and stay "
-        "under ~150 words. The context facts below are authoritative — do not contradict or "
+        "under ~150 words. The context facts below are authoritative. Do not contradict or "
         "restate them verbatim, synthesize a helpful answer.\n\nCONTEXT FACTS:\n"
         + json.dumps(facts)
         + "\n\nUSER QUESTION:\n"
@@ -192,7 +192,7 @@ def run_sequential_adk_onboarding(manifest_dict: dict, model: str | None = None)
     """Run the explicit six-subagent SequentialAgent over the manifest; return the
     ordered subagent transcript + accumulated state.
 
-    This exercises the real ADK multi-agent path — each sub-agent makes its own
+    This exercises the real ADK multi-agent path: each sub-agent makes its own
     Gemini call and emits its keyed output. The decision remains deterministic
     (each sub-agent's tool calls into the deterministic engine functions); ADK
     is the orchestrator, not the decider.
