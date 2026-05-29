@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ClearPoint Workforce Agent: AI Workforce Management",
   description:
-    "The AI Workforce Management onboarding gate. Built on Google's agent platform (ADK, Gemini on Vertex AI, MCP, Vertex AI Search, Cloud Run, A2A) to hire AI agents the way enterprises hire humans.",
+    "Hire, onboard, and manage AI agents the way you do people. Built on Google's agent platform (ADK, Gemini on Vertex AI, MCP, Vertex AI Search, Cloud Run, A2A), with a hiring gate that decides the same way every time.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

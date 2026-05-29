@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Operate — fleet health + anomaly detection across the active roster, powered
+// Operate: fleet health + anomaly detection across the active roster, powered
 // by the Sentinel monitoring engine (which runs behind the scenes). Signals are
 // real: derived from each agent's onboarding outcome (Onboarding Validation Suite
 // findings, readiness score, decision) and the live lifecycle state from the HR
@@ -64,12 +64,11 @@ export default function Operate() {
         <div>
           <h1 className="font-heading text-2xl font-semibold">Operate</h1>
           <p className="text-on-surface-variant">
-            The Operate phase of the AI Workforce Management lifecycle: continuous
-            performance management across the active roster, powered by the{" "}
-            <strong className="text-on-surface">Sentinel</strong> monitoring engine
-            running behind the scenes. Real signals from each agent&apos;s onboarding
-            outcome and lifecycle history, with deterministic anomaly detection that
-            lands findings on the hash-chained personnel file.
+            This is the Operate phase: the ongoing performance review for your whole team, kept by{" "}
+            <strong className="text-on-surface">Sentinel</strong>, the monitoring engine working
+            quietly in the background. The signals are real, drawn from each agent&apos;s onboarding
+            results and lifecycle history. When something looks off, the same deterministic rules
+            catch it and write the finding straight to the hash-chained personnel file.
           </p>
         </div>
         <button
@@ -86,7 +85,7 @@ export default function Operate() {
           {error}
         </div>
       )}
-      {!snap && !error && <p className="text-on-surface-variant">Loading fleet health…</p>}
+      {!snap && !error && <p className="text-on-surface-variant">Checking in on the team…</p>}
 
       {snap && (
         <>
@@ -204,12 +203,12 @@ export default function Operate() {
           </section>
 
           <p className="rounded-lg border border-outline-variant/30 bg-surface-container-lowest p-3 text-xs italic text-on-surface-variant">
-            <span className="font-semibold not-italic">How this works:</span> Sentinel
-            runs the gate code against each fixture (deterministically, no LLM) to
-            recover findings + readiness; combines that with the live lifecycle state
-            from the HR Console; then applies anomaly rules. Any anomaly the operator
-            records via the API appends a real <code>operate.anomaly_detected</code>{" "}
-            event to the agent&apos;s personnel-file hash chain.
+            <span className="font-semibold not-italic">Under the hood:</span> Sentinel re-runs the
+            gate code against each agent (deterministically, no LLM) to recover its findings and
+            readiness, blends that with the live lifecycle state from the HR Console, then runs the
+            anomaly rules over the result. Anything the operator records through the API lands as a
+            real <code>operate.anomaly_detected</code> event on the agent&apos;s personnel-file hash
+            chain.
           </p>
         </>
       )}

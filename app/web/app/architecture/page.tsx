@@ -83,8 +83,9 @@ export default function Architecture() {
       <div>
         <h1 className="font-heading text-2xl font-semibold">Architecture</h1>
         <p className="text-on-surface-variant">
-          How the AI Workforce Management onboarding gate is composed on Google&apos;s agent platform.
-          Top-to-bottom is the request path, and every box is a Google Cloud product or open protocol.
+          Here&apos;s how the whole thing fits together on Google&apos;s agent platform. Read it
+          top to bottom and you&apos;re following a request through the system. Every box is either a
+          Google Cloud product or an open protocol, no placeholders.
         </p>
       </div>
 
@@ -114,16 +115,17 @@ export default function Architecture() {
               <h3 className="font-heading text-sm font-semibold text-on-surface">Platform agents (cross-cutting)</h3>
             </div>
             <p className="mt-1 text-xs text-on-surface-variant">
-              <strong className="text-on-surface">Compass</strong> reads across every layer to advise in natural
-              language and act on confirmation. <strong className="text-on-surface">Sentinel</strong> watches the
-              active roster in the background and surfaces anomalies up to Compass and the operator.
+              <strong className="text-on-surface">Compass</strong> sees across every layer, so it can answer in
+              plain language and take action once you confirm. <strong className="text-on-surface">Sentinel</strong>{" "}
+              keeps an eye on the active roster in the background and raises anything unusual to Compass and to you.
             </p>
           </div>
         </div>
         <p className="text-sm text-on-surface-variant">
-          The onboarding decision (score, caps, blockers, final disposition) is computed
-          deterministically from §11 schemas. Gemini contributes summaries, rationale, and
-          explanations only, so the gate is reliable, reproducible, and audit-defensible.
+          The decision itself (the score, the caps, the blockers, the final call) is computed
+          deterministically from the §11 schemas. Gemini only handles the words around it: summaries,
+          rationale, explanations. That split is the point. It keeps the gate reliable, reproducible,
+          and easy to defend in an audit.
         </p>
       </section>
 

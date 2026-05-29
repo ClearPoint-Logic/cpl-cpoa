@@ -48,10 +48,10 @@ export default function Optimize() {
       <header>
         <h1 className="font-heading text-2xl font-semibold">Talent Development</h1>
         <p className="text-on-surface-variant">
-          The Optimize layer of the AI Workforce Management lifecycle. Each agent has
-          a real development plan: open conditions from the Onboarding Validation
-          Suite become career-development items; the autonomy ladder rungs become
-          promotion targets. Resolve the items, earn the next rung.
+          This is the Optimize phase, where agents grow. Everyone gets a real development plan: the
+          open conditions from the Onboarding Validation Suite become things to work on, and each
+          rung of the autonomy ladder becomes a promotion to earn. Clear the items, earn the next
+          rung. Just like the rest of your team.
         </p>
       </header>
 
@@ -60,7 +60,7 @@ export default function Optimize() {
           {error}
         </div>
       )}
-      {!data && !error && <p className="text-on-surface-variant">Loading plans…</p>}
+      {!data && !error && <p className="text-on-surface-variant">Drawing up development plans…</p>}
 
       {data && (
         <>
@@ -150,9 +150,9 @@ export default function Optimize() {
 
                   {p.development_items.length === 0 && p.promotion_blockers.length === 0 && (
                     <p className="mt-3 text-xs italic text-on-surface-variant">
-                      No outstanding items. {p.next_autonomy
-                        ? `Eligible for promotion to ${p.next_autonomy}.`
-                        : "Top of the ladder."}
+                      Nothing outstanding. {p.next_autonomy
+                        ? `Ready to move up to ${p.next_autonomy}.`
+                        : "Already at the top of the ladder."}
                     </p>
                   )}
                 </article>

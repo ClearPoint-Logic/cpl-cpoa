@@ -64,10 +64,10 @@ function eventLabel(t: string): string {
 // Post-onboarding lifecycle phases, in order. Advancing each appends a signed,
 // hash-chained event to the personnel file (same chain as the HR Console).
 const LIFECYCLE_PHASES: { phase: LifecyclePhase; label: string; blurb: string; icon: string }[] = [
-  { phase: "manage", label: "Manage", blurb: "Activate into the managed roster. HR Console controls available.", icon: "groups" },
-  { phase: "govern", label: "Govern", blurb: "Attest enforced controls against NSA / NIST / EU AI Act.", icon: "policy" },
-  { phase: "operate", label: "Operate", blurb: "Review fleet performance and Sentinel anomaly signals.", icon: "monitor_heart" },
-  { phase: "optimize", label: "Optimize", blurb: "Accept the autonomy-ladder development plan.", icon: "trending_up" },
+  { phase: "manage", label: "Manage", blurb: "Add to the team and open up the HR Console.", icon: "groups" },
+  { phase: "govern", label: "Govern", blurb: "Attest its controls against NSA, NIST, and the EU AI Act.", icon: "policy" },
+  { phase: "operate", label: "Operate", blurb: "Check performance and any Sentinel anomaly signals.", icon: "monitor_heart" },
+  { phase: "optimize", label: "Optimize", blurb: "Sign off on its autonomy-ladder development plan.", icon: "trending_up" },
 ];
 const PHASE_EVENT_TYPE: Record<LifecyclePhase, string> = {
   manage: "manage.activated",
@@ -98,7 +98,7 @@ function Raw({ obj }: { obj: unknown }) {
 
 // --- Lifecycle phase detail cards -------------------------------------------
 // After a phase is attested, expand it into a rich card that shows *what* that
-// phase assessed — placement + passport (Manage), controls + frameworks
+// phase assessed: placement + passport (Manage), controls + frameworks
 // (Govern), the performance review (Operate), the development plan (Optimize).
 
 function StatusPill({ status }: { status: "pass" | "flagged" }) {
@@ -294,7 +294,7 @@ function PhaseDetailCard({
           </ul>
         ) : (
           <p className="mt-2 text-[11px] font-medium text-decision-ready">
-            No anomalies. Operating within policy.
+            All quiet. This one&apos;s operating well within policy.
           </p>
         )}
         <Link href="/operate" className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
@@ -488,8 +488,8 @@ export default function RunPage({ params }: { params: { id: string } }) {
     }
   }
 
-  if (error) return <p role="alert" className="text-decision-blocked">Could not load run: {error}</p>;
-  if (!run) return <p className="text-slate-500">Loading run…</p>;
+  if (error) return <p role="alert" className="text-decision-blocked">We couldn&apos;t load this run: {error}</p>;
+  if (!run) return <p className="text-slate-500">Loading this run…</p>;
 
   // Prompt-injection hero: a Blocked run that carries an OV-004 finding can be
   // remediated (quarantine the tool) and re-run. Hide the CTA once it has been.
@@ -529,7 +529,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
         </dl>
       </section>
 
-      {/* Prompt-injection hero — the sad path and its one-click fix. */}
+      {/* Prompt-injection hero: the sad path and its one-click fix. */}
       {canRemediate && (
         <section className="rounded-xl border-2 border-decision-blocked/40 bg-decision-blocked/5 p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -544,9 +544,10 @@ export default function RunPage({ params }: { params: { id: string } }) {
                 {injectionFinding?.title}. {injectionFinding?.recommended_remediation}
               </p>
               <p className="mt-2 text-xs text-slate-500">
-                Remediating quarantines the offending tool description (treating it as untrusted
-                data per the NSA MCP baseline) and re-runs the <em>same</em> deterministic
-                onboarding pipeline. Nothing is hand-scored: the candidate either clears or it doesn&apos;t.
+                Hit remediate and we quarantine the offending tool description (treating it as
+                untrusted data, per the NSA MCP baseline) and re-run the <em>exact same</em>
+                deterministic onboarding pipeline. No one nudges the score by hand: the candidate
+                either clears on its own or it doesn&apos;t.
               </p>
               {remediateErr && (
                 <p role="alert" className="mt-2 text-xs font-medium text-decision-blocked">
@@ -576,8 +577,8 @@ export default function RunPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-decision-ready">verified</span>
               <p className="text-sm text-slate-700">
-                This blocked candidate was remediated: the prompt injection was quarantined and
-                re-screened clean.
+                This one was blocked, then fixed: we quarantined the prompt injection and it came
+                back through screening clean.
               </p>
             </div>
             <Link
@@ -591,7 +592,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
         </section>
       )}
 
-      {/* Cleared re-run — provenance back to the blocked original. */}
+      {/* Cleared re-run: provenance back to the blocked original. */}
       {run.remediates_run_id && (
         <section className="rounded-xl border border-decision-ready/40 bg-decision-ready/5 p-4 shadow-sm">
           <div className="flex items-center gap-2">
@@ -601,14 +602,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
             </h2>
           </div>
           <p className="mt-1 text-sm text-slate-600">
-            Produced by remediating a previously{" "}
+            This came from fixing a previously{" "}
             <Link
               href={`/runs/${run.remediates_run_id}`}
               className="font-semibold text-primary hover:underline"
             >
               Blocked candidate
             </Link>
-            . The same onboarding pipeline re-ran on the sanitized manifest.
+            . The very same onboarding pipeline ran again, this time on the cleaned-up manifest.
           </p>
           {run.remediation_applied && run.remediation_applied.length > 0 && (
             <ul className="mt-2 space-y-1">
@@ -657,14 +658,14 @@ export default function RunPage({ params }: { params: { id: string } }) {
             </ol>
           </section>
 
-          {/* 2.5 Lifecycle continuation — advance past onboarding through the full lifecycle */}
+          {/* 2.5 Lifecycle continuation: advance past onboarding through the full lifecycle */}
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="font-heading text-lg font-semibold">Lifecycle continuation</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Onboarding is the first phase. Advance {run.agent_name} through the rest of the
-                  workforce lifecycle. Each step appends a signed, hash-chained event to the personnel file.
+                  Onboarding is just day one. Walk {run.agent_name} through the rest of its
+                  career here. Every step you take adds a signed, hash-chained event to the personnel file.
                 </p>
               </div>
               {allPhasesDone ? (
@@ -849,7 +850,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-decision-ready">No findings. All pre-employment screening checks passed.</p>
+                      <p className="text-decision-ready">Clean record. Every pre-employment screening check passed.</p>
                     )}
                   </Section>
                 </>
@@ -893,7 +894,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
             <div className="mt-3 text-3xl font-bold text-cpl-charcoal">
               {run.score.score}<span className="text-base font-normal text-slate-400">/100</span>
             </div>
-            <div className="text-sm text-slate-500">Day-1 readiness · {run.score.band}</div>
+            <div className="text-sm text-slate-500">Day-one readiness · {run.score.band}</div>
             <div className="mt-3 space-y-1">
               {Object.entries(run.score.components).map(([k, v]) => (
                 <div key={k} className="text-xs">

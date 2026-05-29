@@ -8,8 +8,8 @@ import { api } from "@/lib/api";
 
 type NavItem = { href: string; label: string; hint?: string };
 
-// Every stage of the workforce process lives under one "Workforce" menu — the
-// six-phase lifecycle, in order, mapping one-to-one to a surface: Hire
+// Every stage of the workforce process lives under one "Workforce" menu: the
+// six-phase lifecycle, in order, mapping one-to-one to a surface. Hire
 // (Discover), Pre-Boarding (Onboard), Roster (Manage), Compliance (Govern),
 // Operate, and Talent Development (Optimize). Sentinel is the monitoring engine
 // behind Operate, not a page of its own.
@@ -22,7 +22,7 @@ const WORKFORCE: NavItem[] = [
   { href: "/optimize", label: "Talent Development", hint: "Optimize" },
 ];
 
-// Demo collateral — the non-lifecycle "how it's built" evidence surfaces.
+// Demo collateral: the non-lifecycle "how it's built" evidence surfaces.
 const DEMO: NavItem[] = [
   { href: "/architecture", label: "Architecture" },
   { href: "/grounding", label: "Grounding" },
@@ -153,9 +153,9 @@ function NavMenu({
 }
 
 // Reset the lifecycle demo to its pristine state. Two-click confirm (so an
-// errant click never wipes mid-demo state), then a reload so every surface —
-// the roster and the per-phase lifecycle cards — re-derives from the clean
-// store. Onboarding runs are untouched server-side.
+// errant click never wipes mid-demo state), then a reload so every surface (the
+// roster and the per-phase lifecycle cards) re-derives from the clean store.
+// Onboarding runs are untouched server-side.
 type ResetPhase = "idle" | "confirm" | "working" | "done" | "error";
 
 function resetLabel(phase: ResetPhase): { icon: string; text: string; tone: string } {

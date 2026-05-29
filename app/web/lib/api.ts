@@ -92,7 +92,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phase, ref_id: refId, title, summary }),
     }),
-  // Demo controls — reset the lifecycle demo to its pristine state (clears all
+  // Demo controls: reset the lifecycle demo to its pristine state (clears all
   // management/lifecycle state; onboarding runs are left intact).
   resetDemo: () =>
     j<{ status: string; cleared: number }>("/api/demo/reset", { method: "POST" }),
