@@ -209,7 +209,7 @@ function DiscoveredSection({
                   Send to Pre-Boarding →
                 </Link>
                 <span className="text-[11px] text-on-surface-variant">
-                  Routes it to the onboarding gate — Passport, Policy, and Evidence
+                  Routes it to the onboarding gate (Passport, Policy, and Evidence)
                 </span>
               </div>
             </li>
