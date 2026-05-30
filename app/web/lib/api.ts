@@ -17,7 +17,20 @@ import type {
 // Relative paths; next.config rewrites /api/* to the FastAPI backend (dev + deploy).
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { cache: "no-store", ...init });
-  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    // Surface a clean message instead of a raw JSON envelope. FastAPI errors
+    // carry a string `detail`; fall back to the body text, then the status.
+    const body = await res.text();
+    let detail = body;
+    try {
+      const parsed = JSON.parse(body);
+      if (typeof parsed?.detail === "string") detail = parsed.detail;
+      else if (typeof parsed?.message === "string") detail = parsed.message;
+    } catch {
+      // Non-JSON body — keep the raw text.
+    }
+    throw new Error(detail || `Request failed (${res.status})`);
+  }
   return res.json() as Promise<T>;
 }
 
