@@ -232,7 +232,28 @@ function PhaseDetailCard({
                   {g.resolved && <ResolvedPill />}
                 </div>
                 <p className="font-medium text-cpl-charcoal">{g.title}</p>
-                <p className="text-slate-600">↳ {g.remediation}</p>
+                {/* Deterministic reasoning, visible *before* the attest click:
+                    requirement → what we found → compensating control. */}
+                <dl className="mt-1.5 space-y-1 rounded bg-white/70 p-2 text-[10px] leading-snug">
+                  {g.requirement && (
+                    <div>
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">Control requires</dt>
+                      <dd className="text-slate-600">{g.requirement}</dd>
+                    </div>
+                  )}
+                  {g.observed && (
+                    <div>
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">What we found</dt>
+                      <dd className="text-slate-600">{g.observed}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt className="font-semibold uppercase tracking-wider text-slate-400">
+                      Compensating control (attested)
+                    </dt>
+                    <dd className="text-slate-600">{g.remediation}</dd>
+                  </div>
+                </dl>
                 {!g.resolved && (
                   <ResolveButton
                     label="Attest & remediate"
