@@ -71,7 +71,7 @@ const LAYERS: Layer[] = [
     products: ["Firestore", "Cloud KMS", "Cloud Trace"],
     nodes: [
       { name: "Firestore", note: "runs + lifecycle state", icon: "database" },
-      { name: "Evidence chain", note: "SHA-256 + KMS signing", icon: "lock" },
+      { name: "Evidence chain", note: "SHA-256 HMAC · KMS-ready", icon: "lock" },
       { name: "Cloud Trace", note: "span-level observability", icon: "timeline" },
     ],
   },

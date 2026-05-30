@@ -60,6 +60,15 @@ deterministic reasoning and Gemini-authored narrative.
 - **Optimize (Talent Development)** — Per-agent development plans. Open conditions become
   career-development items; the autonomy ladder (L0 → L5) is the promotion track.
 
+## Who it's for & how it's priced
+
+**Buyer:** the person accountable for AI governance as an enterprise stands up an internal agent
+fleet — the **CISO, Head of AI Operations, or platform owner** who has to answer "which agents are
+running, what can they do, and can we prove it?"
+
+**Model:** B2B SaaS, **priced per governed agent per month** — metered per onboarding run, scaling
+from a single team to a multi-org platform.
+
 ## How we built it
 
 A net-new multi-agent workflow orchestrated with Google's **Agent Development Kit (ADK)** — a

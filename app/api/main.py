@@ -419,6 +419,9 @@ _A2A_CARD = {
     ),
     "version": "0.4.0",
     "protocolVersion": "0.2.0",
+    # REST (HTTP+JSON) binding: methods are served at `${url}/message:send`, so a
+    # conformant client resolves the working endpoint from `url` + this hint.
+    "preferredTransport": "HTTP+JSON",
     "capabilities": {"streaming": False, "pushNotifications": False},
     "defaultInputModes": ["application/json", "text/plain"],
     "defaultOutputModes": ["application/json", "text/plain"],
@@ -440,9 +443,18 @@ _A2A_CARD = {
 
 @app.get("/.well-known/agent.json")
 def a2a_agent_card(request: Request) -> dict:
-    """A2A Agent Card — open for discovery by other enterprise agents."""
+    """A2A Agent Card — open for discovery by other enterprise agents.
+
+    Advertise the basic-auth scheme only when judge credentials are configured
+    (i.e. when ``require_auth`` actually enforces it). When the endpoint is open,
+    the card must not claim an auth scheme it does not enforce.
+    """
     base = str(request.base_url).rstrip("/")
-    return {**_A2A_CARD, "url": f"{base}/a2a/v1"}
+    card = {**_A2A_CARD, "url": f"{base}/a2a/v1"}
+    if not (_USER and _PASS):
+        card.pop("securitySchemes", None)
+        card.pop("security", None)
+    return card
 
 
 @app.post("/a2a/v1/message:send", dependencies=[Depends(require_auth)])
@@ -726,6 +738,7 @@ def _phase_detail_full(candidate_id: str, run: dict | None) -> dict:
     m = govern.control_matrix()
     s = m["summary"]
     control_names = {c["control_id"]: c["name"] for c in m["controls"]}
+    control_reqs = {c["control_id"]: c["summary"] for c in m["controls"]}
     findings = (((run or {}).get("validation_run") or {}).get("findings")) or []
     govern_resolved = manage.resolved_refs(state, "govern")
     gaps = []
@@ -739,6 +752,11 @@ def _phase_detail_full(candidate_id: str, run: dict | None) -> dict:
             "finding_id": f.get("finding_id"),
             "title": f.get("title"),
             "severity": f.get("severity"),
+            # Deterministic reasoning, surfaced before the attest click: what the
+            # control requires, what the gate actually observed, and the
+            # compensating control the owner attests (the remediation).
+            "requirement": control_reqs.get(cid),
+            "observed": f.get("description") or None,
             "remediation": f.get("recommended_remediation"),
             "blocks": bool(f.get("blocks_ready_decision")),
             "resolved": cid in govern_resolved,

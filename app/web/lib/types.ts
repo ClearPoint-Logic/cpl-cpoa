@@ -105,6 +105,8 @@ export interface GovernGap {
   finding_id: string;
   title: string;
   severity: string;
+  requirement?: string | null;
+  observed?: string | null;
   remediation: string;
   blocks: boolean;
   resolved: boolean;

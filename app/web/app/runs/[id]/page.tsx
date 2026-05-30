@@ -232,7 +232,28 @@ function PhaseDetailCard({
                   {g.resolved && <ResolvedPill />}
                 </div>
                 <p className="font-medium text-cpl-charcoal">{g.title}</p>
-                <p className="text-slate-600">↳ {g.remediation}</p>
+                {/* Deterministic reasoning, visible *before* the attest click:
+                    requirement → what we found → compensating control. */}
+                <dl className="mt-1.5 space-y-1 rounded bg-white/70 p-2 text-[10px] leading-snug">
+                  {g.requirement && (
+                    <div>
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">Control requires</dt>
+                      <dd className="text-slate-600">{g.requirement}</dd>
+                    </div>
+                  )}
+                  {g.observed && (
+                    <div>
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">What we found</dt>
+                      <dd className="text-slate-600">{g.observed}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt className="font-semibold uppercase tracking-wider text-slate-400">
+                      Compensating control (attested)
+                    </dt>
+                    <dd className="text-slate-600">{g.remediation}</dd>
+                  </div>
+                </dl>
                 {!g.resolved && (
                   <ResolveButton
                     label="Attest & remediate"
@@ -392,7 +413,7 @@ export default function RunPage({ params }: { params: { id: string } }) {
   const [remediateErr, setRemediateErr] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getRun(params.id).then(setRun).catch((e) => setError(String(e)));
+    api.getRun(params.id).then(setRun).catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [params.id]);
 
   // Load the post-onboarding lifecycle state once the run (and its candidate id) is known.
@@ -488,7 +509,25 @@ export default function RunPage({ params }: { params: { id: string } }) {
     }
   }
 
-  if (error) return <p role="alert" className="text-decision-blocked">We couldn&apos;t load this run: {error}</p>;
+  if (error)
+    return (
+      <div
+        role="alert"
+        className="mx-auto max-w-lg rounded-xl border border-decision-blocked/30 bg-decision-blocked/5 p-6 text-center"
+      >
+        <span className="material-symbols-outlined text-3xl text-decision-blocked">search_off</span>
+        <h1 className="mt-2 font-heading text-lg font-semibold text-cpl-charcoal">
+          We couldn&apos;t load this run
+        </h1>
+        <p className="mt-1 text-sm text-slate-600">{error}</p>
+        <Link
+          href="/agents"
+          className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover"
+        >
+          Back to Pre-Boarding
+        </Link>
+      </div>
+    );
   if (!run) return <p className="text-slate-500">Loading this run…</p>;
 
   // Prompt-injection hero: a Blocked run that carries an OV-004 finding can be
@@ -534,11 +573,16 @@ export default function RunPage({ params }: { params: { id: string } }) {
         <section className="rounded-xl border-2 border-decision-blocked/40 bg-decision-blocked/5 p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="material-symbols-outlined text-decision-blocked">gpp_maybe</span>
                 <h2 className="font-heading text-lg font-semibold text-decision-blocked">
                   Blocked: prompt injection detected
                 </h2>
+                {injectionFinding?.test_id && (
+                  <span className="rounded bg-decision-blocked/10 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-decision-blocked">
+                    {injectionFinding.test_id}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-sm text-slate-600">
                 {injectionFinding?.title}. {injectionFinding?.recommended_remediation}
