@@ -14,6 +14,10 @@ JUDGE_USER="${CPOA_JUDGE_BASIC_AUTH_USER:-judge}"
 JUDGE_PASS="${CPOA_JUDGE_BASIC_AUTH_PASS:-$(openssl rand -base64 18 | tr -dc 'A-Za-z0-9' | cut -c1-16)}"
 MCP_TOKEN="${CPOA_MCP_AUTH_TOKEN:-$(openssl rand -hex 16)}"
 SIGNING_SECRET="${CPOA_SIGNING_SECRET:-$(openssl rand -hex 32)}"
+# Warm instances for the user-facing services. Default 0 (scale-to-zero, lowest
+# cost); set CPOA_MIN_INSTANCES=1 before recording or the judging window to
+# eliminate Cloud Run cold-start latency on Compass and lifecycle mutations.
+MIN_INSTANCES="${CPOA_MIN_INSTANCES:-0}"
 
 gcloud config set project "${PROJECT}" -q
 echo "== Enabling APIs =="
@@ -38,7 +42,7 @@ gcloud run deploy cpoa-mcp --image "${AR}/mcp:latest" --region "${REGION}" \
 echo "== Build + deploy API =="
 submit "${AR}/api:latest" infra/cloudrun/Dockerfile.api
 gcloud run deploy cpoa-api --image "${AR}/api:latest" --region "${REGION}" \
-  --allow-unauthenticated --min-instances=0 \
+  --allow-unauthenticated --min-instances="${MIN_INSTANCES}" \
   --set-env-vars "GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_LOCATION=${VERTEX_LOCATION},CPL_GEMINI_MODEL_FAST=gemini-3.5-flash,CPOA_STORAGE_MODE=firestore,CPOA_GROUNDING_MODE=${CPOA_GROUNDING_MODE:-vertex_ai_search},CPOA_SIGNING_MODE=${CPOA_SIGNING_MODE:-local_hmac},CPOA_SIGNING_SECRET=${SIGNING_SECRET},CPOA_JUDGE_BASIC_AUTH_USER=${JUDGE_USER},CPOA_JUDGE_BASIC_AUTH_PASS=${JUDGE_PASS},CPOA_CORS_ORIGINS=${CPOA_CORS_ORIGINS:-*}" -q
 API_URL="$(gcloud run services describe cpoa-api --region "${REGION}" --format='value(status.url)')"
 echo "API_URL=${API_URL}"
@@ -46,7 +50,7 @@ echo "API_URL=${API_URL}"
 echo "== Build + deploy Web (judge UI) =="
 submit "${AR}/web:latest" infra/cloudrun/Dockerfile.web "${API_URL}"
 gcloud run deploy cpoa-web --image "${AR}/web:latest" --region "${REGION}" \
-  --allow-unauthenticated --min-instances=0 \
+  --allow-unauthenticated --min-instances="${MIN_INSTANCES}" \
   --set-env-vars "CPOA_API_BASE=${API_URL},CPOA_JUDGE_BASIC_AUTH_USER=${JUDGE_USER},CPOA_JUDGE_BASIC_AUTH_PASS=${JUDGE_PASS}" -q
 WEB_URL="$(gcloud run services describe cpoa-web --region "${REGION}" --format='value(status.url)')"
 
