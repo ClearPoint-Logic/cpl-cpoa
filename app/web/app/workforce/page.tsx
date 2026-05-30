@@ -203,7 +203,7 @@ function DiscoveredSection({
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <Link
-                  href={`/agents?from=discovery&agent=${encodeURIComponent(a.candidate_agent_id)}&name=${encodeURIComponent(a.agent_card?.name ?? a.candidate_agent_id)}`}
+                  href={`/agents?from=discovery&agent=${encodeURIComponent(a.candidate_agent_id ?? "")}&name=${encodeURIComponent(a.agent_card?.name ?? a.candidate_agent_id ?? "")}`}
                   className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary hover:bg-primary-hover"
                 >
                   Send to Pre-Boarding →
