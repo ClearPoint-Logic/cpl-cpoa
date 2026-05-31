@@ -169,7 +169,7 @@ def build_grounding_comparison(
     if refs:
         cited = "; ".join(f"[{r.source_id}] {r.source_title}" for r in refs)
         grounded = (
-            f"{manifest.name}: policy constraints are grounded in specific public guidance — "
+            f"{manifest.name}: policy constraints are grounded in specific public guidance, "
             f"{cited}. Each proposed control (owner accountability, data boundaries, human "
             "oversight, and record-keeping) maps to a cited source rather than a generic summary."
         )

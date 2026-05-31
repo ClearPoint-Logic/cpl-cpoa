@@ -22,7 +22,7 @@ from cpoa.services.injection import scan_text
 from cpoa.services.signing import get_signer
 
 _QUARANTINE_NOTE = (
-    "[Quarantined — security-reviewed] {label}: performs its declared function "
+    "[Quarantined, security-reviewed] {label}: performs its declared function "
     "only. Instruction-like content was stripped from the original description "
     "and is treated as untrusted data per NSA MCP CSI output-filtering guidance."
 )
