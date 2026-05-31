@@ -114,7 +114,7 @@ def _anomaly_rules(member: FleetMember, manifest) -> list[dict]:
             "rule_id": "BLOCKER-AT-INTAKE",
             "severity": "high",
             "summary": (
-                f"{member.blocking_findings} blocking finding(s) at intake — "
+                f"{member.blocking_findings} blocking finding(s) at intake, "
                 "agent should not be on the active roster."
             ),
         })

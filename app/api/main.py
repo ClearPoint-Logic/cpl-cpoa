@@ -219,7 +219,7 @@ def create_run_via_adk(request: Request, body: dict) -> dict:
         "tools_available": ["onboard_candidate_agent", "lookup_grounding"],
         "narrative": narrative,
         "note": (
-            "This is the live ADK path — Gemini drives the orchestrator's tool "
+            "This is the live ADK path. Gemini drives the orchestrator's tool "
             "calls. The decision is computed deterministically by the underlying "
             "engine function (cpoa.services.engine.onboard); ADK is the conductor."
         ),
@@ -278,7 +278,7 @@ def remediate_run(run_id: str, request: Request) -> dict:
     if not applied:
         raise HTTPException(
             status_code=422,
-            detail="nothing to remediate — no prompt-injection content found in this manifest",
+            detail="nothing to remediate, no prompt-injection content found in this manifest",
         )
 
     with span("remediation", candidate=manifest.candidate_agent_id) as s:
@@ -395,12 +395,12 @@ def grounding_comparison(name: str) -> dict:
 @app.get("/api/architecture")
 def architecture() -> dict:
     return {
-        "title": "ClearPoint Workforce Agent — built on Google's agent platform",
+        "title": "ClearPoint Workforce Agent, built on Google's agent platform",
         "intelligence": "Gemini 3.5 Flash on Vertex AI (region: global)",
-        "orchestration": "Agent Development Kit (ADK) — root LlmAgent + six subagents",
+        "orchestration": "Agent Development Kit (ADK): root LlmAgent + six subagents",
         "tools": "Model Context Protocol (HTTP MCP server, NSA MCP security baseline)",
         "grounding": "Vertex AI Search (Discovery Engine) with local-corpus fallback",
-        "interoperability": "Agent-to-Agent (A2A) protocol — Agent Card at /.well-known/agent.json",
+        "interoperability": "Agent-to-Agent (A2A) protocol: Agent Card at /.well-known/agent.json",
         "persistence": "Firestore for durable runs across scale-to-zero",
         "runtime": "Cloud Run (web, API, MCP) deployed via Cloud Build",
         "observability": "Cloud Trace spans + SHA-256 hash-chained evidence",
@@ -620,14 +620,14 @@ def _phase_summary_detail(candidate_id: str, phase: str) -> tuple[str, dict]:
     """Compute the (summary, detail) for one lifecycle advance from live data."""
     if phase == "manage":
         return (
-            "Activated on the roster — manager assigned, lifecycle tracking started",
+            "Activated on the roster: manager assigned, lifecycle tracking started",
             {"status": "active"},
         )
     if phase == "govern":
         m = govern.control_matrix()
         s = m["summary"]
         return (
-            f"Governance attested — {s['controls_total']} controls mapped to "
+            f"Governance attested: {s['controls_total']} controls mapped to "
             f"{s['frameworks_total']} frameworks ({s['citations_total']} live citations)",
             {
                 "controls": s["controls_total"],
@@ -645,10 +645,10 @@ def _phase_summary_detail(candidate_id: str, phase: str) -> tuple[str, dict]:
         anomalies = (me or {}).get("anomalies", [])
         if anomalies:
             return (
-                f"Performance reviewed — {len(anomalies)} anomaly signal(s) under watch",
+                f"Performance reviewed: {len(anomalies)} anomaly signal(s) under watch",
                 {"anomalies": len(anomalies)},
             )
-        return ("Performance reviewed — no anomalies; operating within policy", {"anomalies": 0})
+        return ("Performance reviewed: no anomalies; operating within policy", {"anomalies": 0})
     if phase == "optimize":
         plans = optimize.development_plans()
         me = next(
@@ -658,7 +658,7 @@ def _phase_summary_detail(candidate_id: str, phase: str) -> tuple[str, dict]:
         items = (me or {}).get("development_items", [])
         nxt = (me or {}).get("next_autonomy")
         return (
-            f"Development plan accepted — {len(items)} growth item(s); "
+            f"Development plan accepted: {len(items)} growth item(s); "
             f"next rung: {nxt or 'top of ladder'}",
             {"development_items": len(items), "next_autonomy": nxt},
         )
@@ -973,7 +973,7 @@ def _compass_facts(context: dict) -> tuple[dict, dict | None]:
     names so the advisor speaks in plain business language (see _COMPASS_INSTRUCTION).
     """
     facts: dict = {
-        "platform": "ClearPoint Workforce Agent — onboards and manages AI agents the "
+        "platform": "ClearPoint Workforce Agent: onboards and manages AI agents the "
                     "way an enterprise hires and manages people",
         "lifecycle_phases": ["Discover", "Onboard", "Manage", "Govern", "Operate", "Optimize"],
         "current_screen": _friendly_page(context.get("page")),
@@ -1068,13 +1068,13 @@ def _compass_deterministic_answer(message: str, run: dict | None) -> str:
         lines += [
             "",
             "Use the **lifecycle stepper** to advance this agent through Manage, Govern, "
-            "Operate, and Optimize — each step writes a signed event to the personnel file.",
+            "Operate, and Optimize. Each step writes a signed event to the personnel file.",
         ]
         return "\n".join(lines)
     return (
         "I'm **Compass**, your in-platform advisor. I can:\n\n"
         "- Explain onboarding **decisions**, **findings**, and **policy**\n"
-        "- Walk you through the six-phase lifecycle — Discover, Onboard, Manage, Govern, "
+        "- Walk you through the six-phase lifecycle: Discover, Onboard, Manage, Govern, "
         "Operate, Optimize\n"
         "- Take actions for you (like advancing an agent's lifecycle) **with your confirmation**\n\n"
         "Open a candidate from **Pre-Boarding**, then ask me to explain the result."

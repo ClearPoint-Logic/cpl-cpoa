@@ -106,7 +106,7 @@ _CONTROL_MAP: list[dict] = [
         "summary": "The MCP server implements the NSA security baseline: "
                    "authentication, RBAC, message integrity + replay protection, "
                    "strict schema validation, output filtering, and audit "
-                   "logging — verified by 19 security tests.",
+                   "logging, verified by 19 security tests.",
         "enforces": ["mcp_servers/onboarding_tools/security.py"],
         "nsa_mcp_csi": ["nsa-auth", "nsa-validation", "nsa-integrity-replay",
                         "nsa-untrusted-input", "nsa-audit"],

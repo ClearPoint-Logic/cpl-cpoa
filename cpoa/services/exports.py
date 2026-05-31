@@ -26,9 +26,9 @@ def bundle_to_markdown(bundle: EvidenceBundle) -> str:
     chain_ok, chain_errs = verify_event_chain(bundle.evidence_events)
 
     lines: list[str] = []
-    lines.append(f"# Onboarding Evidence Bundle — {p.agent_name}")
+    lines.append(f"# Onboarding Evidence Bundle: {p.agent_name}")
     lines.append("")
-    lines.append(f"**Decision:** {_BADGE.get(bundle.decision, bundle.decision)} — {bundle.decision}")
+    lines.append(f"**Decision:** {_BADGE.get(bundle.decision, bundle.decision)} ({bundle.decision})")
     lines.append(f"**Passport Readiness Score:** {score.score}/100 ({score.band})")
     lines.append(f"**Trust tier:** {p.trust_tier}  ·  **Kill-switch:** {p.kill_switch_state}")
     lines.append(f"**Bundle ID:** `{bundle.bundle_id}`")
@@ -38,10 +38,10 @@ def bundle_to_markdown(bundle: EvidenceBundle) -> str:
     lines.append("")
 
     lines.append("## Passport (ID badge)")
-    lines.append(f"- **Candidate:** {p.candidate_agent_id} — {p.agent_name} ({p.origin})")
+    lines.append(f"- **Candidate:** {p.candidate_agent_id}, {p.agent_name} ({p.origin})")
     lines.append(f"- **Owner:** {p.owner.name or '—'} <{p.owner.email or '—'}> "
-                 f"[{p.owner.team or '—'}] — status: **{p.owner.status}**")
-    lines.append(f"- **Purpose:** {p.purpose.declared or '—'} — status: **{p.purpose.status}**")
+                 f"[{p.owner.team or '—'}], status: **{p.owner.status}**")
+    lines.append(f"- **Purpose:** {p.purpose.declared or '—'}, status: **{p.purpose.status}**")
     lines.append(f"- **Runtime:** {p.runtime.framework} / {p.runtime.deployment_target} "
                  f"({p.runtime.region or 'region n/a'}), identity: {p.runtime.identity or '—'}")
     if p.approval_requirements:
@@ -68,7 +68,7 @@ def bundle_to_markdown(bundle: EvidenceBundle) -> str:
         for f in bundle.validation_run.findings:
             lines.append(f"| {f.test_id} | {f.severity} | {f.title} | {f.recommended_remediation} |")
     else:
-        lines.append("_No findings — all OVS checks passed._")
+        lines.append("_No findings, all OVS checks passed._")
     lines.append("")
 
     lines.append("## Policy envelope (job description) highlights")
@@ -92,14 +92,14 @@ def bundle_to_markdown(bundle: EvidenceBundle) -> str:
     lines.append("")
 
     lines.append("## Evidence chain")
-    lines.append(f"- **Chain valid:** {'yes' if chain_ok else 'NO — ' + '; '.join(chain_errs)}")
+    lines.append(f"- **Chain valid:** {'yes' if chain_ok else 'NO: ' + '; '.join(chain_errs)}")
     lines.append("")
     lines.append("| # | Event | Event hash (short) |")
     lines.append("|---:|---|---|")
     for i, e in enumerate(bundle.evidence_events):
         lines.append(f"| {i} | {e.event_type} | `{e.event_hash[7:23]}…` |")
     lines.append("")
-    lines.append("_Demo signatures are `demo_stub` only — not production cryptographic attestation._")
+    lines.append("_Demo signatures are `demo_stub` only, not production cryptographic attestation._")
     lines.append("")
     return "\n".join(lines)
 
