@@ -92,6 +92,29 @@ def test_remediate_blocked_prompt_injection_clears():
     assert "ignore previous instructions" in applied[0]["phrases"]
 
 
+def test_remediate_autoclears_downstream_operate_and_optimize():
+    # Remediating the prompt-injection (the onboarding-level fix) should also
+    # resolve the downstream lifecycle items that stemmed from the same finding,
+    # so the cleared re-run reads consistently across every phase. Reset first so
+    # the before-state is deterministic on the shared in-memory ledger.
+    client.post("/api/demo/reset")
+    blocked = client.post("/api/runs", json={"fixture": "prompt_injected_mcp_agent"}).json()
+    cid = blocked["candidate_agent_id"]
+    before = client.get(f"/api/workforce/{cid}/lifecycle-detail").json()
+    assert before["operate"]["status"] == "flagged"
+    assert before["optimize"]["status"] == "flagged"
+
+    r = client.post(f"/api/runs/{blocked['run_id']}/remediate")
+    assert r.status_code == 200, r.text
+
+    after = client.get(f"/api/workforce/{cid}/lifecycle-detail").json()
+    assert after["operate"]["status"] == "pass", after["operate"]
+    assert after["optimize"]["status"] == "pass", after["optimize"]
+    # The rows are individually marked resolved (audit-trail intact), not hidden.
+    assert all(a["resolved"] for a in after["operate"]["anomalies"])
+    assert all(b["resolved"] for b in after["optimize"]["promotion_blockers"])
+
+
 def test_remediate_links_original_and_appends_signed_event():
     blocked = client.post("/api/runs", json={"fixture": "prompt_injected_mcp_agent"}).json()
     cleared = client.post(f"/api/runs/{blocked['run_id']}/remediate").json()

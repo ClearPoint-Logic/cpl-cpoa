@@ -317,6 +317,37 @@ def remediate_run(run_id: str, request: Request) -> dict:
     original["remediated_by_run_id"] = new_run_id
     store.save(run_id, original)
 
+    # Auto-clear the downstream lifecycle items that stemmed from the finding(s)
+    # this remediation just fixed, so the cleared re-run reads consistently across
+    # every phase, not only at the top. Only when the re-run fully cleared (no
+    # remaining blockers). Uses the same signed ledger path as the manual Resolve
+    # buttons; "Reset demo" restores the original flagged state. Govern gaps are a
+    # separate attestation and are left untouched.
+    if not any(f.blocks_ready_decision for f in result.validation_run.findings):
+        cid = sanitized.candidate_agent_id
+        note = f"Auto-resolved by onboarding remediation (re-run {new_run_id} cleared)."
+        plan = next(
+            (p for p in optimize.development_plans()["plans"] if p["candidate_agent_id"] == cid),
+            None,
+        )
+        for b in (plan or {}).get("promotion_blockers", []):
+            if b.get("finding_id"):
+                manage.record_remediation(
+                    cid, "optimize", b["finding_id"],
+                    title=b.get("title") or b["finding_id"], summary=note,
+                    actor_id="remediation.engine@clearpointlogic.com",
+                )
+        fleet = operate.assess_fleet()
+        snap = fleet[0] if fleet else {"members": []}
+        me = next((x for x in snap["members"] if x["candidate_agent_id"] == cid), None)
+        for a in (me or {}).get("anomalies", []):
+            if a.get("rule_id") == "BLOCKER-AT-INTAKE":
+                manage.record_remediation(
+                    cid, "operate", a["rule_id"],
+                    title="Blocker at intake cleared", summary=note,
+                    actor_id="remediation.engine@clearpointlogic.com",
+                )
+
     return payload
 
 
