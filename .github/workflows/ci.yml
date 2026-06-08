@@ -2,19 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   python:
-    name: Python — lint + full test suite (unit / integration / evals / security)
+    name: Python
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: "3.13"
           cache: pip
@@ -22,35 +34,35 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt   # pulls runtime + dev tooling (ruff, pytest, coverage)
+          pip install -r requirements-dev.txt
 
-      - name: Lint (ruff)
+      - name: Lint
         run: ruff check .
 
-      - name: Full pytest suite (unit + integration + evals + security)
+      - name: Test
         run: pytest -q
 
       - name: Coverage threshold
-        # Gate at 88% (we run at ~90% locally; the 2-point cushion absorbs
-        # platform variance and intentionally-uncovered live-Gemini /
-        # Cloud-KMS code paths that are gated behind real GCP credentials).
         run: |
           coverage run --source=cpoa,agents,mcp_servers,app -m pytest -q
           coverage report --fail-under=88
 
   web:
-    name: Web — Next.js build + lint
+    name: Web
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: app/web
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          node-version: "20"
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
           cache: npm
           cache-dependency-path: app/web/package-lock.json
 
@@ -59,3 +71,22 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  ci-gate:
+    name: CI Gate
+    runs-on: ubuntu-latest
+    needs:
+      - python
+      - web
+    if: always()
+    steps:
+      - name: Check required jobs
+        run: |
+          if [ "${{ needs.python.result }}" != "success" ]; then
+            echo "Python failed with result: ${{ needs.python.result }}"
+            exit 1
+          fi
+          if [ "${{ needs.web.result }}" != "success" ]; then
+            echo "Web failed with result: ${{ needs.web.result }}"
+            exit 1
+          fi
