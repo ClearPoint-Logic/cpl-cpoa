@@ -45,3 +45,6 @@ Local workflow:
 
 Team routing for this repo: ClearPoint Ops / OPS is the default routing owner for CPOA operations-agent and workplace automation work; route security-sensitive work to ClearPoint SecOps / SECOPS and shared platform substrate to ClearPoint Anchor Core / CPC. High-risk changes include MCP server behavior, credentials, deployment, customer/internal data handling, automation writes, and any agent action that mutates external systems.
 <!-- END CLEARPOINT LOGIC LINEAR AGENTIC OPERATING CONTRACT -->
+## Agentic PR review gate — one reviewer suffices
+
+A merge requires **at least one** agentic PR reviewer — **either Codex or CodeRabbit** — to approve the current head. Both reviewers run on every pull request, but a **single passing review satisfies the gate**: you do not need both, and **CodeRabbit is not the sole or required reviewer**. Either reviewer **requesting changes still blocks** the merge, and a credit/quota outage on one reviewer never wedges a PR — the other clears it. (Per ADR-0023 / ADR-0024, single-agentic-reviewer amendment 2026-06-29. Supersedes any prior "both reviewers required" language.)

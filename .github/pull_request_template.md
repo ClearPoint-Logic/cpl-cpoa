@@ -11,3 +11,4 @@
 
 ## Risk
 
+> **Review gate:** one agentic reviewer (Codex **or** CodeRabbit) approving the current head satisfies the merge gate — you do not need both; either requesting changes blocks. (ADR-0023/0024, 2026-06-29.)
